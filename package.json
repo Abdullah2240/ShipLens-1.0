@@ -1,0 +1,57 @@
+{
+  "name": "shiplens",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint --no-error-on-unmatched-pattern src scripts db tests eslint.config.mjs next.config.ts vitest.config.ts && node scripts/check-logical-css.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test:all": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "migrate": "node scripts/migrate.mjs",
+    "i18n:check": "node scripts/check-i18n.mjs",
+    "permissions:doc": "node scripts/gen-permissions-doc.mjs",
+    "permissions:check": "node scripts/gen-permissions-doc.mjs --check",
+    "format": "prettier --write --no-error-on-unmatched-pattern src scripts db tests messages \"*.json\" \"*.mjs\" \"*.ts\"",
+    "format:check": "prettier --check --no-error-on-unmatched-pattern src scripts db tests messages \"*.json\" \"*.mjs\" \"*.ts\""
+  },
+  "dependencies": {
+    "@node-rs/argon2": "^2.2.2",
+    "next": "~16.4.3",
+    "next-intl": "~4.14.0",
+    "pg": "^8.23.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "@types/node": "^24.19.2",
+    "@types/pg": "^8.23.1",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "@vitest/coverage-v8": "^5.0.5",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "~16.4.3",
+    "jsdom": "^30.1.3",
+    "prettier": "^3.9.10",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "~5.9",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.0.5"
+  }
+}
