@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { NextIntlClientProvider } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
+import { fontClassNames } from '@/app/fonts';
 import { dirFor, routing } from '@/i18n/routing';
 import '../globals.css';
 
@@ -32,7 +33,7 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} dir={dirFor(locale)}>
+    <html lang={locale} dir={dirFor(locale)} className={fontClassNames}>
       <body>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
