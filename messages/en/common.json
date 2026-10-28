@@ -1,4 +1,39 @@
 {
   "appName": "ShipLens",
-  "tagline": "Every approved number, traceable to its source."
+  "tagline": "Every approved number, traceable to its source.",
+  "theme": {
+    "label": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "actions": {
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "retry": "Try again",
+    "close": "Close"
+  },
+  "states": {
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "Records will appear here once they are added.",
+    "errorTitle": "Something went wrong",
+    "errorBody": "We could not load this. Please try again.",
+    "loading": "Loading"
+  },
+  "status": {
+    "draft": "Draft",
+    "submitted": "Submitted",
+    "returned": "Returned",
+    "approved": "Approved",
+    "pending": "Pending",
+    "accepted": "Accepted",
+    "declined": "Declined",
+    "active": "Active",
+    "inactive": "Inactive",
+    "forming": "Forming",
+    "paused": "Paused",
+    "closed": "Closed",
+    "published": "Published",
+    "voided": "Voided"
+  }
 }
