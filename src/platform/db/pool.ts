@@ -2,6 +2,7 @@
 // parser. It never reads the environment or opens a connection until getPool() is
 // called from inside a handler or script.
 import { Pool, types } from 'pg';
+import { PG_POOL_MAX } from '@/platform/config/constants';
 import { getEnv } from '@/platform/config/env';
 
 // date (OID 1082) stays a 'YYYY-MM-DD' string so PKT business dates never pass through
@@ -14,7 +15,7 @@ const globalForPool = globalThis as unknown as { __shiplensPool?: Pool };
 export function getPool(): Pool {
   globalForPool.__shiplensPool ??= new Pool({
     connectionString: getEnv().DATABASE_URL,
-    max: 5, // plan 07 switches this to PG_POOL_MAX from constants
+    max: PG_POOL_MAX,
     idleTimeoutMillis: 30_000,
   });
   return globalForPool.__shiplensPool;
