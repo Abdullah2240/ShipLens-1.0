@@ -104,7 +104,7 @@ describe('float guard', () => {
     expect(() => compareMoney(asAny(1), asAny(2))).toThrow(TypeError);
     expect(() => parseMoneyInput(asAny(5))).toThrow(TypeError);
     expect(() => sumMoney([asAny(1)])).toThrow(TypeError);
-    expect(() => fromMinor(asAny(5))).toThrow(TypeError);
+    expect(() => fromMinor(5 as unknown as bigint)).toThrow(TypeError);
   });
 
   it('source contains no floating point tokens', () => {
