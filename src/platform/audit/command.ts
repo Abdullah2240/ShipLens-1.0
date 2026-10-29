@@ -10,7 +10,11 @@ import type { AuditEventInput, CommandContext } from './types';
  * Actor. The login service builds it from the verified user row after the password check,
  * so the auth.login audit row carries the real actor id and role.
  */
-export const SYSTEM_COMMANDS: readonly string[] = ['auth.record_failed_login'];
+// Anonymous public application submits still write an audit event.
+export const SYSTEM_COMMANDS: readonly string[] = [
+  'auth.record_failed_login',
+  'application.submit',
+];
 
 /** Names allowed to commit with zero audit events (`opts.audit === 'none'`). */
 export const COMMANDS_WITHOUT_AUDIT: readonly string[] = ['auth.record_failed_login'];

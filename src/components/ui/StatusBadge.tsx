@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl';
+﻿import { useTranslations } from 'next-intl';
 
 export type Tone = 'neutral' | 'info' | 'success' | 'warning' | 'danger' | 'pending';
 
@@ -22,6 +22,7 @@ export const STATUS_TONES: Record<string, Tone> = {
   declined: 'danger',
   active: 'success',
   inactive: 'neutral',
+  left: 'neutral', // logical-css-ignore: member status value, not a CSS property
   forming: 'info',
   paused: 'warning',
   closed: 'neutral',

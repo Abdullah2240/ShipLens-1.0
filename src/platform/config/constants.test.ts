@@ -32,7 +32,7 @@ describe('business constants', () => {
     expect([...COLLECTION_STATUSES]).toEqual(['active', 'voided']);
     expect([...APPLICATION_STATUSES]).toEqual(['pending', 'accepted', 'declined']);
     expect([...CONTENT_STATUSES]).toEqual(['draft', 'published']);
-    expect([...MEMBER_STATUSES]).toEqual(['active', 'inactive']);
+    expect([...MEMBER_STATUSES]).toEqual(['active', 'inactive', 'left']);
   });
 
   it('names the seven dashboard KPIs', () => {

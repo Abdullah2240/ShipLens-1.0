@@ -123,6 +123,11 @@ describe('snapshotChanges', () => {
 });
 
 describe('AUDIT_FIELD_ALLOWLIST', () => {
+  it('allows content digests and event fields required for safe audit snapshots', () => {
+    expect(AUDIT_FIELD_ALLOWLIST.content).toContain('body_digest');
+    expect(AUDIT_FIELD_ALLOWLIST.event).toEqual(expect.arrayContaining(['ends_at', 'title_en']));
+  });
+
   it('never allowlists secrets or application contact details', () => {
     const banned = [
       'password',

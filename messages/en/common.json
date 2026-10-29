@@ -30,6 +30,7 @@
     "declined": "Declined",
     "active": "Active",
     "inactive": "Inactive",
+    "left": "Left",
     "forming": "Forming",
     "paused": "Paused",
     "closed": "Closed",

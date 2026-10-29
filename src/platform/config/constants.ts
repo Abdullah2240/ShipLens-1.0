@@ -13,7 +13,8 @@ export const BRANCH_STATUSES = ['forming', 'active', 'paused', 'closed'] as cons
 export const COLLECTION_STATUSES = ['active', 'voided'] as const;
 export const APPLICATION_STATUSES = ['pending', 'accepted', 'declined'] as const;
 export const CONTENT_STATUSES = ['draft', 'published'] as const;
-export const MEMBER_STATUSES = ['active', 'inactive'] as const;
+// Left keeps history; members are never hard deleted.
+export const MEMBER_STATUSES = ['active', 'inactive', 'left'] as const;
 
 export type ReportStatus = (typeof REPORT_STATUSES)[number];
 export type BranchStatus = (typeof BRANCH_STATUSES)[number];

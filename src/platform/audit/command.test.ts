@@ -2,7 +2,13 @@ import type { Pool } from 'pg';
 import { describe, expect, it, vi } from 'vitest';
 import type { Actor } from '../authz/actor';
 import { fixedClock } from '../time';
-import { COMMANDS_WITHOUT_AUDIT, COMMAND_NAMES_SEEN, SYSTEM_COMMANDS, command } from './command';
+import {
+  COMMANDS_WITHOUT_AUDIT,
+  COMMAND_NAMES_SEEN,
+  MissingAuditError,
+  SYSTEM_COMMANDS,
+  command,
+} from './command';
 import type { CommandContext } from './types';
 
 const TOUCHED = 'pool was touched';
@@ -52,8 +58,8 @@ function ctx(overrides: Partial<CommandContext> = {}): CommandContext {
 const noop = async () => 'ok';
 
 describe('allowlists', () => {
-  it('start with the failed-login system command only', () => {
-    expect([...SYSTEM_COMMANDS]).toEqual(['auth.record_failed_login']);
+  it('lists failed login and anonymous application submit as system commands', () => {
+    expect([...SYSTEM_COMMANDS]).toEqual(['auth.record_failed_login', 'application.submit']);
     expect([...COMMANDS_WITHOUT_AUDIT]).toEqual(['auth.record_failed_login']);
   });
 });
@@ -83,6 +89,13 @@ describe('command guards', () => {
     await expect(
       command(ctx({ actor: null }), 'auth.record_failed_login', noop, { audit: 'none' }),
     ).rejects.toThrow(TOUCHED);
+  });
+
+  it('requires an audit event for an anonymous application submit', async () => {
+    const { pool } = fakePool();
+    await expect(
+      command(ctx({ actor: null, pool }), 'application.submit', noop),
+    ).rejects.toBeInstanceOf(MissingAuditError);
   });
 
   it('accepts a system command called with a real actor (reaches the pool)', async () => {
