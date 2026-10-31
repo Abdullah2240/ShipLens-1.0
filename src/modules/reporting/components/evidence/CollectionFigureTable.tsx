@@ -58,18 +58,6 @@ export function CollectionFigureTable({ level, reportStatus }: CollectionFigureT
       className: 'min-w-[10rem]',
     },
     {
-      key: 'routed',
-      header: t('columns.routed'),
-      render: (row) =>
-        approved ? (
-          <RoutedBadge routed={row.routedAt !== null} />
-        ) : (
-          <span aria-hidden="true" className="text-text-muted">
-            —
-          </span>
-        ),
-    },
-    {
       key: 'amount',
       header: t('columns.amount'),
       align: 'numeric',
@@ -86,6 +74,18 @@ export function CollectionFigureTable({ level, reportStatus }: CollectionFigureT
         </FigureLink>
       ),
       className: 'whitespace-nowrap',
+    },
+    {
+      key: 'routed',
+      header: t('columns.routed'),
+      render: (row) =>
+        approved ? (
+          <RoutedBadge routed={row.routedAt !== null} />
+        ) : (
+          <span aria-hidden="true" className="text-text-muted">
+            —
+          </span>
+        ),
     },
   ];
 
