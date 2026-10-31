@@ -86,7 +86,9 @@ describe('phase 3 namespaces', () => {
     const source = readFileSync(path.resolve(import.meta.dirname, '../../i18n/request.ts'), 'utf8');
     const list = /NAMESPACES = \[([\s\S]*?)\] as const/.exec(source)?.[1] ?? '';
     const names = [...list.matchAll(/'([^']+)'/g)].map((m) => m[1]);
-    expect(names.slice(-NEW.length)).toEqual(NEW);
+    const start = names.indexOf(NEW[0] ?? '');
+    expect(names.slice(start, start + NEW.length)).toEqual(NEW);
+    expect(start).toBeGreaterThan(1);
     expect(names.slice(0, 2)).toEqual(['common', 'errors']);
     for (const ns of names) {
       for (const locale of LOCALES) {

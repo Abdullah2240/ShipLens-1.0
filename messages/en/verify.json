@@ -1,0 +1,89 @@
+{
+  "badge": {
+    "intact": "Audit chain intact",
+    "intactDetail": "<ltr>{count}</ltr> events checked at <ltr>{time}</ltr>",
+    "broken": "Audit chain broken at event <ltr>#{seq}</ltr>",
+    "brokenDetail": "Found while checking <ltr>{count}</ltr> events at <ltr>{time}</ltr>",
+    "reason": {
+      "sequence_gap": "An event is missing, or one was added out of order.",
+      "link_mismatch": "This event no longer links to the event before it.",
+      "hash_mismatch": "This event was changed after it was recorded."
+    },
+    "empty": "No audit events to check yet",
+    "emptyDetail": "Checked at <ltr>{time}</ltr>",
+    "recheck": "Check again"
+  },
+  "panel": {
+    "title": "Public verification",
+    "intro": "Anyone with this code or QR code can confirm the approved figures of this report without signing in.",
+    "code": "Verification code",
+    "seal": "Seal",
+    "sealHelp": "The seal comes from the approval event in the audit chain. If the history were ever rewritten, the seal on this link would stop matching.",
+    "sealNone": "No seal yet",
+    "link": "Public link",
+    "open": "Open the public check",
+    "copy": "Copy link",
+    "copied": "Link copied",
+    "copyManual": "Link selected. Press Ctrl+C to copy it.",
+    "qrLabel": "QR code that opens the public verification page",
+    "scan": "Scan with a phone camera"
+  },
+  "page": {
+    "title": "Verify a weekly report",
+    "intro": "Enter the code printed on a weekly report, or scan its QR code, to see the approved figures and confirm they have not been altered.",
+    "codeLabel": "Verification code",
+    "codeHint": "10 characters, for example 7K2QH-M9XWD",
+    "submit": "Check report",
+    "invalid": "That does not look like a verification code. Codes have 10 letters and numbers.",
+    "notFound": "We could not recognise that code. Check each character and try again.",
+    "rateLimited": "Too many checks. Try again in {seconds} seconds.",
+    "metaDescription": "Check that a ShipLens weekly report was approved and has not been altered since."
+  },
+  "result": {
+    "eyebrow": "Verification certificate",
+    "code": "Code",
+    "branch": "Branch",
+    "weekLabel": "Report week",
+    "week": "Week of <ltr>{start}</ltr> to <ltr>{end}</ltr>",
+    "approvedTotal": "Approved total",
+    "collections": "Collections counted",
+    "approvedOn": "Approved on",
+    "notRecorded": "Not recorded",
+    "integrity": {
+      "verified": "This report is verified",
+      "mismatch": "These figures do not match the record",
+      "unanchored": "This report could not be traced",
+      "chain_broken": "The audit record cannot be trusted right now"
+    },
+    "integrityDetail": {
+      "verified": "The approved total and collection count match what was submitted and approved, and the approval is recorded in an intact audit chain.",
+      "mismatch": "The figures on this report differ from the totals recorded when it was submitted and approved. Please treat them with caution.",
+      "unanchored": "We could not find the submission and approval events for this report in the audit chain, so its figures cannot be confirmed.",
+      "chain_broken": "The audit chain failed its integrity check, so no report can be confirmed until it is restored."
+    },
+    "trail": {
+      "label": "How this report is anchored",
+      "approved": "Approved by Finance",
+      "recorded": "Recorded in the chain",
+      "checked": "Chain checked"
+    },
+    "anchor": "Recorded in the audit chain as event <ltr>#{seq}</ltr>",
+    "anchorMissing": "No approval event found",
+    "seal": "Seal",
+    "sealCheck": {
+      "match": "The seal in your link matches the audit chain.",
+      "mismatch": "The seal in your link does not match. The history of this report may have been rewritten after your link was issued.",
+      "not_provided": "No seal was included in your link."
+    },
+    "sealMismatchTitle": "Seal does not match",
+    "chain": {
+      "intact": "Audit chain intact: <ltr>{count}</ltr> events checked",
+      "broken": "Audit chain broken at event <ltr>#{seq}</ltr>",
+      "empty": "The audit chain has no events yet"
+    },
+    "checkedAt": "Checked at <ltr>{time}</ltr>",
+    "howItWorksTitle": "How this check works",
+    "howItWorks": "Every change in ShipLens is written to an audit chain in which each event carries a fingerprint of the one before it, so editing or deleting any event breaks the chain. The seal in your link comes from this report's approval event, so it stops matching if the history is ever rewritten.",
+    "privacy": "No personal information is shown on this page."
+  }
+}
