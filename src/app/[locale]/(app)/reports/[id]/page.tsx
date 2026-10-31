@@ -7,6 +7,7 @@ import { ReportActions } from '@/modules/reports/components/ReportActions';
 import { ReportCollectionsTable } from '@/modules/reports/components/ReportCollectionsTable';
 import { ReportHistory } from '@/modules/reports/components/ReportHistory';
 import { ReportSummary, ReportTotals } from '@/modules/reports/components/ReportSummary';
+import { ShareReportButton } from '@/modules/reporting/components/share/ShareReportButton';
 import { getReportTimeline } from '@/modules/timeline';
 import { AuditTimeline } from '@/modules/timeline/components/AuditTimeline';
 import { getPool } from '@/platform/db';
@@ -71,6 +72,9 @@ export default async function ReportPage({ params }: { params: Params }) {
             liveAmount={report.liveAmount}
             branchName={report.branchName}
             frozenAmount={report.frozenAmount}
+            extra={
+              actor.role === 'branch_lead' ? <ShareReportButton reportId={report.id} /> : undefined
+            }
           />
         </aside>
 
