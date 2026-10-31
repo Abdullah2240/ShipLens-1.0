@@ -15,6 +15,13 @@ type RowBase = Pick<
   UnroutedRow,
   'branchCode' | 'branchName' | 'weekStart' | 'collectedOn' | 'purpose' | 'amount'
 >;
+/**
+ * Makes the table's scroll region the containing block of its screen-reader-only labels,
+ * so those absolutely positioned labels are clipped by the region instead of widening the
+ * page on narrow screens (seen in RTL on phones).
+ */
+export const CLIP_ABSOLUTE = '[&>[role=region]]:relative';
+
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
 /** "BR002, 12 Oct 2026, PKR 12,500.00": names the collection in actions and messages. */
@@ -148,19 +155,21 @@ export function UnroutedTable({
     : null;
 
   return (
-    <TraceTable
-      columns={columns}
-      rows={rows}
-      getRowKey={(row) => row.collectionId}
-      caption={t('tables.open')}
-      captionHidden
-      measure="amount"
-      totalColumnKey="amount"
-      total={formatMoney(totalAmount, locale)}
-      recordCount={recordCount}
-      matchesParent={matchesParent}
-      parentLabel={trace('figures.not_yet_routed.label')}
-      empty={<EmptyState title={t('empty.openTitle')} body={t('empty.openBody')} />}
-    />
+    <div className={CLIP_ABSOLUTE}>
+      <TraceTable
+        columns={columns}
+        rows={rows}
+        getRowKey={(row) => row.collectionId}
+        caption={t('tables.open')}
+        captionHidden
+        measure="amount"
+        totalColumnKey="amount"
+        total={formatMoney(totalAmount, locale)}
+        recordCount={recordCount}
+        matchesParent={matchesParent}
+        parentLabel={trace('figures.not_yet_routed.label')}
+        empty={<EmptyState title={t('empty.openTitle')} body={t('empty.openBody')} />}
+      />
+    </div>
   );
 }

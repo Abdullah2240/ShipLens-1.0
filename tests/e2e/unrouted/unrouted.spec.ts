@@ -1,4 +1,4 @@
-import type { APIRequestContext, Page, TestInfo } from '@playwright/test';
+import type { APIRequestContext, Locator, Page, TestInfo } from '@playwright/test';
 import { expect, test, type UiLocale } from '../support/fixtures';
 
 // The "not yet routed" page (DASH-04) and the routing flow (COLL-06). Specs never import app
@@ -6,7 +6,7 @@ import { expect, test, type UiLocale } from '../support/fixtures';
 
 const TEXT = {
   en: {
-    tabs: { open: 'Not yet routed', recent: 'Recently routed' },
+    tabs: { label: 'Routing lists', open: 'Not yet routed', recent: 'Recently routed' },
     markFor: 'Mark as sent: ',
     undoFor: 'Undo routing: ',
     confirmMarkTitle: 'Mark as sent to the main account?',
@@ -17,7 +17,7 @@ const TEXT = {
     undone: 'Routing undone: ',
   },
   ur: {
-    tabs: { open: 'منتقلی باقی', recent: 'حال ہی میں منتقل شدہ' },
+    tabs: { label: 'منتقلی کی فہرستیں', open: 'منتقلی باقی', recent: 'حال ہی میں منتقل شدہ' },
     markFor: 'منتقل شدہ نشان زد کریں: ',
     undoFor: 'منتقلی واپس لیں: ',
     confirmMarkTitle: 'مرکزی اکاؤنٹ میں منتقل شدہ نشان زد کریں؟',
@@ -112,6 +112,11 @@ async function expectFooterMatchesFigure(page: Page, query = '') {
   }).toPass({ timeout: 30_000 });
 }
 
+/** The Open / Recently routed tab links (the header figure also names the figure). */
+function tabsOf(main: Locator, locale: UiLocale): Locator {
+  return main.getByRole('navigation', { name: TEXT[locale].tabs.label });
+}
+
 async function screenshot(page: Page, testInfo: TestInfo, name: string) {
   await page.screenshot({
     path: `test-results/screens/unrouted/${testInfo.project.name}-${name}.png`,
@@ -157,16 +162,18 @@ test.describe('not yet routed page', () => {
       await expect(table).toHaveCount(0);
     }
     await expect(
-      main.getByRole('link', { name: new RegExp(TEXT[uiLocale].tabs.open) }),
+      tabsOf(main, uiLocale).getByRole('link', { name: new RegExp(TEXT[uiLocale].tabs.open) }),
     ).toHaveAttribute('aria-current', 'page');
     await expect(page.locator('html')).toHaveAttribute('dir', uiLocale === 'ur' ? 'rtl' : 'ltr');
     await screenshot(page, testInfo, 'open');
     await expectNoHorizontalOverflow(page);
 
-    await main.getByRole('link', { name: TEXT[uiLocale].tabs.recent, exact: true }).click();
+    await tabsOf(main, uiLocale)
+      .getByRole('link', { name: TEXT[uiLocale].tabs.recent, exact: true })
+      .click();
     await expect(page).toHaveURL(/[?&]tab=recent/);
     await expect(
-      main.getByRole('link', { name: TEXT[uiLocale].tabs.recent, exact: true }),
+      tabsOf(main, uiLocale).getByRole('link', { name: TEXT[uiLocale].tabs.recent, exact: true }),
     ).toHaveAttribute('aria-current', 'page');
     await screenshot(page, testInfo, 'recent');
     await expectNoHorizontalOverflow(page);
@@ -249,7 +256,9 @@ test.describe('routing to the main account', () => {
       await expect(foot).toContainText(money(less));
       expect((await notYetRouted(page.request)).value).toBe(less);
 
-      await main.getByRole('link', { name: text.tabs.recent, exact: true }).click();
+      await tabsOf(main, uiLocale)
+        .getByRole('link', { name: text.tabs.recent, exact: true })
+        .click();
       await expect(page).toHaveURL(/[?&]tab=recent/);
       const undo = main.getByRole('button', { name: `${text.undoFor}${summary}`, exact: true });
       await expect(main.locator('tbody tr').first().getByRole('button')).toHaveAccessibleName(
@@ -264,7 +273,9 @@ test.describe('routing to the main account', () => {
       await expect(undo).toHaveCount(0);
       routed = false;
 
-      await main.getByRole('link', { name: new RegExp(text.tabs.open) }).click();
+      await tabsOf(main, uiLocale)
+        .getByRole('link', { name: new RegExp(text.tabs.open) })
+        .click();
       await expect(
         main.getByRole('button', { name: `${text.markFor}${summary}`, exact: true }),
       ).toBeVisible();

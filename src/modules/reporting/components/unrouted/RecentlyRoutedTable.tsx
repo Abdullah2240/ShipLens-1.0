@@ -6,7 +6,7 @@ import type { Locale } from '@/i18n/routing';
 import { traceHref } from '@/modules/reporting/figures';
 import type { RoutedRow } from '@/modules/reporting/types';
 import { RoutingAction } from './RoutingAction';
-import { actionHeader, routingSummary, sharedColumns } from './UnroutedTable';
+import { CLIP_ABSOLUTE, actionHeader, routingSummary, sharedColumns } from './UnroutedTable';
 
 export interface RecentlyRoutedTableProps {
   rows: RoutedRow[];
@@ -58,13 +58,15 @@ export function RecentlyRoutedTable({ rows, canRoute }: RecentlyRoutedTableProps
   }
 
   return (
-    <DataTable
-      columns={columns}
-      rows={rows}
-      getRowKey={(row) => row.collectionId}
-      caption={t('tables.recent')}
-      captionHidden
-      empty={<EmptyState title={t('empty.recentTitle')} body={t('empty.recentBody')} />}
-    />
+    <div className={CLIP_ABSOLUTE}>
+      <DataTable
+        columns={columns}
+        rows={rows}
+        getRowKey={(row) => row.collectionId}
+        caption={t('tables.recent')}
+        captionHidden
+        empty={<EmptyState title={t('empty.recentTitle')} body={t('empty.recentBody')} />}
+      />
+    </div>
   );
 }
