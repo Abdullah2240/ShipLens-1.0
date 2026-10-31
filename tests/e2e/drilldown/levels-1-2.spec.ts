@@ -227,7 +227,7 @@ test.describe('drill-down levels 1 and 2', () => {
     const l1 = await api<Level>(page, `/api/v1/trace/approved${query}`);
     await expect(headline(page)).toHaveText(money(l1.parentValue));
     await expect(footer(page).total).toContainText(money(l1.total));
-    await expect(page.locator('main header dl')).toContainText(/\d{4}/);
+    await expect(page.locator('main header > dl')).toContainText(/\d{4}/);
 
     const rows = await levelOneLinks(page);
     expect(rows.length).toBe(l1.rows.length);

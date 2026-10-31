@@ -60,7 +60,7 @@
     "latest": "Latest"
   },
   "countFigure": {
-    "reportsLabel": "Reports awaiting review",
+    "reportsLabel": "Awaiting review",
     "branchesLabel": "Branches",
     "viewApproved": "View approved",
     "approvedReports": "Approved reports",

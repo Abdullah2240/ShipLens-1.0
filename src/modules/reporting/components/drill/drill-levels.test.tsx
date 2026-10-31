@@ -48,7 +48,7 @@ const COPY = {
     wholeWeek: 'Whole week',
     lastSubmission: 'At last submission',
     notYet: 'Not yet',
-    awaitingHeader: 'Reports awaiting review',
+    awaitingHeader: 'Awaiting review',
     approvedReports: 'Approved reports',
   },
   ur: {
@@ -64,7 +64,7 @@ const COPY = {
     wholeWeek: 'پورا ہفتہ',
     lastSubmission: 'آخری بار جمع کراتے وقت',
     notYet: 'ابھی نہیں',
-    awaitingHeader: 'جائزے کی منتظر رپورٹیں',
+    awaitingHeader: 'منتظرِ جائزہ',
     approvedReports: 'منظور شدہ رپورٹیں',
   },
 } as const;
