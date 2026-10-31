@@ -3,34 +3,58 @@
 // query, and reports whether its own total matches it. The URL path is a proof chain:
 // any branch, report or collection that does not contribute to the figure under the
 // filters is the same NotFound as one that does not exist.
+import { getCollectionTimeline, getReportTimeline } from '@/modules/timeline';
 import { authorize, type Actor, type Scope } from '@/platform/authz';
 import type { Queryable } from '@/platform/db';
 import { NotFound } from '@/platform/errors';
 import { compareMoney, sumMoney } from '@/platform/money';
 import { addDays } from '@/platform/time';
 import { FIGURES, REPORTING_LIMITS, isFigureId, isMoneyFigure, traceHref } from './figures';
-import { normaliseFilters } from './filters';
+import { isUuid, normaliseFilters } from './filters';
 import {
   selectActiveBranches,
   selectFigureByBranch,
+  selectFigureCollections,
   selectFigureReports,
   selectFigureTotals,
+  selectReportFigure,
   selectSubmittedReportCounts,
   type FigureTotals,
+  type KpiFilters,
 } from './repo-kpi';
-import { selectBranchHeader, selectBranchHeaders, selectSubmittedReports } from './repo-trace';
+import {
+  collectionContributes,
+  selectBranchHeader,
+  selectBranchHeaders,
+  selectCollectionDetail,
+  selectReportEvents,
+  selectReportHeaderPeople,
+  selectSubmittedReports,
+} from './repo-trace';
 import { withReadSnapshot } from './service-dashboard';
 import { buildTrail } from './trace-trail';
 import type {
   BranchFigureRow,
   BranchHeader,
   BranchReportsLevel,
+  CollectionDetail,
+  CollectionEvidence,
+  CollectionFigureRow,
+  ReportCollectionsLevel,
+  ReportEventRow,
   ReportFigureRow,
+  ReportHeader,
   TraceLevel,
   TraceLevelName,
   TrailStep,
 } from './trace-types';
-import type { Explanation, FigureId, FigureMeasure, ReportingFilters } from './types';
+import type {
+  Explanation,
+  FigureId,
+  FigureMeasure,
+  MoneyFigureId,
+  ReportingFilters,
+} from './types';
 
 type TracedFigure = Exclude<FigureId, 'active_branches'>;
 
@@ -325,4 +349,268 @@ export async function getBranchReports(
     });
     return { ...level, branch };
   });
+}
+
+/** Everything a level below the report needs: the proven path and the values along it. */
+interface ReportChain {
+  branch: BranchHeader;
+  asOf: string;
+  overview: string;
+  branchValue: string;
+  /** The report's L2 row: its value for the figure is the L3 parent. */
+  reportRow: ReportFigureRow;
+  header: ReportHeader;
+  reportEvents: ReportEventRow[];
+  /** Collection-level predicate: the figure itself, or pending_approval for awaiting review. */
+  predicate: MoneyFigureId;
+  /**
+   * Collection filters. Money figures keep the month filter on collected_on; reports
+   * awaiting review filter months on week_start, which the report already satisfied at L2,
+   * so all of its collections count.
+   */
+  collectionFilters: KpiFilters & { branchId: string; reportId: string };
+}
+
+/** Frozen totals bind only once a report is submitted; null before that or after a return. */
+function frozenMatchesLive(live: {
+  status: string;
+  frozenAmount: string | null;
+  frozenCount: number | null;
+  liveAmount: string;
+  liveCount: number;
+}): boolean | null {
+  if (live.status !== 'submitted' && live.status !== 'approved') return null;
+  if (live.frozenAmount === null || live.frozenCount === null) return false;
+  return (
+    compareMoney(live.frozenAmount, live.liveAmount) === 0 && live.frozenCount === live.liveCount
+  );
+}
+
+/**
+ * Proves branch -> report for the figure and filters: the report must be one of the rows
+ * the branch's L2 level lists. Anything else is NotFound.
+ */
+async function resolveReportChain(
+  q: Queryable,
+  scope: Scope,
+  figure: TracedFigure,
+  branchId: string,
+  reportId: string,
+  f: ReportingFilters,
+): Promise<ReportChain> {
+  if (!isUuid(reportId)) throw new NotFound();
+  const branch = await selectBranchHeader(q, scope, branchId);
+  const id = branch.branchId;
+  const rid = reportId.toLowerCase();
+  const reportRow = (await branchReportRows(q, scope, figure, id, f)).find(
+    (r) => r.reportId === rid,
+  );
+  if (!reportRow) throw new NotFound();
+
+  const totals = await selectFigureTotals(q, scope, f);
+  const parent = await branchFigureValue(q, scope, figure, id, f);
+  const live = await selectReportFigure(q, scope, rid);
+  if (!live || live.branchId !== id) throw new NotFound();
+  const people = await selectReportHeaderPeople(q, rid);
+  const reportEvents = await selectReportEvents(q, rid);
+  const predicate = FIGURES[figure].collectionPredicate;
+  if (!predicate) throw new NotFound();
+
+  return {
+    branch,
+    asOf: totals.asOf,
+    overview: overviewValue(totals, figure),
+    branchValue: parent.value,
+    reportRow,
+    header: {
+      reportId: rid,
+      weekStart: live.weekStart,
+      weekEnd: addDays(live.weekStart, 6),
+      status: live.status,
+      liveAmount: live.liveAmount,
+      liveCount: live.liveCount,
+      frozenAmount: live.frozenAmount,
+      frozenCount: live.frozenCount,
+      frozenMatchesLive: frozenMatchesLive(live),
+      submittedAt: live.submittedAt,
+      submittedByName: people?.submittedByName ?? null,
+      reviewedAt: live.reviewedAt,
+      reviewedByName: people?.reviewedByName ?? null,
+      returnReason: people?.returnReason ?? null,
+    },
+    reportEvents,
+    predicate,
+    collectionFilters: isMoneyFigure(figure)
+      ? { ...f, branchId: id, reportId: rid }
+      : { branchId: id, reportId: rid },
+  };
+}
+
+function chainTrail(
+  figure: TracedFigure,
+  f: ReportingFilters,
+  chain: ReportChain,
+  collection?: { id: string; collectedOn: string; amount: string },
+): TrailStep[] {
+  return buildTrail({
+    figure,
+    filters: f,
+    overview: chain.overview,
+    branch: {
+      id: chain.branch.branchId,
+      code: chain.branch.branchCode,
+      name: chain.branch.branchName,
+      value: chain.branchValue,
+    },
+    report: {
+      id: chain.reportRow.reportId,
+      weekStart: chain.reportRow.weekStart,
+      value: chain.reportRow.value,
+    },
+    collection,
+  });
+}
+
+/** L3: the collections behind one report's value. Always amounts. */
+export async function getReportCollections(
+  db: Queryable,
+  actor: Actor,
+  figure: FigureId,
+  branchId: string,
+  reportId: string,
+  filters: ReportingFilters,
+): Promise<ReportCollectionsLevel> {
+  const scope = authorizeTrace(actor, figure);
+  const traced = tracedFigure(figure);
+  const f = pathFilters(filters);
+
+  return withReadSnapshot(db, async (q) => {
+    const chain = await resolveReportChain(q, scope, traced, branchId, reportId, f);
+    const { branchId: id, reportId: rid } = chain.collectionFilters;
+    const listed = await selectFigureCollections(
+      q,
+      scope,
+      chain.predicate,
+      chain.collectionFilters,
+      { limit: REPORTING_LIMITS.traceMaxRows },
+    );
+    const truncated =
+      listed.recordCount > listed.rows.length ? { shown: listed.rows.length } : null;
+    const shownSum = sumMoney(listed.rows.map((r) => r.amount));
+    // The footer is the sum of the rows shown; when rows are cut it is the full SQL sum.
+    const total = truncated ? listed.total : shownSum;
+    const consistent =
+      (truncated !== null || compareMoney(shownSum, listed.total) === 0) &&
+      listed.recordCount === chain.reportRow.recordCount &&
+      listed.rows.every((r) => r.branchId === id && r.reportId === rid);
+    const rows: CollectionFigureRow[] = listed.rows.map((r) => ({
+      collectionId: r.collectionId,
+      collectedOn: r.collectedOn,
+      purpose: r.purpose,
+      amount: r.amount,
+      routedAt: r.routedAt,
+      href: traceHref(traced, { branchId: id, reportId: rid, collectionId: r.collectionId }, f),
+    }));
+
+    const level = buildLevel({
+      figure: traced,
+      measure: 'amount',
+      level: 'collections',
+      parentValue: chain.reportRow.value,
+      rows,
+      truncated,
+      total,
+      recordCount: listed.recordCount,
+      consistent,
+      filters: { ...f, branchId: id, reportId: rid },
+      asOf: chain.asOf,
+      trail: chainTrail(traced, f, chain),
+    });
+    return {
+      ...level,
+      branch: chain.branch,
+      report: chain.header,
+      reportEvents: chain.reportEvents,
+    };
+  });
+}
+
+/**
+ * L4: one collection as evidence, with the report header, report events and the audit
+ * timelines of the collection and of the report. The collection must be one of the rows
+ * the report's L3 level counts. Timelines are read after the snapshot closes.
+ */
+export async function getCollectionEvidence(
+  db: Queryable,
+  actor: Actor,
+  figure: FigureId,
+  branchId: string,
+  reportId: string,
+  collectionId: string,
+  filters: ReportingFilters,
+): Promise<CollectionEvidence> {
+  const scope = authorizeTrace(actor, figure);
+  const traced = tracedFigure(figure);
+  const f = pathFilters(filters);
+  if (!isUuid(collectionId)) throw new NotFound();
+  const cid = collectionId.toLowerCase();
+
+  const { chain, detail } = await withReadSnapshot(db, async (q) => {
+    const proven = await resolveReportChain(q, scope, traced, branchId, reportId, f);
+    const contributes = await collectionContributes(q, scope, proven.predicate, {
+      ...proven.collectionFilters,
+      collectionId: cid,
+    });
+    if (!contributes) throw new NotFound();
+    const found = await selectCollectionDetail(q, scope, cid);
+    if (
+      !found ||
+      found.branchId !== proven.collectionFilters.branchId ||
+      found.reportId !== proven.collectionFilters.reportId
+    ) {
+      throw new NotFound();
+    }
+    return { chain: proven, detail: found };
+  });
+
+  const { branchId: id, reportId: rid } = chain.collectionFilters;
+  const collectionTimeline = await getCollectionTimeline(db, actor, cid);
+  const reportTimeline = await getReportTimeline(db, actor, rid);
+  const collection: CollectionDetail = {
+    collectionId: detail.collectionId,
+    amount: detail.amount,
+    collectedOn: detail.collectedOn,
+    purpose: detail.purpose,
+    status: detail.status,
+    voidReason: detail.voidReason,
+    routedAt: detail.routedAt,
+    routedByName: detail.routedByName,
+    createdAt: detail.createdAt,
+    createdByName: detail.createdByName,
+  };
+
+  return {
+    figure: traced,
+    slug: FIGURES[traced].slug,
+    branch: chain.branch,
+    report: chain.header,
+    reportEvents: chain.reportEvents,
+    collection,
+    collectionTimeline,
+    reportTimeline,
+    explain: {
+      figure: traced,
+      level: 'collection',
+      filters: { ...f, branchId: id, reportId: rid, collectionId: cid },
+      recordCount: 1,
+      value: collection.amount,
+      asOf: chain.asOf,
+    },
+    asOf: chain.asOf,
+    trail: chainTrail(traced, f, chain, {
+      id: cid,
+      collectedOn: collection.collectedOn,
+      amount: collection.amount,
+    }),
+  };
 }
