@@ -8,8 +8,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { findPhysicalDirection } from '../../../../scripts/lib/logical-css.mjs';
 import { renderWithIntl } from '../../../../tests/support/render-intl';
 import { formatDate } from '@/platform/i18n/format';
-import type { BranchListItem } from '../types';
+import type { BranchDetail, BranchListItem, LeadCandidate } from '../types';
 import { BranchCreateForm } from './BranchCreateForm';
+import { BranchDetailsForm } from './BranchDetailsForm';
+import { BranchLeadsPanel } from './BranchLeadsPanel';
+import { BranchStatusControl } from './BranchStatusControl';
 import { BranchesTable } from './BranchesTable';
 
 const router = vi.hoisted(() => ({ refresh: vi.fn(), push: vi.fn() }));
@@ -253,19 +256,471 @@ describe.each(LOCALES)('BranchCreateForm (%s)', (locale) => {
   });
 });
 
-describe('branch component sources', () => {
-  it.each(['BranchesTable.tsx', 'BranchCreateForm.tsx', 'form-kit.tsx'])(
-    '%s uses logical utilities only',
-    (file) => {
-      const source = readFileSync(path.resolve(import.meta.dirname, file), 'utf8');
-      expect(findPhysicalDirection(source, file)).toEqual([]);
+const USER_LEAD = '33333333-3333-4333-8333-333333333333';
+const USER_OTHER = '55555555-5555-4555-8555-555555555555';
+const USER_FREE = '66666666-6666-4666-8666-666666666666';
+
+function branchDetail(overrides: Partial<BranchDetail> = {}): BranchDetail {
+  return {
+    ...branchItem(),
+    summary: 'Weekly food drive in Gulberg.',
+    updatedAt: '2026-10-01T05:00:00.000Z',
+    leads: [
+      {
+        userId: USER_LEAD,
+        name: 'Omar Siddiqui',
+        email: 'lead@shiplens.test',
+        role: 'branch_lead',
+      },
+    ],
+    allowedTransitions: ['paused', 'closed'],
+    openReportCount: 0,
+    ...overrides,
+  };
+}
+
+describe.each(LOCALES)('BranchDetailsForm (%s)', (locale) => {
+  const m = (key: string, values?: Record<string, string>) => msg(locale, key, values);
+  const save = () => screen.getByRole('button', { name: m('edit.save') });
+  const summaryBox = () => screen.getByRole('textbox', { name: m('detail.summary') });
+  const cityBox = () => screen.getByRole('textbox', { name: m('create.city') });
+
+  it('is a read-only list without edit rights', () => {
+    const { container } = renderWithIntl(
+      <BranchDetailsForm branch={branchDetail()} canEdit={false} />,
+      { locale, namespaces: NAMESPACES },
+    );
+    expect(container).toHaveAttribute('dir', locale === 'ur' ? 'rtl' : 'ltr');
+    expect(screen.getByText(m('detail.readOnlyNotice'))).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).toBeNull();
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.getByText('BR001').tagName).toBe('BDI');
+    expect(screen.getByText(m('detail.codeHint'))).toBeInTheDocument();
+    expect(screen.getByText('Weekly food drive in Gulberg.')).toBeInTheDocument();
+    expect(screen.getByText(formatDate('2026-03-14', locale))).toBeInTheDocument();
+  });
+
+  it('shows the missing summary text when there is none', () => {
+    renderWithIntl(<BranchDetailsForm branch={branchDetail({ summary: null })} canEdit={false} />, {
+      locale,
+      namespaces: NAMESPACES,
+    });
+    expect(screen.getByText(m('detail.noSummary'))).toBeInTheDocument();
+  });
+
+  it('sends only the changed fields and confirms the save', async () => {
+    const user = userEvent.setup();
+    const updated = branchDetail({ summary: 'Food drive and tutoring.', city: null });
+    fetchMock.mockResolvedValueOnce(reply(200, { data: updated }));
+    renderWithIntl(<BranchDetailsForm branch={branchDetail()} canEdit />, {
+      locale,
+      namespaces: NAMESPACES,
+    });
+    expect(screen.getByText('BR001')).toHaveAttribute('dir', 'ltr');
+    expect(screen.getByText(m('detail.codeHint'))).toBeInTheDocument();
+    expect(save()).toBeDisabled();
+    expect(screen.getByText(m('edit.noChanges'))).toBeInTheDocument();
+
+    await user.clear(summaryBox());
+    await user.type(summaryBox(), ' Food drive and tutoring. ');
+    await user.clear(cityBox());
+    expect(screen.getByText(m('edit.unsaved'))).toBeInTheDocument();
+    expect(save()).toBeEnabled();
+    await user.click(save());
+
+    expect(calls()).toEqual([
+      {
+        url: `/api/v1/branches/${BRANCH_A}`,
+        method: 'PATCH',
+        contentType: 'application/json',
+        body: { city: null, summary: 'Food drive and tutoring.' },
+      },
+    ]);
+    expect(await screen.findByText(m('edit.saved'))).toBeInTheDocument();
+    expect(router.refresh).toHaveBeenCalledTimes(1);
+    expect(summaryBox()).toHaveValue('Food drive and tutoring.');
+    expect(save()).toBeDisabled();
+  });
+
+  it('checks the name before sending', async () => {
+    const user = userEvent.setup();
+    renderWithIntl(<BranchDetailsForm branch={branchDetail()} canEdit />, {
+      locale,
+      namespaces: NAMESPACES,
+    });
+    const nameBox = screen.getByRole('textbox', { name: m('create.name') });
+    await user.clear(nameBox);
+    await user.type(nameBox, 'X');
+    await user.click(save());
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(nameBox).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByText(m('errors.too_short'))).toBeInTheDocument();
+  });
+
+  it('explains a refusal because the branch closed meanwhile', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(
+      reply(409, { error: { code: 'branch_closed', message: 'Conflict' } }),
+    );
+    renderWithIntl(<BranchDetailsForm branch={branchDetail()} canEdit />, {
+      locale,
+      namespaces: NAMESPACES,
+    });
+    await user.type(summaryBox(), ' More.');
+    await user.click(save());
+    expect(await screen.findByRole('alert')).toHaveTextContent(m('errors.branch_closed'));
+    expect(router.refresh).toHaveBeenCalled();
+  });
+
+  it('shows a duplicate name on the name field', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(
+      reply(409, { error: { code: 'duplicate_branch_name', message: 'Conflict' } }),
+    );
+    renderWithIntl(<BranchDetailsForm branch={branchDetail()} canEdit />, {
+      locale,
+      namespaces: NAMESPACES,
+    });
+    const nameBox = screen.getByRole('textbox', { name: m('create.name') });
+    await user.type(nameBox, ' Two');
+    await user.click(save());
+    expect(await screen.findByText(m('errors.duplicate_branch_name'))).toBeInTheDocument();
+    expect(nameBox).toHaveAttribute('aria-invalid', 'true');
+  });
+
+  it('offers no inputs on a closed branch', () => {
+    renderWithIntl(
+      <BranchDetailsForm
+        branch={branchDetail({ status: 'closed', allowedTransitions: [] })}
+        canEdit
+      />,
+      { locale, namespaces: NAMESPACES },
+    );
+    expect(screen.getByText(m('detail.closedNotice'))).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).toBeNull();
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+});
+
+describe.each(LOCALES)('BranchStatusControl (%s)', (locale) => {
+  const m = (key: string, values?: Record<string, string>) => msg(locale, key, values);
+  const moveTo = (status: string) => m('status.moveTo', { status: statusLabel(locale, status) });
+
+  it('marks the current step and offers only the allowed moves', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(
+      reply(200, {
+        data: branchDetail({ status: 'active', allowedTransitions: ['paused', 'closed'] }),
+      }),
+    );
+    renderWithIntl(
+      <BranchStatusControl
+        branchId={BRANCH_A}
+        status="forming"
+        allowedTransitions={['active', 'closed']}
+        canTransition
+        name="Lahore Central"
+      />,
+      { locale, namespaces: NAMESPACES },
+    );
+    const steps = screen.getAllByRole('listitem');
+    expect(steps.map((li) => li.textContent)).toEqual(
+      ['forming', 'active', 'paused', 'closed'].map((s) => statusLabel(locale, s)),
+    );
+    expect(steps[0]).toHaveAttribute('aria-current', 'step');
+    expect(steps.filter((li) => li.hasAttribute('aria-current'))).toHaveLength(1);
+    expect(screen.getByText(m('statusHelp.forming'))).toBeInTheDocument();
+
+    expect(screen.getAllByRole('button').map((b) => b.textContent)).toEqual([
+      moveTo('active'),
+      moveTo('closed'),
+    ]);
+
+    // Activating needs no confirmation.
+    await user.click(screen.getByRole('button', { name: moveTo('active') }));
+    expect(calls()).toEqual([
+      {
+        url: `/api/v1/branches/${BRANCH_A}/status`,
+        method: 'POST',
+        contentType: 'application/json',
+        body: { to: 'active' },
+      },
+    ]);
+    expect(
+      await screen.findByText(m('status.moved', { status: statusLabel(locale, 'active') })),
+    ).toBeInTheDocument();
+    expect(router.refresh).toHaveBeenCalledTimes(1);
+    expect(screen.getAllByRole('listitem')[1]).toHaveAttribute('aria-current', 'step');
+    expect(screen.getByRole('button', { name: moveTo('paused') })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: moveTo('active') })).toBeNull();
+  });
+
+  it('asks before closing, with a destructive confirmation', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(
+      reply(200, { data: branchDetail({ status: 'closed', allowedTransitions: [] }) }),
+    );
+    renderWithIntl(
+      <BranchStatusControl
+        branchId={BRANCH_A}
+        status="active"
+        allowedTransitions={['paused', 'closed']}
+        canTransition
+        name="Lahore Central"
+      />,
+      { locale, namespaces: NAMESPACES },
+    );
+    await user.click(screen.getByRole('button', { name: moveTo('closed') }));
+    const dialog = screen.getByRole('dialog', { name: m('status.confirmCloseTitle') });
+    expect(dialog).toHaveTextContent(m('status.confirmCloseBody', { name: 'Lahore Central' }));
+    await user.click(
+      within(dialog).getByRole('button', { name: lookup(locale, 'common', 'actions.cancel') }),
+    );
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(screen.queryByRole('dialog')).toBeNull();
+
+    await user.click(screen.getByRole('button', { name: moveTo('closed') }));
+    const again = screen.getByRole('dialog', { name: m('status.confirmCloseTitle') });
+    const confirm = within(again).getByRole('button', { name: m('status.confirmCloseAction') });
+    expect(confirm.className).toContain('bg-danger');
+    await user.click(confirm);
+    expect(calls().map((c) => c.body)).toEqual([{ to: 'closed' }]);
+    expect(await screen.findByText(m('status.noMoves'))).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem')[3]).toHaveAttribute('aria-current', 'step');
+    expect(screen.queryByRole('button', { name: moveTo('paused') })).toBeNull();
+  });
+
+  it('asks before pausing', async () => {
+    const user = userEvent.setup();
+    renderWithIntl(
+      <BranchStatusControl
+        branchId={BRANCH_A}
+        status="active"
+        allowedTransitions={['paused', 'closed']}
+        canTransition
+        name="Lahore Central"
+      />,
+      { locale, namespaces: NAMESPACES },
+    );
+    await user.click(screen.getByRole('button', { name: moveTo('paused') }));
+    const dialog = screen.getByRole('dialog', { name: m('status.confirmPauseTitle') });
+    expect(dialog).toHaveTextContent(m('status.confirmPauseBody', { name: 'Lahore Central' }));
+    expect(
+      within(dialog).getByRole('button', { name: m('status.confirmPauseAction') }).className,
+    ).not.toContain('bg-danger');
+  });
+
+  it.each(['branch_has_open_reports', 'invalid_transition'])(
+    'shows a refused move (%s) in an alert',
+    async (code) => {
+      const user = userEvent.setup();
+      fetchMock.mockResolvedValueOnce(reply(409, { error: { code, message: 'Conflict' } }));
+      renderWithIntl(
+        <BranchStatusControl
+          branchId={BRANCH_A}
+          status="forming"
+          allowedTransitions={['active', 'closed']}
+          canTransition
+          name="Lahore Central"
+        />,
+        { locale, namespaces: NAMESPACES },
+      );
+      await user.click(screen.getByRole('button', { name: moveTo('active') }));
+      expect(await screen.findByRole('alert')).toHaveTextContent(m(`errors.${code}`));
+      expect(screen.getAllByRole('listitem')[0]).toHaveAttribute('aria-current', 'step');
+      expect(router.refresh).toHaveBeenCalledTimes(code === 'invalid_transition' ? 1 : 0);
     },
   );
 
-  it('client components never import the server index', () => {
-    for (const file of ['BranchCreateForm.tsx', 'form-kit.tsx', 'BranchesTable.tsx']) {
-      const source = readFileSync(path.resolve(import.meta.dirname, file), 'utf8');
-      expect(source).not.toMatch(/from '@\/modules\/branches'/);
-    }
+  it('renders no move buttons without the right or on a closed branch', () => {
+    const { unmount } = renderWithIntl(
+      <BranchStatusControl
+        branchId={BRANCH_A}
+        status="active"
+        allowedTransitions={['paused', 'closed']}
+        canTransition={false}
+        name="Lahore Central"
+      />,
+      { locale, namespaces: NAMESPACES },
+    );
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.getAllByRole('listitem')[1]).toHaveAttribute('aria-current', 'step');
+    unmount();
+
+    renderWithIntl(
+      <BranchStatusControl
+        branchId={BRANCH_A}
+        status="closed"
+        allowedTransitions={[]}
+        canTransition
+        name="Lahore Central"
+      />,
+      { locale, namespaces: NAMESPACES },
+    );
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(screen.getByText(m('status.noMoves'))).toBeInTheDocument();
+  });
+});
+
+const CANDIDATES: LeadCandidate[] = [
+  {
+    userId: USER_LEAD,
+    name: 'Omar Siddiqui',
+    email: 'lead@shiplens.test',
+    role: 'branch_lead',
+    branchId: BRANCH_A,
+    branchName: 'Lahore Central',
+  },
+  {
+    userId: USER_OTHER,
+    name: 'Zara Iqbal',
+    email: 'lead.karachi@shiplens.test',
+    role: 'branch_lead',
+    branchId: BRANCH_B,
+    branchName: 'Hyderabad East',
+  },
+  {
+    userId: USER_FREE,
+    name: 'Hira Raza',
+    email: 'hr@shiplens.test',
+    role: 'hr_lead',
+    branchId: null,
+    branchName: null,
+  },
+];
+
+describe.each(LOCALES)('BranchLeadsPanel (%s)', (locale) => {
+  const m = (key: string, values?: Record<string, string>) => msg(locale, key, values);
+  const leads = branchDetail().leads;
+
+  it('lists leads by role with emails kept left to right', () => {
+    renderWithIntl(
+      <BranchLeadsPanel branchId={BRANCH_A} leads={leads} canAssign={false} closed={false} />,
+      { locale, namespaces: NAMESPACES },
+    );
+    const branchLeads = screen.getByRole('list', { name: m('leads.branchLead') });
+    expect(within(branchLeads).getByText('Omar Siddiqui')).toBeInTheDocument();
+    expect(within(branchLeads).getByText('lead@shiplens.test')).toHaveAttribute('dir', 'ltr');
+    expect(screen.queryByRole('list', { name: m('leads.hrLead') })).toBeNull();
+    expect(screen.getByText(m('leads.none'))).toBeInTheDocument();
+    expect(screen.queryByRole('combobox')).toBeNull();
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('assigns a candidate grouped by role, with the move warning', async () => {
+    const user = userEvent.setup();
+    const after = [
+      ...leads,
+      { userId: USER_FREE, name: 'Hira Raza', email: 'hr@shiplens.test', role: 'hr_lead' as const },
+    ];
+    fetchMock.mockResolvedValueOnce(reply(200, { data: branchDetail({ leads: after }) }));
+    renderWithIntl(
+      <BranchLeadsPanel
+        branchId={BRANCH_A}
+        leads={leads}
+        candidates={CANDIDATES}
+        canAssign
+        closed={false}
+      />,
+      { locale, namespaces: NAMESPACES },
+    );
+    const select = screen.getByRole('combobox', { name: m('leads.candidate') });
+    const groups = select.querySelectorAll('optgroup');
+    expect([...groups].map((g) => g.label)).toEqual([m('leads.branchLead'), m('leads.hrLead')]);
+    // People already leading this branch are not offered again.
+    expect(select.textContent).not.toContain('Omar Siddiqui');
+    const other = within(select).getByRole('option', { name: /Zara Iqbal/ });
+    expect(other.textContent).toContain(
+      m('leads.candidateCurrentBranch', { branch: 'Hyderabad East' }),
+    );
+    expect(within(select).getByRole('option', { name: /Hira Raza/ }).textContent).toContain(
+      m('leads.candidateNoBranch'),
+    );
+    expect(screen.getByText(m('leads.moveWarning'))).toBeInTheDocument();
+
+    const assign = screen.getByRole('button', { name: m('leads.assign') });
+    expect(assign).toBeDisabled();
+    await user.selectOptions(select, USER_FREE);
+    await user.click(assign);
+    expect(calls()).toEqual([
+      {
+        url: `/api/v1/branches/${BRANCH_A}/leads`,
+        method: 'POST',
+        contentType: 'application/json',
+        body: { userId: USER_FREE },
+      },
+    ]);
+    expect(await screen.findByText(m('leads.assigned'))).toBeInTheDocument();
+    expect(router.refresh).toHaveBeenCalledTimes(1);
+    const hrLeads = screen.getByRole('list', { name: m('leads.hrLead') });
+    expect(within(hrLeads).getByText('hr@shiplens.test')).toHaveAttribute('dir', 'ltr');
+  });
+
+  it('explains an ineligible person', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(
+      reply(422, {
+        error: {
+          code: 'validation_failed',
+          message: 'Invalid',
+          details: { fields: [{ path: 'userId', code: 'invalid_user' }] },
+        },
+      }),
+    );
+    renderWithIntl(
+      <BranchLeadsPanel
+        branchId={BRANCH_A}
+        leads={leads}
+        candidates={CANDIDATES}
+        canAssign
+        closed={false}
+      />,
+      { locale, namespaces: NAMESPACES },
+    );
+    await user.selectOptions(screen.getByRole('combobox'), USER_OTHER);
+    await user.click(screen.getByRole('button', { name: m('leads.assign') }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(m('errors.invalid_user'));
+    expect(router.refresh).not.toHaveBeenCalled();
+  });
+
+  it('offers no assignment on a closed branch or without candidates', () => {
+    const { unmount } = renderWithIntl(
+      <BranchLeadsPanel
+        branchId={BRANCH_A}
+        leads={leads}
+        candidates={CANDIDATES}
+        canAssign
+        closed
+      />,
+      { locale, namespaces: NAMESPACES },
+    );
+    expect(screen.queryByRole('combobox')).toBeNull();
+    unmount();
+    renderWithIntl(
+      <BranchLeadsPanel branchId={BRANCH_A} leads={leads} canAssign closed={false} />,
+      { locale, namespaces: NAMESPACES },
+    );
+    expect(screen.queryByRole('combobox')).toBeNull();
+  });
+});
+
+const COMPONENT_FILES = [
+  'BranchesTable.tsx',
+  'BranchCreateForm.tsx',
+  'BranchDetailsForm.tsx',
+  'BranchStatusControl.tsx',
+  'BranchLeadsPanel.tsx',
+  'form-kit.tsx',
+];
+
+describe('branch component sources', () => {
+  it.each(COMPONENT_FILES)('%s uses logical utilities only', (file) => {
+    const source = readFileSync(path.resolve(import.meta.dirname, file), 'utf8');
+    expect(findPhysicalDirection(source, file)).toEqual([]);
+  });
+
+  it.each(COMPONENT_FILES)('%s never imports the server index', (file) => {
+    const source = readFileSync(path.resolve(import.meta.dirname, file), 'utf8');
+    expect(source).not.toMatch(/from '@\/modules\/branches'/);
   });
 });

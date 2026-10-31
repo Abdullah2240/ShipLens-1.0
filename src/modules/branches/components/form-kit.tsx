@@ -183,3 +183,13 @@ export function Panel({
     </section>
   );
 }
+
+/** One label and value pair inside a definition list. */
+export function Fact({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <dt className="text-xs font-semibold text-text-muted">{label}</dt>
+      <dd className="min-w-0 text-sm text-text">{children}</dd>
+    </div>
+  );
+}
