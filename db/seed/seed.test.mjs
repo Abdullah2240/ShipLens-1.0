@@ -7,7 +7,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { promisify } from 'node:util';
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { verifyPassword } from '../../scripts/lib/password.mjs';
 import { runSeedIfRequested } from '../../scripts/migrate.mjs';
 import {
@@ -19,7 +19,7 @@ import {
   testPool,
 } from '../../tests/support/db';
 import { DEMO_BRANCH, DEMO_USERS } from './demo-users.mjs';
-import { runSeed } from './index.mjs';
+import { runSeed as runSeedAllSteps } from './index.mjs';
 
 const run = promisify(execFile);
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
@@ -62,12 +62,30 @@ async function tempDir(prefix) {
   return mkdtemp(path.join(os.tmpdir(), prefix));
 }
 
+// Step 01 tests run against a steps directory holding only step 01, so later steps (the
+// demo dataset) do not change the counts asserted here. The boot-hook tests at the end run
+// the real steps directory.
+let step01Only;
+function runSeed(options) {
+  return runSeedAllSteps({ stepsDir: step01Only, ...options });
+}
+
+beforeAll(async () => {
+  step01Only = await mkdtemp(path.join(os.tmpdir(), 'shiplens-seed-01-'));
+  await writeFile(
+    path.join(step01Only, '01-demo-branch-and-users.mjs'),
+    `export { name, run } from ${JSON.stringify(STEP_01.href)};
+`,
+  );
+});
+
 beforeEach(async () => {
   await resetDb();
 });
 
 afterAll(async () => {
   await closeTestPool();
+  if (step01Only) await rm(step01Only, { recursive: true, force: true });
 });
 
 describe('runSeed on a fresh database', () => {
@@ -453,11 +471,15 @@ describe('boot hook in scripts/migrate.mjs', () => {
     const first = await migrateProcess({ SEED_ON_BOOT: 'true', SEED_DEMO_PASSWORD: PASSWORD });
     expect(first.code, first.stderr).toBe(0);
     expect(first.stdout).not.toContain(PASSWORD);
-    expect(await counts()).toEqual({ users: 5, branches: 1, audit: 6 });
+    expect(first.stdout).toContain('seed: running 01-demo-branch-and-users');
+    const users = await demoUsers();
+    expect(users.map((u) => u.email)).toEqual(DEMO_USERS.map((u) => u.email).sort());
+    const afterFirst = await counts();
 
     const second = await migrateProcess({ SEED_ON_BOOT: 'true', SEED_DEMO_PASSWORD: PASSWORD });
     expect(second.code, second.stderr).toBe(0);
-    expect(await counts()).toEqual({ users: 5, branches: 1, audit: 6 });
+    expect(await counts()).toEqual(afterFirst);
+    expect(await demoUsers()).toEqual(users);
   });
 
   it('does not seed when SEED_ON_BOOT is unset', async () => {
