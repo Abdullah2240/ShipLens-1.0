@@ -72,10 +72,13 @@ export function composeArgs({ project = DEFAULT_PROJECT, mode, playwrightArgs = 
     case 'up':
       return [...base, 'up', '-d', '--build', '--wait', 'app'];
     case 'run':
+      // --no-deps: reuse the app started (and health-checked) by `up` instead of letting
+      // run recreate it; the playwright service shares that container's network.
       return [
         ...base,
         'run',
         '--rm',
+        '--no-deps',
         '--build',
         'playwright',
         'npx',

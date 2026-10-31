@@ -75,6 +75,7 @@ describe('composeArgs', () => {
       'shiplens-e2e',
       'run',
       '--rm',
+      '--no-deps',
       '--build',
       'playwright',
       'npx',
