@@ -110,7 +110,10 @@ export function ApplicationDetailView({ application: app, decision }: Applicatio
 
           <Card title={t('message')}>
             {app.message ? (
-              <p dir="auto" className="text-sm leading-relaxed whitespace-pre-wrap break-words text-text">
+              <p
+                dir="auto"
+                className="text-sm leading-relaxed whitespace-pre-wrap break-words text-text"
+              >
                 {app.message}
               </p>
             ) : (

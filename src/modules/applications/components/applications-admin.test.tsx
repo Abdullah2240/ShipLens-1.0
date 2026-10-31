@@ -1,13 +1,15 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import type { ReactNode } from 'react';
-import { screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useState, type ReactNode } from 'react';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { findPhysicalDirection } from '../../../../scripts/lib/logical-css.mjs';
 import { renderWithIntl } from '../../../../tests/support/render-intl';
 import { formatDateTime } from '@/platform/i18n/format';
 import type { ApplicationDetail, ApplicationListItem } from '../review-types';
+import { ApplicationDecision } from './ApplicationDecision';
 import { ApplicationDetailView } from './ApplicationDetailView';
 import {
   ApplicationStatusTabs,
@@ -121,7 +123,8 @@ const DECLINED = detail({
 });
 
 // Physical-direction utilities, with any variant prefix (for example `hover:ml-2`).
-const PHYSICAL_CLASS = /(^|\s)(?:[\w-]+:)*-?(?:ml|mr|pl|pr|left|right)-|(^|\s)text-(?:left|right)(\s|$)/;
+const PHYSICAL_CLASS =
+  /(^|\s)(?:[\w-]+:)*-?(?:ml|mr|pl|pr|left|right)-|(^|\s)text-(?:left|right)(\s|$)/;
 
 function physicalClasses(root: HTMLElement): string[] {
   return [root, ...Array.from(root.querySelectorAll<HTMLElement>('[class]'))]
@@ -133,8 +136,31 @@ function isIsolatedLtr(node: HTMLElement): boolean {
   return node.closest('[dir="ltr"]') !== null;
 }
 
+function reply(status: number, body: unknown): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  });
+}
+
+let fetchMock: ReturnType<typeof vi.fn>;
+
 beforeEach(() => {
   vi.clearAllMocks();
+  router.refresh.mockReset();
+  fetchMock = vi.fn();
+  vi.stubGlobal('fetch', fetchMock);
+  // jsdom has no modal dialog support
+  HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
+    this.setAttribute('open', '');
+  };
+  HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
+    this.removeAttribute('open');
+  };
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe('applicationTabFrom and applicationsHref', () => {
@@ -396,24 +422,204 @@ describe.each(LOCALES)('ApplicationDetailView (%s)', (locale) => {
   });
 });
 
-describe('applications messages', () => {
-  it.each(LOCALES)('keeps the public form and thanks keys next to the admin keys (%s)', (locale) => {
-    for (const key of ['form.title', 'form.submit', 'form.errors.generic', 'thanks.title']) {
-      expect(lookup(locale, 'applications', key).length).toBeGreaterThan(0);
+const APP_ID = 'a0000000-0000-4000-8000-000000000001';
+
+function renderDecision(locale: Locale, status: ApplicationDetail['status'] = 'pending') {
+  return renderWithIntl(
+    <ApplicationDecision applicationId={APP_ID} applicantName="Zara Hussain" status={status} />,
+    { locale, namespaces: NAMESPACES },
+  );
+}
+
+function openDialog(): HTMLElement {
+  const dialog = document.querySelector<HTMLElement>('dialog[open]');
+  if (!dialog) throw new Error('no open dialog');
+  return dialog;
+}
+
+describe.each(LOCALES)('ApplicationDecision (%s)', (locale) => {
+  const m = (key: string, values?: Record<string, string>) => msg(locale, key, values);
+
+  it('renders nothing for a decided application', () => {
+    for (const status of ['accepted', 'declined'] as const) {
+      const { container, unmount } = renderDecision(locale, status);
+      expect(container.querySelector('button')).toBeNull();
+      expect(container.textContent).toBe('');
+      unmount();
     }
-    expect(msg(locale, 'decision.acceptBody', { name: 'Zara' })).toContain('Zara');
-    expect(msg(locale, 'decision.declineBody', { name: 'Zara' })).toContain('Zara');
+  });
+
+  it('offers accept and decline for a pending application, with logical classes only', () => {
+    const { container } = renderDecision(locale);
+    expect(container).toHaveAttribute('dir', locale === 'ur' ? 'rtl' : 'ltr');
+    expect(screen.getByRole('button', { name: m('decision.accept') })).toBeEnabled();
+    expect(screen.getByRole('button', { name: m('decision.decline') })).toBeEnabled();
+    expect(document.querySelector('dialog[open]')).toBeNull();
+    expect(physicalClasses(container)).toEqual([]);
+  });
+
+  it('asks before accepting and sends nothing when cancelled', async () => {
+    const user = userEvent.setup();
+    renderDecision(locale);
+    await user.click(screen.getByRole('button', { name: m('decision.accept') }));
+    const dialog = openDialog();
+    expect(within(dialog).getByRole('heading', { name: m('decision.acceptTitle') })).toBeVisible();
+    expect(dialog).toHaveTextContent(m('decision.acceptBody', { name: 'Zara Hussain' }));
+    await user.click(
+      within(dialog).getByRole('button', { name: lookup(locale, 'common', 'actions.cancel') }),
+    );
+    expect(document.querySelector('dialog[open]')).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('accepts once, shows the new member code with a link, and refreshes', async () => {
+    let release: (r: Response) => void = () => {};
+    fetchMock.mockImplementationOnce(() => new Promise<Response>((resolve) => (release = resolve)));
+    const user = userEvent.setup();
+    renderDecision(locale);
+    await user.click(screen.getByRole('button', { name: m('decision.accept') }));
+    const confirm = within(openDialog()).getByRole('button', {
+      name: m('decision.confirmAccept'),
+    });
+    await user.dblClick(confirm);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe(`/api/v1/applications/${APP_ID}/accept`);
+    expect(init.method).toBe('POST');
+    expect(init.body).toBeUndefined();
+    expect(screen.getByRole('button', { name: m('decision.accept') })).toBeDisabled();
+    expect(screen.getByRole('button', { name: m('decision.decline') })).toBeDisabled();
+    expect(screen.getByText(m('decision.working'))).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: m('decision.accept') }));
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    release(reply(200, { data: { memberId: MEMBER_ID, memberCode: 'M00052' } }));
+    expect(
+      await screen.findByText(m('decision.accepted', { name: 'Zara Hussain' })),
+    ).toBeInTheDocument();
+    const code = screen.getByText('M00052');
+    expect(code.tagName).toBe('BDI');
+    expect(isIsolatedLtr(code)).toBe(true);
+    expect(screen.getByRole('link', { name: m('detail.viewMember') })).toHaveAttribute(
+      'href',
+      `/people/members/${MEMBER_ID}`,
+    );
+    expect(router.refresh).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('button', { name: m('decision.accept') })).toBeNull();
+  });
+
+  it('keeps the accepted notice after the page refreshes with the decided status', async () => {
+    fetchMock.mockResolvedValueOnce(
+      reply(200, { data: { memberId: MEMBER_ID, memberCode: 'M00052' } }),
+    );
+    const user = userEvent.setup();
+    // The page refresh re-renders the controls with the decided status.
+    function Refreshing() {
+      const [status, setStatus] = useState<ApplicationDetail['status']>('pending');
+      router.refresh.mockImplementation(() => setStatus('accepted'));
+      return (
+        <ApplicationDecision applicationId={APP_ID} applicantName="Zara Hussain" status={status} />
+      );
+    }
+    renderWithIntl(<Refreshing />, { locale, namespaces: NAMESPACES });
+    await user.click(screen.getByRole('button', { name: m('decision.accept') }));
+    await user.click(
+      within(openDialog()).getByRole('button', { name: m('decision.confirmAccept') }),
+    );
+    await waitFor(() => expect(router.refresh).toHaveBeenCalledTimes(1));
+    expect(screen.getByText('M00052')).toBeInTheDocument();
+  });
+
+  it('declines with a trimmed note as JSON and refreshes', async () => {
+    fetchMock.mockResolvedValueOnce(reply(200, { data: { ok: true } }));
+    const user = userEvent.setup();
+    renderDecision(locale);
+    await user.click(screen.getByRole('button', { name: m('decision.decline') }));
+    const dialog = openDialog();
+    expect(within(dialog).getByRole('heading', { name: m('decision.declineTitle') })).toBeVisible();
+    expect(dialog).toHaveTextContent(m('decision.declineBody', { name: 'Zara Hussain' }));
+    const note = within(dialog).getByLabelText(m('decision.noteLabel'));
+    expect(note.tagName).toBe('TEXTAREA');
+    expect(note).toHaveAttribute('maxLength', '500');
+    await user.type(note, '  Not this term.  ');
+    await user.click(within(dialog).getByRole('button', { name: m('decision.confirmDecline') }));
+
+    await waitFor(() => expect(router.refresh).toHaveBeenCalledTimes(1));
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe(`/api/v1/applications/${APP_ID}/decline`);
+    expect(init.method).toBe('POST');
+    expect(new Headers(init.headers).get('content-type')).toBe('application/json');
+    expect(JSON.parse(init.body as string)).toEqual({ note: 'Not this term.' });
+    expect(await screen.findByText(m('decision.declined'))).toBeInTheDocument();
+  });
+
+  it('sends an empty decline body when no note is given', async () => {
+    fetchMock.mockResolvedValueOnce(reply(200, { data: { ok: true } }));
+    const user = userEvent.setup();
+    renderDecision(locale);
+    await user.click(screen.getByRole('button', { name: m('decision.decline') }));
+    await user.click(
+      within(openDialog()).getByRole('button', { name: m('decision.confirmDecline') }),
+    );
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    const init = (fetchMock.mock.calls[0] as [string, RequestInit])[1];
+    expect(JSON.parse(init.body as string)).toEqual({});
+  });
+
+  it('explains a lost race and refreshes on 409', async () => {
+    fetchMock.mockResolvedValueOnce(reply(409, { error: { code: 'already_decided' } }));
+    const user = userEvent.setup();
+    renderDecision(locale);
+    await user.click(screen.getByRole('button', { name: m('decision.accept') }));
+    await user.click(
+      within(openDialog()).getByRole('button', { name: m('decision.confirmAccept') }),
+    );
+    expect(await screen.findByRole('alert')).toHaveTextContent(m('decision.alreadyDecided'));
+    expect(router.refresh).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['a server error', () => Promise.resolve(reply(500, { error: { code: 'internal_error' } }))],
+    ['a network failure', () => Promise.reject(new TypeError('Failed to fetch'))],
+  ])('shows the generic error and allows a retry after %s', async (_label, outcome) => {
+    fetchMock.mockImplementationOnce(outcome);
+    const user = userEvent.setup();
+    renderDecision(locale);
+    await user.click(screen.getByRole('button', { name: m('decision.decline') }));
+    await user.click(
+      within(openDialog()).getByRole('button', { name: m('decision.confirmDecline') }),
+    );
+    expect(await screen.findByRole('alert')).toHaveTextContent(m('decision.error'));
+    expect(router.refresh).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: m('decision.decline') })).toBeEnabled();
+    expect(screen.getByRole('button', { name: m('decision.accept') })).toBeEnabled();
   });
 });
 
-describe('applications admin component sources', () => {
-  it.each(['ApplicationsTable.tsx', 'ApplicationStatusTabs.tsx', 'ApplicationDetailView.tsx'])(
-    '%s uses logical utilities only and imports no server module index',
-    (file) => {
-      const source = readFileSync(path.resolve(import.meta.dirname, file), 'utf8');
-      expect(findPhysicalDirection(source, file)).toEqual([]);
-      expect(source).not.toMatch(/from '@\/modules\/applications'/);
-      expect(source).not.toMatch(/dangerouslySetInnerHTML/);
+describe('applications messages', () => {
+  it.each(LOCALES)(
+    'keeps the public form and thanks keys next to the admin keys (%s)',
+    (locale) => {
+      for (const key of ['form.title', 'form.submit', 'form.errors.generic', 'thanks.title']) {
+        expect(lookup(locale, 'applications', key).length).toBeGreaterThan(0);
+      }
+      expect(msg(locale, 'decision.acceptBody', { name: 'Zara' })).toContain('Zara');
+      expect(msg(locale, 'decision.declineBody', { name: 'Zara' })).toContain('Zara');
     },
   );
+});
+
+describe('applications admin component sources', () => {
+  it.each([
+    'ApplicationsTable.tsx',
+    'ApplicationStatusTabs.tsx',
+    'ApplicationDetailView.tsx',
+    'ApplicationDecision.tsx',
+  ])('%s uses logical utilities only and imports no server module index', (file) => {
+    const source = readFileSync(path.resolve(import.meta.dirname, file), 'utf8');
+    expect(findPhysicalDirection(source, file)).toEqual([]);
+    expect(source).not.toMatch(/from '@\/modules\/applications'/);
+    expect(source).not.toMatch(/dangerouslySetInnerHTML/);
+  });
 });
