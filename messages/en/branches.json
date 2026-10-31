@@ -1,1 +1,99 @@
-{}
+{
+  "register": {
+    "title": "Branches",
+    "subtitle": "Every branch in the network, its lifecycle status and the people who lead it.",
+    "count": "{count, plural, one {# branch} other {# branches}}",
+    "create": "New branch",
+    "empty": "No branches yet",
+    "emptyBody": "Branches you create appear here with their code and status.",
+    "caption": "Branch register",
+    "readOnlyNotice": "You can view branches. Only a Super Admin can create or change them."
+  },
+  "columns": {
+    "code": "Code",
+    "name": "Name",
+    "city": "City",
+    "status": "Status",
+    "leads": "Leads",
+    "created": "Created"
+  },
+  "create": {
+    "title": "Create a branch",
+    "intro": "The code is assigned automatically. New branches start as Forming.",
+    "name": "Branch name",
+    "city": "City",
+    "summary": "Summary",
+    "optional": "Optional",
+    "submit": "Create branch",
+    "submitting": "Creating",
+    "success": "Branch {code} created."
+  },
+  "detail": {
+    "title": "Branch",
+    "back": "All branches",
+    "details": "Details",
+    "lifecycle": "Lifecycle",
+    "leads": "Leads",
+    "openReports": "{count, plural, =0 {No open reports} one {# open report} other {# open reports}}",
+    "code": "Branch code",
+    "codeHint": "Assigned automatically and never changes.",
+    "created": "Created",
+    "updated": "Last updated",
+    "summary": "Summary",
+    "noSummary": "No summary yet.",
+    "notSet": "Not set",
+    "readOnlyNotice": "You can view this branch. Only a Super Admin can change its details, status or leads.",
+    "closedNotice": "This branch is closed. Its records stay available, but nothing about it can change."
+  },
+  "edit": {
+    "save": "Save changes",
+    "saving": "Saving",
+    "saved": "Changes saved",
+    "noChanges": "No changes to save",
+    "unsaved": "Unsaved changes"
+  },
+  "status": {
+    "moveTo": "Move to {status}",
+    "current": "Current status",
+    "confirmCloseTitle": "Close this branch?",
+    "confirmCloseBody": "{name} will become read-only for good. Collections and reports stay on record, but no new ones can be added and the branch cannot be reopened.",
+    "confirmCloseAction": "Close branch",
+    "confirmPauseTitle": "Pause this branch?",
+    "confirmPauseBody": "{name} will stop accepting new collections until it is made active again.",
+    "confirmPauseAction": "Pause branch",
+    "moved": "Status changed to {status}.",
+    "noMoves": "No further moves. A closed branch stays closed."
+  },
+  "statusHelp": {
+    "forming": "Being set up. Collections can be logged while the team gets going.",
+    "active": "Operating normally and accepting collections and weekly reports.",
+    "paused": "Temporarily on hold. No new collections until it is active again.",
+    "closed": "Permanently closed and read-only. History stays on record."
+  },
+  "leads": {
+    "title": "Leads",
+    "branchLead": "Branch Leads",
+    "hrLead": "HR Leads",
+    "none": "None assigned",
+    "assign": "Assign lead",
+    "assigning": "Assigning",
+    "assignHint": "Only active Branch Lead and HR Lead accounts are listed.",
+    "candidate": "Person",
+    "choose": "Choose a person",
+    "candidateCurrentBranch": "currently at {branch}",
+    "candidateNoBranch": "no branch",
+    "assigned": "Lead assigned.",
+    "moveWarning": "A person leads one branch at a time. Assigning them here removes them from their current branch."
+  },
+  "errors": {
+    "invalid_transition": "That move is not allowed from the current status. The page now shows the latest status.",
+    "branch_has_open_reports": "This branch still has open weekly reports. Approve or resolve them before closing it.",
+    "branch_closed": "This branch is closed and can no longer be changed.",
+    "duplicate_branch_name": "Another branch already uses this name. Choose a different one.",
+    "invalid_user": "This person cannot lead a branch. Choose an active Branch Lead or HR Lead.",
+    "too_short": "Use at least 2 characters.",
+    "too_long": "This is too long. Shorten it and try again.",
+    "empty_patch": "Change at least one field before saving.",
+    "generic": "Something went wrong. Please try again."
+  }
+}
