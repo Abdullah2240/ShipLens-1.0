@@ -36,5 +36,11 @@
     "closed": "Closed",
     "published": "Published",
     "voided": "Voided"
+  },
+  "pager": {
+    "label": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {pages}"
   }
 }
