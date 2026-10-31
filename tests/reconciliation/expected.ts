@@ -132,3 +132,48 @@ export function normaliseExpected(raw: unknown): NormalisedExpected {
 export function loadExpected(): NormalisedExpected {
   return normaliseExpected(JSON.parse(readFileSync(EXPECTED_FILE, 'utf8')));
 }
+
+/** One compared value: what the oracle says against what the app returned. */
+export interface DiffRow {
+  figure: string;
+  expected: string;
+  actual: string;
+}
+
+/**
+ * Collects exact string comparisons and reports every mismatch at once as a compact
+ * table (figure, expected, actual), instead of stopping at the first one.
+ */
+type Checked = string | number | boolean | null | undefined;
+
+export class Reconciler {
+  readonly rows: DiffRow[] = [];
+
+  check(figure: string, expected: Checked, actual: Checked): void {
+    this.rows.push({ figure, expected: String(expected), actual: String(actual) });
+  }
+
+  figure(label: string, expected: FigureExpect, actual: { amount: string; count: number }): void {
+    this.check(`${label} amount`, expected.amount, actual.amount);
+    this.check(`${label} count`, expected.count, actual.count);
+  }
+
+  mismatches(): DiffRow[] {
+    return this.rows.filter((r) => r.expected !== r.actual);
+  }
+
+  report(): string {
+    const bad = this.mismatches();
+    if (bad.length === 0) return `all ${this.rows.length} values match`;
+    const w = [6, 8, 6].map((min, i) =>
+      Math.max(min, ...bad.map((r) => [r.figure, r.expected, r.actual][i]!.length)),
+    );
+    const line = (a: string, b: string, c: string) =>
+      `${a.padEnd(w[0]!)} | ${b.padStart(w[1]!)} | ${c.padStart(w[2]!)}`;
+    return [
+      `${bad.length} of ${this.rows.length} values differ from expected.json:`,
+      line('figure', 'expected', 'actual'),
+      ...bad.map((r) => line(r.figure, r.expected, r.actual)),
+    ].join('\n');
+  }
+}

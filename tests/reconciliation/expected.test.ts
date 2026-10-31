@@ -1,7 +1,7 @@
 // The oracle loader and the demo seeding helper the reconciliation suite stands on.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { closeTestPool, testPool } from '../support/db';
-import { loadExpected, normaliseExpected } from './expected';
+import { Reconciler, loadExpected, normaliseExpected } from './expected';
 import { runDemoSeed, seedDemoDatabase } from './seed-demo';
 
 const fig = (amount: string, count: number) => ({ amount, count });
@@ -97,6 +97,35 @@ describe('normaliseExpected', () => {
     const raw = sample();
     delete raw.approvedReports;
     expect(() => normaliseExpected(raw)).toThrow(/approvedReports/);
+  });
+});
+
+describe('Reconciler', () => {
+  it('compares exact strings and lists every mismatch as figure, expected, actual', () => {
+    const r = new Reconciler();
+    r.figure('approved', { amount: '10.00', count: 2 }, { amount: '10.00', count: 2 });
+    r.figure('routed', { amount: '10.00', count: 1 }, { amount: '10.0', count: 1 });
+    r.check('active_branches', 3, '2');
+    expect(r.rows).toHaveLength(5);
+    expect(r.mismatches()).toEqual([
+      { figure: 'routed amount', expected: '10.00', actual: '10.0' },
+      { figure: 'active_branches', expected: '3', actual: '2' },
+    ]);
+    const report = r.report();
+
+    expect(report.split('\n')).toEqual([
+      '2 of 5 values differ from expected.json:',
+      'figure          | expected | actual',
+      'routed amount   |    10.00 |   10.0',
+      'active_branches |        3 |      2',
+    ]);
+  });
+
+  it('reports a clean run', () => {
+    const r = new Reconciler();
+    r.check('x', '1.00', '1.00');
+    expect(r.mismatches()).toEqual([]);
+    expect(r.report()).toBe('all 1 values match');
   });
 });
 
