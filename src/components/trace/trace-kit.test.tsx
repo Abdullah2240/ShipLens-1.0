@@ -7,7 +7,9 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithIntl } from '../../../tests/support/render-intl';
 import type { Column } from '@/components/ui';
+import { formatDateTime } from '@/platform/i18n/format';
 import {
+  ExplainDrawer,
   FigureLink,
   MonthRangeFilter,
   TRACE_FIGURE_IDS,
@@ -420,5 +422,168 @@ describe.each(LOCALES)('MonthRangeFilter (%s)', (locale) => {
     const user = userEvent.setup();
     await user.click(screen.getByRole('button', { name: msg(locale, 'filter.clear') }));
     expect(nav.push).toHaveBeenCalledWith('/dashboard');
+  });
+});
+
+describe.each(LOCALES)('ExplainDrawer (%s)', (locale) => {
+  const asOf = '2026-10-31T09:05:00.000Z';
+  const props = {
+    figure: 'collected',
+    value: 'PKR 5,439,002.59',
+    recordCount: 1207,
+    asOf,
+    filters: [
+      { label: 'From', value: 'Aug 2026' },
+      { label: 'Branch', value: 'LHR-01' },
+    ],
+    identities: [
+      {
+        left: 'Collected PKR 30.00',
+        right: 'Approved + Pending + In progress PKR 30.00',
+        holds: true,
+      },
+      { left: 'Approved PKR 20.00', right: 'Routed + Not yet routed PKR 19.00', holds: false },
+    ],
+  };
+
+  function renderDrawer(overrides: Partial<Parameters<typeof ExplainDrawer>[0]> = {}) {
+    return renderWithIntl(
+      <main>
+        <button type="button">before</button>
+        <ExplainDrawer {...props} {...overrides} />
+      </main>,
+      { locale, namespaces: NAMESPACES },
+    );
+  }
+
+  it('opens a labelled modal dialog and moves focus to its heading', async () => {
+    const showModal = vi.spyOn(HTMLDialogElement.prototype, 'showModal');
+    renderDrawer();
+    const user = userEvent.setup();
+    expect(screen.queryByRole('dialog')).toBeNull();
+    await user.click(screen.getByRole('button', { name: msg(locale, 'explain.open') }));
+
+    // showModal puts the dialog in the top layer and makes the rest of the page inert.
+    expect(showModal).toHaveBeenCalledTimes(1);
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+    const heading = within(dialog).getByRole('heading', { level: 2 });
+    expect(dialog).toHaveAttribute('aria-labelledby', heading.id);
+    expect(heading).toHaveTextContent(msg(locale, 'explain.title'));
+    expect(heading).toHaveTextContent(msg(locale, 'figures.collected.label'));
+    expect(heading).toHaveFocus();
+    showModal.mockRestore();
+  });
+
+  it('shows every part of the explanation in order', async () => {
+    renderDrawer();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: msg(locale, 'explain.open') }));
+    const dialog = screen.getByRole('dialog');
+    const text = dialog.textContent ?? '';
+
+    expect(dialog.querySelector('bdi[dir="ltr"]')).toHaveTextContent('PKR 5,439,002.59');
+    const parts = [
+      'PKR 5,439,002.59',
+      msg(locale, 'figures.collected.definition'),
+      msg(locale, 'figures.collected.includes'),
+      msg(locale, 'figures.collected.excludes'),
+      'Aug 2026',
+      'LHR-01',
+      '1,207',
+      formatDateTime(new Date(asOf), locale),
+      'Approved + Pending + In progress PKR 30.00',
+    ];
+    const positions = parts.map((part) => text.indexOf(part));
+    for (const [i, pos] of positions.entries()) expect(pos, parts[i]).toBeGreaterThanOrEqual(0);
+    expect([...positions].sort((a, b) => a - b)).toEqual(positions);
+
+    expect(dialog.querySelector(`time[datetime="${asOf}"]`)).not.toBeNull();
+    const lines = within(dialog).getAllByRole('listitem');
+    const identity = lines.filter((li) => li.hasAttribute('data-holds'));
+    expect(identity).toHaveLength(2);
+    expect(identity[0]).toHaveAttribute('data-holds', 'true');
+    expect(identity[0]).toHaveTextContent(msg(locale, 'explain.holds'));
+    expect(identity[1]).toHaveAttribute('data-holds', 'false');
+    expect(identity[1]).toHaveTextContent(msg(locale, 'explain.broken'));
+  });
+
+  it('says all time when no filter is active and hides identities when none are given', async () => {
+    renderDrawer({ filters: [], identities: undefined });
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: msg(locale, 'explain.open') }));
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveTextContent(msg(locale, 'explain.allTime'));
+    expect(dialog).not.toHaveTextContent(msg(locale, 'explain.identities'));
+  });
+
+  it('keeps Tab inside the dialog', async () => {
+    renderDrawer();
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: msg(locale, 'explain.open') }));
+    const dialog = screen.getByRole('dialog');
+    const closers = within(dialog).getAllByRole('button', { name: msg(locale, 'explain.close') });
+    expect(closers).toHaveLength(2);
+    const [top, bottom] = closers;
+
+    await user.tab();
+    expect(top).toHaveFocus();
+    await user.tab();
+    expect(bottom).toHaveFocus();
+    await user.tab();
+    expect(top).toHaveFocus();
+    await user.tab({ shift: true });
+    expect(bottom).toHaveFocus();
+  });
+
+  it('closes on Escape and returns focus to the trigger', async () => {
+    renderDrawer();
+    const user = userEvent.setup();
+    const trigger = screen.getByRole('button', { name: msg(locale, 'explain.open') });
+    await user.click(trigger);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(trigger).toHaveFocus();
+  });
+
+  it('closes from the close button and returns focus to the trigger', async () => {
+    renderDrawer({ triggerVariant: 'icon' });
+    const user = userEvent.setup();
+    const name = msg(locale, 'explain.openFor').replace(
+      '{figure}',
+      msg(locale, 'figures.collected.label'),
+    );
+    const trigger = screen.getByRole('button', { name });
+    expect(trigger).toHaveTextContent('i');
+    await user.click(trigger);
+    const dialog = screen.getByRole('dialog');
+    await user.click(
+      within(dialog).getAllByRole('button', { name: msg(locale, 'explain.close') })[1]!,
+    );
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(trigger).toHaveFocus();
+  });
+
+  it('uses a custom trigger label', () => {
+    renderDrawer({ triggerLabel: 'Why this number' });
+    expect(screen.getByRole('button', { name: 'Why this number' })).toBeInTheDocument();
+  });
+
+  it('is an inline-end sheet on wide screens, a bottom sheet on phones, tokens only', () => {
+    const { container } = renderDrawer();
+    const dialog = container.querySelector('dialog');
+    const cls = dialog?.getAttribute('class') ?? '';
+    expect(cls).toContain('sm:end-0');
+    expect(cls).toContain('bottom-0');
+    expect(cls).toMatch(/rtl:[\w:]*-translate-x-full/);
+    expect(cls).toContain('motion-reduce:transition-none');
+    expectLogicalOnly(container);
+    for (const el of container.querySelectorAll<HTMLElement>('[class]')) {
+      const c = el.getAttribute('class') ?? '';
+      expect(c).not.toMatch(
+        /#[0-9a-f]{3,6}|\b(?:bg|text|border|ring)-(?:white|black|gray|slate|zinc|stone)\b/,
+      );
+    }
   });
 });
