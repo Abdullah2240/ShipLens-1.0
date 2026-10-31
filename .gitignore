@@ -55,7 +55,7 @@ docker-compose.override.yml
 
 # Generated exports
 tmp/
-exports/
+/exports/
 
 # Editors and OS
 .vscode/*
