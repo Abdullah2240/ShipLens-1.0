@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import { expect, test } from '../support/fixtures';
 
 // Exact on-screen values on a freshly seeded stack: every dashboard figure equals
@@ -19,15 +19,18 @@ function escape(text: string): string {
 
 type Kpis = Record<string, { amount: string; count: number } | number>;
 
-// Repository path from this file; E2E_EXPECTED_JSON overrides it for runners that mount
-// the seed elsewhere.
-const EXPECTED_PATH =
-  process.env.E2E_EXPECTED_JSON ??
-  fileURLToPath(new URL('../../../db/seed/expected.json', import.meta.url));
+// The repository root is the folder of playwright.config.ts (on the host and in the runner,
+// which must mount db/seed/expected.json there); E2E_EXPECTED_JSON overrides it.
+function expectedPath(): string {
+  if (process.env.E2E_EXPECTED_JSON) return process.env.E2E_EXPECTED_JSON;
+  const config = test.info().config.configFile;
+  const root = config ? path.dirname(config) : process.cwd();
+  return path.join(root, 'db', 'seed', 'expected.json');
+}
 
-function loadKpis(): Kpis | null {
-  if (!existsSync(EXPECTED_PATH)) return null;
-  const text = readFileSync(EXPECTED_PATH, 'utf8');
+function loadKpis(file: string): Kpis | null {
+  if (!existsSync(file)) return null;
+  const text = readFileSync(file, 'utf8');
   return (JSON.parse(text) as { kpis: Kpis }).kpis;
 }
 
@@ -44,10 +47,11 @@ const SLUGS: Record<string, string> = {
 
 test.describe('dashboard on the demo dataset', { tag: '@pristine' }, () => {
   test('every figure equals db/seed/expected.json', async ({ page, loginAs, localePath }) => {
-    const kpis = loadKpis();
+    const file = expectedPath();
+    const kpis = loadKpis(file);
     test.skip(
       kpis === null,
-      `db/seed/expected.json is not readable at ${EXPECTED_PATH}: mount it into the runner`,
+      `db/seed/expected.json is not readable at ${file}: mount it into the runner`,
     );
     if (!kpis) return;
 
@@ -64,7 +68,9 @@ test.describe('dashboard on the demo dataset', { tag: '@pristine' }, () => {
         typeof expected === 'number'
           ? new RegExp(`[,،] ${escape(group(String(expected)))}:`)
           : new RegExp(escape(money(expected.amount)));
-      const links = page.locator(`main a[href="${localePath(`/dashboard/kpi/${slug}`)}"]`);
+      const links = page
+        .locator(`main a[href="${localePath(`/dashboard/kpi/${slug}`)}"]`)
+        .filter({ visible: true });
       await expect(links.first(), `${figure} link`).toBeVisible();
       for (const link of await links.all()) {
         await expect(link, `${figure} on screen`).toHaveAccessibleName(name);

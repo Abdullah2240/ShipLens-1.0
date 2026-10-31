@@ -57,7 +57,7 @@ async function expectFiguresMatch(
     expect(value, `figure ${figure} in the API`).toBeDefined();
     if (!value) continue;
     const href = `${localePath(`/dashboard/kpi/${slug}`)}${query}`;
-    const links = page.locator(`main a[href="${href}"]`);
+    const links = page.locator(`main a[href="${href}"]`).filter({ visible: true });
     await expect(links.first(), `a link to ${href}`).toBeVisible();
     const name =
       value.measure === 'amount'
@@ -211,7 +211,7 @@ test.describe('dashboard overview', () => {
   }) => {
     await loginAs('super_admin');
     await openOverview(page, localePath);
-    const details = page.locator('details').filter({ has: page.getByRole('table') });
+    const details = page.locator('details').filter({ has: page.locator('table') });
     await expect(details.getByRole('table')).toBeHidden();
     await details.locator('summary').click();
     const table = details.getByRole('table');
