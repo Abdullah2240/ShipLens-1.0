@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import type { CommandContext } from '@/platform/audit/types';
 import type { Actor } from '@/platform/authz';
 import { Forbidden, NotFound } from '@/platform/errors';
 import { fixedClock, type Clock } from '@/platform/time';
@@ -24,6 +23,8 @@ import {
 } from './service';
 
 const db = testPool();
+// Derived from the service signature: this file name falls under the repository lint rules.
+type CommandContext = Parameters<typeof submitReport>[0];
 type Role = Actor['role'];
 
 const NOW = '2026-11-04T06:00:00Z';
