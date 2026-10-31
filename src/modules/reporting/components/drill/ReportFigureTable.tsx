@@ -5,6 +5,7 @@ import type { Locale } from '@/i18n/routing';
 import type { BranchHeader, ReportFigureRow, TraceLevel } from '@/modules/reporting/trace-types';
 import { formatDate, formatInt, formatMoney } from '@/platform/i18n/format';
 import { sumMoney } from '@/platform/money';
+import { TableFrame } from './BranchFigureTable';
 import { footerRecordCount, frozenNoteKind } from './drill-view-model';
 
 const BUSINESS_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -149,21 +150,23 @@ export function ReportFigureTable({ level }: ReportFigureTableProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <TraceTable
-        columns={columns}
-        rows={level.rows}
-        getRowKey={(row) => row.reportId}
-        caption={t('tableLabel', { figure: figureLabel, name: level.branch.branchName })}
-        captionHidden
-        empty={<EmptyState title={t('empty.title')} body={t('empty.body')} />}
-        measure="amount"
-        total={formatMoney(total, locale)}
-        recordCount={recordCount}
-        matchesParent={level.matchesParent}
-        parentLabel={level.branch.branchCode}
-        truncated={level.truncated ?? undefined}
-        totalColumnKey="value"
-      />
+      <TableFrame>
+        <TraceTable
+          columns={columns}
+          rows={level.rows}
+          getRowKey={(row) => row.reportId}
+          caption={t('tableLabel', { figure: figureLabel, name: level.branch.branchName })}
+          captionHidden
+          empty={<EmptyState title={t('empty.title')} body={t('empty.body')} />}
+          measure="amount"
+          total={formatMoney(total, locale)}
+          recordCount={recordCount}
+          matchesParent={level.matchesParent}
+          parentLabel={level.branch.branchCode}
+          truncated={level.truncated ?? undefined}
+          totalColumnKey="value"
+        />
+      </TableFrame>
       {level.rows.length > 0 ? (
         <p className="max-w-3xl px-1 text-xs leading-relaxed text-text-muted">{t('frozenHint')}</p>
       ) : null}

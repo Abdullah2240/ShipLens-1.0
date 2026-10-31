@@ -317,6 +317,23 @@ describe.each(LOCALES)('BranchFigureTable (%s)', (locale) => {
     expectLogical(container);
   });
 
+  it('keeps screen-reader labels inside a positioned, clipping frame', () => {
+    for (const ui of [
+      <BranchFigureTable key="l1" level={APPROVED_L1} />,
+      <ReportFigureTable key="l2" level={l2(L2_ROWS)} />,
+    ]) {
+      const { container, unmount } = render(ui);
+      const frame = container.querySelector('[data-drill-table]');
+      expect(frame?.classList.contains('relative')).toBe(true);
+      expect(frame?.classList.contains('overflow-clip')).toBe(true);
+      // Every absolutely positioned label lives inside the frame.
+      for (const label of container.querySelectorAll('.sr-only')) {
+        expect(frame?.contains(label), label.textContent ?? '').toBe(true);
+      }
+      unmount();
+    }
+  });
+
   it('renders the level-1 empty state when no branch contributes', () => {
     const { container } = render(<BranchFigureTable level={l1('approved', [])} />);
     expect(screen.getByRole('status').textContent).toContain(C.emptyL1);

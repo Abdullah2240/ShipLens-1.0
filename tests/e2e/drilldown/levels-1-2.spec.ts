@@ -66,11 +66,13 @@ const trail = (page: Page) => page.locator('main nav:has([data-trail-separator])
 
 async function expectNoOverflow(page: Page, testInfo: TestInfo) {
   if (!testInfo.project.name.startsWith('mobile')) return;
-  const { scrollWidth, innerWidth } = await page.evaluate(() => ({
+  // clientWidth is the layout viewport: a phone that zooms out to fit wide content
+  // reports a larger innerWidth, so innerWidth alone cannot reveal the overflow.
+  const { scrollWidth, clientWidth } = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
-    innerWidth: window.innerWidth,
+    clientWidth: document.documentElement.clientWidth,
   }));
-  expect(scrollWidth, 'no horizontal overflow').toBeLessThanOrEqual(innerWidth + 1);
+  expect(scrollWidth, 'no horizontal overflow').toBeLessThanOrEqual(clientWidth + 1);
 }
 
 async function shot(page: Page, testInfo: TestInfo, name: string) {
@@ -255,6 +257,7 @@ test.describe('drill-down levels 1 and 2', () => {
     }
 
     await shot(page, testInfo, 'approved-l2-filtered');
+    await expectNoOverflow(page, testInfo);
 
     // The Dashboard crumb returns to the overview with the same filters.
     await crumbLinks.nth(0).click();

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { FigureLink, TraceTable } from '@/components/trace';
 import { Bdi, EmptyState, IdText, StatusBadge, type Column } from '@/components/ui';
@@ -6,6 +7,20 @@ import type { Locale } from '@/i18n/routing';
 import type { BranchFigureRow, TraceLevel } from '@/modules/reporting/trace-types';
 import { formatInt, formatMoney } from '@/platform/i18n/format';
 import { footerRecordCount } from './drill-view-model';
+
+/**
+ * Keeps a level table inside the page width. Screen-reader-only labels in the cells are
+ * absolutely positioned; without a positioned ancestor they escape the table's scroll
+ * region and widen the page on phones. The frame contains and clips them, with room for
+ * the card shadow.
+ */
+export function TableFrame({ children }: { children: ReactNode }) {
+  return (
+    <div data-drill-table="" className="relative overflow-clip [overflow-clip-margin:0.75rem]">
+      {children}
+    </div>
+  );
+}
 
 export interface BranchFigureTableProps {
   level: TraceLevel<BranchFigureRow>;
@@ -116,21 +131,23 @@ export function BranchFigureTable({ level }: BranchFigureTableProps) {
       : [branch, status, value];
 
   return (
-    <TraceTable
-      columns={columns}
-      rows={level.rows}
-      getRowKey={(row) => row.branchId}
-      caption={t('level1.title', { figure: figureLabel })}
-      captionHidden
-      empty={<EmptyState title={t('level1.empty.title')} body={t('level1.empty.body')} />}
-      measure={level.measure}
-      total={show(level.total)}
-      recordCount={footerRecordCount('branches', level.measure, level.rows, level.recordCount)}
-      matchesParent={level.matchesParent}
-      parentLabel={tt(`figures.${level.figure}.short`)}
-      truncated={level.truncated ?? undefined}
-      totalColumnKey="value"
-    />
+    <TableFrame>
+      <TraceTable
+        columns={columns}
+        rows={level.rows}
+        getRowKey={(row) => row.branchId}
+        caption={t('level1.title', { figure: figureLabel })}
+        captionHidden
+        empty={<EmptyState title={t('level1.empty.title')} body={t('level1.empty.body')} />}
+        measure={level.measure}
+        total={show(level.total)}
+        recordCount={footerRecordCount('branches', level.measure, level.rows, level.recordCount)}
+        matchesParent={level.matchesParent}
+        parentLabel={tt(`figures.${level.figure}.short`)}
+        truncated={level.truncated ?? undefined}
+        totalColumnKey="value"
+      />
+    </TableFrame>
   );
 }
 
