@@ -10,6 +10,7 @@ import { renderWithIntl } from '../../../../tests/support/render-intl';
 import { formatDate, formatMoney } from '@/platform/i18n/format';
 import type { CollectionEditability } from '../lock';
 import type { CollectionItem, CurrentWeek } from '../types';
+import { CollectionFiltersForm } from './CollectionFiltersForm';
 import { CollectionForm } from './CollectionForm';
 import { CollectionsTable } from './CollectionsTable';
 import { CurrentWeekCard } from './CurrentWeekCard';
@@ -68,6 +69,7 @@ const COMPONENT_FILES = [
   'CollectionsTable.tsx',
   'CollectionForm.tsx',
   'VoidCollectionDialog.tsx',
+  'CollectionFiltersForm.tsx',
 ];
 
 const fetchMock = vi.fn<typeof fetch>();
@@ -590,4 +592,34 @@ describe.each(LOCALES)('VoidCollectionDialog (%s)', (locale) => {
       expect(router.refresh).not.toHaveBeenCalled();
     },
   );
+});
+
+describe.each(LOCALES)('CollectionFiltersForm (%s)', (locale) => {
+  const t = translator(locale);
+
+  it('is a GET form with branch, status and week filters', () => {
+    const { container } = renderWithIntl(
+      <CollectionFiltersForm
+        branches={[
+          { id: BRANCH, code: 'BR-0001', name: 'Sample Branch' },
+          { id: REPORT, code: 'BR-0002', name: 'Lahore' },
+        ]}
+        values={{ branchId: BRANCH, status: 'voided' }}
+      />,
+      { locale, namespaces: NAMESPACES },
+    );
+    const form = container.querySelector('form') as HTMLFormElement;
+    expect(form).toHaveAttribute('method', 'get');
+    expect(screen.getByLabelText(t('page.filterBranch'))).toHaveValue(BRANCH);
+    expect(screen.getByLabelText(t('page.filterStatus'))).toHaveValue('voided');
+    expect(screen.getByLabelText(t('page.filterWeek'))).toHaveAttribute('name', 'weekStart');
+    const options = [...container.querySelectorAll('#collections-branch option')].map(
+      (o) => o.textContent,
+    );
+    expect(options).toEqual([t('page.allBranches'), 'Sample Branch (BR-0001)', 'Lahore (BR-0002)']);
+    expect(screen.getByRole('link', { name: t('page.clear') })).toHaveAttribute(
+      'href',
+      '/collections',
+    );
+  });
 });
