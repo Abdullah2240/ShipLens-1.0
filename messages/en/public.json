@@ -55,5 +55,31 @@
       "lead": "Questions about volunteering, donations or a branch near you? Here is how to reach us.",
       "body": "Our contact details will be published on this page soon.\n\nUntil then, the easiest way to reach us is through your nearest branch. Its volunteers can answer most questions about local programs, events and donations.\n\nIf you would like to volunteer, apply from the Get involved page and a branch team will contact you."
     }
+  },
+  "branches": {
+    "title": "Find a branch near you",
+    "lead": "Every branch is run by volunteers who live in the neighbourhood it serves. Find the one closest to you and apply to join its team.",
+    "jumpTo": "Jump to a city",
+    "cityCount": "{count, plural, one {# branch} other {# branches}}",
+    "otherCity": "Other areas",
+    "applyHere": "Volunteer with this branch",
+    "empty": {
+      "title": "No branches are open yet",
+      "body": "We are still setting up our first branches. Please check back soon."
+    }
+  },
+  "events": {
+    "title": "Upcoming events",
+    "lead": "Health camps, relief drives and community days organised by our branches. Everyone is welcome.",
+    "timezone": "All times are Pakistan time (PKT).",
+    "when": "When",
+    "where": "Where",
+    "hostedBy": "Hosted by",
+    "untilTime": "until <ltr>{time}</ltr>",
+    "fallbackNote": "This event's details are not yet available in English.",
+    "empty": {
+      "title": "No upcoming events right now",
+      "body": "New events appear here as our branches plan them. Check back soon, or find your nearest branch to hear about them first."
+    }
   }
 }
