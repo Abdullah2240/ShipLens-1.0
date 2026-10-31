@@ -1,3 +1,4 @@
+export { ExplainDrawer, type ExplainDrawerProps, type ExplainIdentity } from './ExplainDrawer';
 export { FigureLink, type FigureLinkProps, type FigureSize } from './FigureLink';
 export { MonthRangeFilter, type MonthRangeFilterProps } from './MonthRangeFilter';
 export {
