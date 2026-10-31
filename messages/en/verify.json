@@ -37,7 +37,22 @@
     "invalid": "That does not look like a verification code. Codes have 10 letters and numbers.",
     "notFound": "We could not recognise that code. Check each character and try again.",
     "rateLimited": "Too many checks. Try again in {seconds} seconds.",
-    "metaDescription": "Check that a ShipLens weekly report was approved and has not been altered since."
+    "metaDescription": "Check that a ShipLens weekly report was approved and has not been altered since.",
+    "eyebrow": "Proof, not promises",
+    "scanHint": "Have the QR code? Point your phone camera at it and this check opens by itself.",
+    "stepsTitle": "How verification works",
+    "stepApprovedTitle": "Finance approves the report",
+    "stepApprovedBody": "A finance reviewer checks a branch's weekly collections and approves the total.",
+    "stepIssuedTitle": "A code is issued",
+    "stepIssuedBody": "The approved report gets its own 10-character code and a QR code that carries a seal.",
+    "stepChainedTitle": "The approval is chained",
+    "stepChainedBody": "The approval is written to an audit chain in which every event is linked to the one before it, so a later edit shows.",
+    "stepCheckTitle": "Anyone can check",
+    "stepCheckBody": "Enter the code to see the approved figures and whether the record is intact. No sign-in needed.",
+    "privacy": "Only branch-level figures are shown: no names, contact details or individual donations.",
+    "notFoundTitle": "Code not recognised",
+    "rateLimitedTitle": "Please wait a moment",
+    "checkAnother": "Check another code"
   },
   "result": {
     "eyebrow": "Verification certificate",
