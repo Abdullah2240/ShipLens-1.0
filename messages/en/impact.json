@@ -1,1 +1,46 @@
-{}
+{
+  "meta": {
+    "title": "Our impact",
+    "description": "Money raised by our branches and approved by head office, month by month. Every figure is checked line by line before it appears here."
+  },
+  "hero": {
+    "eyebrow": "Our impact",
+    "title": "Every rupee here has been checked and approved.",
+    "lead": "These are the amounts our volunteers collected and head office approved, one weekly report at a time. Nothing still waiting for review is counted, and nothing is rounded up."
+  },
+  "figures": {
+    "title": "What has been approved so far",
+    "approvedTotal": "Approved and accounted for",
+    "approvedTotalHint": "Collected by our branches and approved by head office, since our first report.",
+    "reports": "Weekly reports approved",
+    "reportsHint": "Each one reviewed line by line before it was approved.",
+    "months": "Months of giving",
+    "monthsHint": "Months in which approved money was collected.",
+    "branches": "Active branches",
+    "cities": "Cities"
+  },
+  "trend": {
+    "title": "Month by month",
+    "caption": "Approved money by month",
+    "summary": "Approved money by month from {first} to {last}. The highest month was {peak}, with {peakAmount}.",
+    "series": "Approved"
+  },
+  "branches": {
+    "title": "Where the work happens",
+    "lead": "Our active branches, grouped by city. Each one is run by volunteers from its own neighbourhood.",
+    "count": "{count, plural, one {# branch} other {# branches}}",
+    "otherCity": "Other places",
+    "empty": "Our first branches are getting ready. Please check back soon."
+  },
+  "asOf": "Figures as of <time></time>",
+  "method": {
+    "title": "How we count",
+    "body": "Only money in weekly reports that head office has approved is counted here. Money still waiting for review, or sent back for a correction, is left out until it is approved. These are totals only: no names, no contact details and no individual gifts are ever shown."
+  },
+  "cta": {
+    "title": "Be part of next month's figures",
+    "lead": "Volunteer with a branch near you, or help start one in your neighbourhood.",
+    "getInvolved": "Get involved",
+    "branches": "Find a branch"
+  }
+}
