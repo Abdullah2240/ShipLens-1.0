@@ -1,1 +1,21 @@
-{}
+{
+  "chart": {
+    "viewTable": "View as table",
+    "hideTable": "Hide table",
+    "monthAxis": "Month",
+    "amountAxis": "Amount (PKR)",
+    "legend": "Legend",
+    "noData": "No figures for this period yet.",
+    "total": "Total",
+    "barTitle": "{month} · {series}: {amount}",
+    "cellContext": "{month}, {series}"
+  },
+  "card": {
+    "viewBreakdown": "View breakdown",
+    "of": "{share} of {whole}"
+  },
+  "identity": {
+    "caption": "Breakdown of {figure}",
+    "legend": "Breakdown by status"
+  }
+}
