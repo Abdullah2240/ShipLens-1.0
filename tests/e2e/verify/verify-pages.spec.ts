@@ -1,5 +1,5 @@
 import type { Page, TestInfo } from '@playwright/test';
-import { expect, test, type UiLocale } from '../support/fixtures';
+import { expect, test } from '../support/fixtures';
 import { ROLES_E2E } from '../support/roles';
 
 // Public report verification pages (SUB-03): the code entry form, the result page and the
