@@ -1,1 +1,17 @@
-{}
+{
+  "button": "Share to WhatsApp",
+  "buttonHint": "Sends the branch, week, status and total with a sign-in link. No collection details or names are shared.",
+  "sharing": "Sharing…",
+  "opened": "WhatsApp opens in a new tab with the message ready to send.",
+  "openAgain": "Open WhatsApp again",
+  "text": "{branch} ({code}) weekly report\nWeek: {weekStart} to {weekEnd}\nStatus: {status}\nTotal: {amount} from {count, plural, one {{countText} collection} other {{countText} collections}}\nOpen (login required): {link}",
+  "errors": {
+    "forbidden": "Only the lead of this branch can share its reports.",
+    "not_found": "This report could not be found. It may belong to another branch.",
+    "network": "The share could not be prepared. Check your connection and try again."
+  },
+  "landing": {
+    "title": "Shared weekly report",
+    "redirecting": "Opening the report…"
+  }
+}
