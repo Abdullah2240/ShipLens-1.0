@@ -1,1 +1,29 @@
-{}
+{
+  "csv": {
+    "total": "میزان",
+    "figure": "عدد",
+    "value": "قدر",
+    "records": "ریکارڈز",
+    "collectionId": "وصولی آئی ڈی",
+    "branchCode": "شاخ کوڈ",
+    "branchName": "شاخ کا نام",
+    "weekStart": "ہفتے کا آغاز",
+    "weekEnd": "ہفتے کا اختتام",
+    "status": "حیثیت",
+    "amount": "رقم (PKR)",
+    "collections": "وصولیاں",
+    "frozenAmount": "جمع کردہ میزان (PKR)",
+    "submittedAt": "جمع کرانے کا وقت",
+    "approvedAt": "منظوری کا وقت",
+    "collectedOn": "وصولی کی تاریخ",
+    "purpose": "مقصد",
+    "routedAt": "منتقلی کا وقت",
+    "daysWaiting": "انتظار کے دن",
+    "statuses": {
+      "draft": "مسودہ",
+      "submitted": "جمع شدہ",
+      "returned": "واپس کردہ",
+      "approved": "منظور شدہ"
+    }
+  }
+}
