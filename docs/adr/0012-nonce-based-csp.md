@@ -1,0 +1,61 @@
+# 0012 Nonce-based Content Security Policy set in the proxy
+
+- Status: Accepted
+- Date: 2026-10-31
+
+## Context
+
+A Content Security Policy is the browser-side backstop against cross-site scripting: even if an attacker gets markup into a page, the browser refuses to run scripts the policy does not allow. ShipLens renders user-supplied content (CMS Markdown, member names, report notes), so this backstop matters, and OWASP security is 15 of the 100 judging points.
+
+Next.js inlines small scripts into every page for hydration. A static policy therefore needs `script-src 'unsafe-inline'`, which lets any injected inline script run and removes most of the protection. The alternative is a per-request nonce: the server puts a fresh random value in the policy and on every script tag it emits, and the browser runs only scripts carrying it.
+
+The usual objection to nonces is that they force every page to render dynamically, losing static caching. In ShipLens that cost is already paid: the root layout reads the theme cookie, so every page is dynamic anyway. A nonce adds nothing.
+
+The other complication was composing a nonce with the next-intl locale middleware. Its source shows it copies the incoming request headers into the rewritten or forwarded request, so a nonce set on the request survives it.
+
+## Decision
+
+- `src/proxy.ts` creates a nonce per request (`Buffer.from(crypto.randomUUID()).toString('base64')`), sets `Content-Security-Policy` and `x-nonce` on a cloned request, passes that request to the next-intl middleware, then sets the same `Content-Security-Policy` on the response. Next reads the nonce from the request header and stamps it on its own scripts.
+- Production policy:
+
+  `default-src 'self'; script-src 'self' 'nonce-{N}' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; manifest-src 'self'; worker-src 'self' blob:`
+
+  plus `upgrade-insecure-requests` only when the request arrived over https, so local http runs of the Docker image still work. Development adds `'unsafe-eval'` and `ws:` for hot reload.
+- API responses (`/api/*`, not matched by the proxy) get `default-src 'none'; frame-ancestors 'none'` from `next.config.ts`, since they never render HTML.
+- Every response also carries HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: DENY`, a restrictive `Permissions-Policy`, `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin`; `X-Powered-By` is off.
+- `scripts/check-headers.mjs` verifies this against the production build running in Docker: the policy is present on English, Urdu and verification pages, the nonce differs between two requests, every `<script>` tag carries that response's nonce, `script-src` has no `'unsafe-inline'`, and the API and other headers are correct. The same check runs locally, in CI and after deploy.
+- Fallback, used only if the nonce cannot be made to reach Next's scripts: a static policy identical except `script-src 'self' 'unsafe-inline'`, with the evidence recorded. The record is updated if that happens.
+
+## Consequences
+
+### Positive
+
+- Injected inline scripts and scripts from other origins do not run, which is the main point of a CSP.
+- `frame-ancestors 'none'`, `object-src 'none'` and `base-uri 'self'` close clickjacking, plugin and base-tag injection paths.
+- The policy is tested against the real production build, not only in unit tests.
+
+### Negative
+
+- `style-src 'unsafe-inline'` remains. React `style` attributes and font CSS need it. This is an accepted residual: injected styles can deface a page but cannot run code.
+- Every HTML response is dynamic and uncacheable by a CDN. It already was.
+- Any third-party script added later must be loaded by a nonced script under `'strict-dynamic'`, or the policy blocks it.
+
+### Neutral
+
+- QR codes are rendered as inline SVG paths by a Server Component, so they need no script or `data:` image exception.
+
+## Alternatives considered
+
+- **Static CSP with `'unsafe-inline'` scripts.** Simple and cacheable, but leaves the main XSS path open.
+- **Hash-based CSP.** Next's inline scripts change per build and per page, so hashes cannot be listed in advance.
+- **No CSP, rely on output escaping.** React escapes by default, but defence in depth expects a second layer.
+
+## Where it lives
+
+- [`src/proxy.ts`](../../src/proxy.ts): proxy where the nonce and policy are applied.
+- [`next.config.ts`](../../next.config.ts): headers for every response, including API responses.
+
+## Where it lives (planned)
+
+- [`src/platform/http/csp.ts`](../../src/platform/http/csp.ts): policy builder.
+- [`scripts/check-headers.mjs`](../../scripts/check-headers.mjs): header and nonce check against a running build.
