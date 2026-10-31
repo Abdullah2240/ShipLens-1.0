@@ -1,0 +1,50 @@
+[
+  {
+    "key": "islamabad",
+    "name": "Islamabad North (Demo)",
+    "city": "Islamabad",
+    "summary": "Demo branch supporting school fees and flood relief collections.",
+    "status": "active",
+    "adopt": false
+  },
+  {
+    "key": "lahore",
+    "name": "Lahore Central (Demo)",
+    "city": "Lahore",
+    "summary": "Demo branch running medical camps and a winter clothing drive.",
+    "status": "active",
+    "adopt": false
+  },
+  {
+    "key": "multan",
+    "name": "Multan (Demo)",
+    "city": "Multan",
+    "summary": "Demo branch still forming; recruiting its first volunteers.",
+    "status": "forming",
+    "adopt": false
+  },
+  {
+    "key": "peshawar",
+    "name": "Peshawar (Demo)",
+    "city": "Peshawar",
+    "summary": "Demo branch paused in October while volunteers regroup.",
+    "status": "paused",
+    "adopt": false
+  },
+  {
+    "key": "quetta",
+    "name": "Quetta (Demo)",
+    "city": "Quetta",
+    "summary": "Demo branch closed in September after its relief project ended.",
+    "status": "closed",
+    "adopt": false
+  },
+  {
+    "key": "sample",
+    "name": "Sample Branch (Demo)",
+    "city": "Karachi",
+    "summary": "Demo branch used for the sample logins. Weekly ration and school-fee drives.",
+    "status": "active",
+    "adopt": true
+  }
+]
