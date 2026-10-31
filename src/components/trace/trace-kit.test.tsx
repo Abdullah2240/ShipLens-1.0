@@ -98,7 +98,7 @@ describe('phase 3 namespaces', () => {
   });
 
   it('start empty except trace and the namespaces their owning plans have filled', () => {
-    const FILLED = ['exports', 'unrouted', 'share'];
+    const FILLED = ['exports', 'unrouted', 'share', 'evidence', 'drilldown'];
     for (const ns of NEW.slice(1).filter((n) => !FILLED.includes(n))) {
       for (const locale of LOCALES) expect(messages(locale, ns)).toEqual({});
     }
