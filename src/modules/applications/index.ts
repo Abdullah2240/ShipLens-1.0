@@ -1,7 +1,12 @@
 export { submitApplication } from './service';
 export { applicationInputSchema, APPLICATION_ERROR_CODES } from './schema';
 export { applicationRateLimiter } from './rate-limit';
-export { listApplications, getApplication } from './service-review';
+export {
+  listApplications,
+  getApplication,
+  acceptApplication,
+  declineApplication,
+} from './service-review';
 export {
   applicationListQuerySchema,
   parseApplicationListQuery,

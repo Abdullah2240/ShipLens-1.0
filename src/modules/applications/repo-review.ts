@@ -115,3 +115,76 @@ export async function selectApplicationById(
   if (!rows[0]) throw new NotFound();
   return mapDetail(rows[0]);
 }
+
+export type LockedApplication = {
+  id: string;
+  branch_id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  status: ApplicationStatus;
+  decision_note: string | null;
+};
+
+/** Locks the application row for the rest of the transaction. Missing and out of scope are the same NotFound. */
+export async function lockApplication(
+  tx: Queryable,
+  scope: Scope,
+  id: string,
+): Promise<LockedApplication> {
+  if (!UUID.test(id)) throw new NotFound();
+  const where = scopeWhere(scope, 'a.branch_id', 2);
+  const { rows } = await tx.query<LockedApplication>(
+    `SELECT a.id, a.branch_id, a.full_name, a.email, a.phone, a.status, a.decision_note
+       FROM applications a
+      WHERE a.id = $1 AND ${where.sql}
+        FOR UPDATE OF a`,
+    [id, ...where.params],
+  );
+  if (!rows[0]) throw new NotFound();
+  return rows[0];
+}
+
+export async function nextMemberSequence(tx: Queryable): Promise<string> {
+  const { rows } = await tx.query<{ n: string }>("SELECT nextval('member_id_seq')::text AS n");
+  return rows[0]!.n;
+}
+
+export type InsertedMember = {
+  id: string;
+  member_code: string;
+  branch_id: string;
+  member_role: string;
+  status: string;
+};
+
+export async function insertMemberFromApplication(
+  tx: Queryable,
+  app: LockedApplication,
+  memberCode: string,
+  joinedOn: string,
+): Promise<InsertedMember> {
+  const { rows } = await tx.query<InsertedMember>(
+    `INSERT INTO members (member_code, branch_id, application_id, full_name, email, phone, joined_on)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     RETURNING id, member_code, branch_id, member_role, status`,
+    [memberCode, app.branch_id, app.id, app.full_name, app.email, app.phone, joinedOn],
+  );
+  return rows[0]!;
+}
+
+export async function markApplicationDecided(
+  tx: Queryable,
+  id: string,
+  status: Exclude<ApplicationStatus, 'pending'>,
+  actorId: string,
+  decidedAt: Date,
+  note: string | null,
+): Promise<void> {
+  await tx.query(
+    `UPDATE applications
+        SET status = $2, decided_by = $3, decided_at = $4, decision_note = $5
+      WHERE id = $1 AND status = 'pending'`,
+    [id, status, actorId, decidedAt, note],
+  );
+}
