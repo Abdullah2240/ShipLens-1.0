@@ -444,7 +444,7 @@ describe('route() import-time safety', () => {
     vi.resetModules();
   });
 
-  it('imports route, origin and index with no environment', async () => {
+  it('imports route, origin, index and the auth route files with no environment', async () => {
     vi.stubEnv('NODE_ENV', 'production');
     vi.stubEnv('DATABASE_URL', '');
     vi.stubEnv('APP_ORIGIN', '');
@@ -457,6 +457,9 @@ describe('route() import-time safety', () => {
     await expect(import('./route')).resolves.toHaveProperty('route');
     await expect(import('./origin')).resolves.toHaveProperty('isAllowedOrigin');
     await expect(import('./index')).resolves.toHaveProperty('route');
+    await expect(import('@/app/api/v1/auth/login/route')).resolves.toHaveProperty('POST');
+    await expect(import('@/app/api/v1/auth/logout/route')).resolves.toHaveProperty('POST');
+    await expect(import('@/app/api/v1/auth/me/route')).resolves.toHaveProperty('GET');
   });
 
   it('keeps route.ts and origin.ts free of framework imports', () => {
