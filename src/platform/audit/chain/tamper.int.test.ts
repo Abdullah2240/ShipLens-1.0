@@ -23,6 +23,8 @@ const pool = testPool();
 const GUARD = 'audit_events_no_update_delete';
 
 afterAll(async () => {
+  // Leave no tampered chain behind for later suites.
+  await resetDb(pool);
   await closeTestPool();
 });
 
