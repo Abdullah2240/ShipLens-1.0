@@ -47,7 +47,7 @@
     "returned": "Returned",
     "resubmitted": "Resubmitted",
     "approved": "Approved",
-    "by": "by {name}",
+    "by": "by <name></name>",
     "system": "by the system",
     "reason": "Reason",
     "empty": "No report events yet",

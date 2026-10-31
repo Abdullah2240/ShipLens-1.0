@@ -199,6 +199,11 @@ const EVIDENCE: CollectionEvidence = {
   ],
 };
 
+/** Text of every auto-direction isolate (names, purposes, localized dates). */
+function isolatedTexts(root: Element | undefined): (string | null)[] {
+  return [...(root?.querySelectorAll('bdi:not([dir])') ?? [])].map((b) => b.textContent);
+}
+
 function render(ui: React.ReactElement, locale: 'en' | 'ur') {
   return renderWithIntl(ui, { locale, namespaces: NAMESPACES });
 }
@@ -321,7 +326,7 @@ describe.each(LOCALES)('ReportEventsList (%s)', (locale) => {
     expect(items[1]?.textContent).toContain(copy.returned);
     expect(items[1]?.textContent).toContain('Receipt 14 is missing');
     expect(items[3]?.textContent).toContain(copy.approved);
-    expect(items[3]?.querySelector('bdi:not([dir])')?.textContent).toBe('Faraz Finance');
+    expect(isolatedTexts(items[3])).toContain('Faraz Finance');
     expect(items[3]?.querySelector('time')?.getAttribute('dateTime')).toBe(
       '2026-09-08T09:30:00.000Z',
     );
@@ -349,7 +354,7 @@ describe.each(LOCALES)('CollectionFigureTable (%s)', (locale) => {
     const rows = [...container.querySelectorAll('tbody tr')];
     expect(rows).toHaveLength(2);
     expect(rows[0]?.querySelector('time')?.getAttribute('dateTime')).toBe('2026-08-31');
-    expect(rows[0]?.querySelector('bdi:not([dir])')?.textContent).toBe('Food parcels');
+    expect(isolatedTexts(rows[0])).toContain('Food parcels');
     const link = rows[0]?.querySelector(`a[href="${L4}"]`);
     expect(link?.textContent).toContain('PKR 1,000.00');
     expect(link?.getAttribute('aria-label')).toContain('PKR 1,000.00');
