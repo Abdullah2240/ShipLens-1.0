@@ -1,0 +1,182 @@
+name: CI
+
+# Gates every pushed branch and every pull request to main. Branch protection requires
+# the single aggregate check `ci-ok`. No secrets are used: the database credentials are
+# throwaway values for disposable CI containers, and the E2E demo password is generated
+# per run and masked.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  static:
+    name: static
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Permissions doc drift
+        run: npm run permissions:check
+      - name: i18n parity
+        run: npm run i18n:check
+      - name: Unit tests
+        run: npm test
+
+  database:
+    name: database
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          # Throwaway values for this disposable CI container only.
+          POSTGRES_USER: shiplens
+          POSTGRES_PASSWORD: shiplens
+          POSTGRES_DB: shiplens
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U shiplens -d shiplens"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Migrate from empty
+        env:
+          DATABASE_URL: postgres://shiplens:shiplens@localhost:5432/shiplens
+        run: |
+          node scripts/migrate.mjs
+          second="$(node scripts/migrate.mjs)"
+          echo "$second"
+          if ! grep -q 'No pending migrations' <<<"$second"; then
+            echo '::error::A second migrate run applied migrations again; migrations are not idempotent.'
+            exit 1
+          fi
+      - name: Tests with coverage
+        env:
+          TEST_DATABASE_URL: postgres://shiplens:shiplens@localhost:5432/shiplens_test
+        run: npm run test:coverage
+      - name: Upload coverage
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  e2e:
+    name: e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # No service container: compose.e2e.yaml brings its own tmpfs database.
+    env:
+      E2E_PROJECT: shiplens-e2e-ci
+      E2E_PORT: '3100'
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      # scripts/e2e-docker.mjs and scripts/smoke.mjs use Node built-ins only: no npm ci.
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - name: Generate a per-run demo password
+        run: |
+          password="$(openssl rand -hex 16)"
+          echo "::add-mask::$password"
+          echo "E2E_DEMO_PASSWORD=$password" >> "$GITHUB_ENV"
+      - name: Build the production image and start the stack
+        run: npm run e2e:up
+      - name: Smoke
+        run: |
+          SKIP=""
+          [ -f "src/app/[locale]/(auth)/login/page.tsx" ] || SKIP="pages"
+          BASE_URL="http://localhost:$E2E_PORT" SMOKE_DEMO_PASSWORD="$E2E_DEMO_PASSWORD" \
+            node scripts/smoke.mjs ${SKIP:+--skip "$SKIP"}
+      - name: App container runs as a non-root user
+        run: |
+          uid="$(docker compose -f compose.e2e.yaml -p "$E2E_PROJECT" exec -T app id -u)"
+          echo "app uid: $uid"
+          if [ -z "$uid" ] || [ "$uid" = "0" ]; then
+            echo '::error::The production image runs as root.'
+            exit 1
+          fi
+      # Pristine specs assert exact seeded figures, so they run first on the freshly
+      # seeded stack; later specs change data.
+      - name: Playwright (pristine specs)
+        run: npm run e2e:run -- --grep @pristine --pass-with-no-tests
+      - name: Playwright (all other specs)
+        run: npm run e2e:run -- --grep-invert @pristine
+      - name: App log
+        if: failure()
+        run: docker compose -f compose.e2e.yaml -p "$E2E_PROJECT" logs app --tail 300
+      - name: Upload Playwright report and traces
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+      - name: Tear down the stack
+        if: always()
+        run: npm run e2e:down
+
+  ci-ok:
+    name: ci-ok
+    needs: [static, database, e2e]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Require every job to succeed
+        env:
+          STATIC: ${{ needs.static.result }}
+          DATABASE: ${{ needs.database.result }}
+          E2E: ${{ needs.e2e.result }}
+        run: |
+          echo "static=$STATIC database=$DATABASE e2e=$E2E"
+          for result in "$STATIC" "$DATABASE" "$E2E"; do
+            if [ "$result" != "success" ]; then
+              echo '::error::At least one required job did not succeed.'
+              exit 1
+            fi
+          done

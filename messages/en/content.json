@@ -1,1 +1,141 @@
-{}
+{
+  "tabs": {
+    "label": "Content sections",
+    "pages": "Pages",
+    "events": "Events"
+  },
+  "list": {
+    "title": "Website content",
+    "caption": "Public pages by language",
+    "intro": "Edit the text of the public pages in English and Urdu. Saving keeps a private draft; visitors only see what you publish."
+  },
+  "columns": {
+    "page": "Page",
+    "english": "English",
+    "urdu": "Urdu",
+    "updated": "Last edited"
+  },
+  "keys": {
+    "about": "About us",
+    "programs": "Programs",
+    "get-involved": "Get involved",
+    "contact": "Contact"
+  },
+  "state": {
+    "notCreated": "Not created",
+    "draft": "Draft",
+    "published": "Published",
+    "unpublishedChanges": "Unpublished changes",
+    "missingTranslation": "Missing translation"
+  },
+  "actions": {
+    "edit": "Edit",
+    "preview": "Preview",
+    "open": "Open {page} in {language}"
+  },
+  "editor": {
+    "title": "Edit {page}",
+    "back": "All pages",
+    "language": "{language} entry",
+    "titleLabel": "Title",
+    "bodyLabel": "Body",
+    "bodyHelpTitle": "Formatting help",
+    "bodyHelp": "Write plain text, or use the simple Markdown below. HTML is not allowed: any tags are removed when the page is shown.",
+    "syntax": {
+      "heading": "<code>## Heading</code> section heading",
+      "bold": "<code>**bold**</code> bold text",
+      "italic": "<code>*italic*</code> italic text",
+      "list": "<code>- item</code> bulleted list",
+      "numbered": "<code>1. item</code> numbered list",
+      "quote": "<code>> quote</code> quotation",
+      "link": "<code>[text](https://example.org)</code> link (https, mailto or tel only)",
+      "paragraph": "Leave a blank line to start a new paragraph."
+    },
+    "count": "{count} / {max}",
+    "unsaved": "Unsaved changes",
+    "save": "Save draft",
+    "saving": "Saving",
+    "saved": "Draft saved. The public page has not changed.",
+    "publish": "Publish",
+    "publishing": "Publishing",
+    "published": "Published. Visitors now see this version.",
+    "unpublish": "Unpublish",
+    "unpublished": "Unpublished. The page is no longer on the public site.",
+    "publishTitle": "Publish this page?",
+    "publishBody": "Visitors will see this {language} text on the public site straight away. Unsaved edits are saved first.",
+    "unpublishTitle": "Unpublish this page?",
+    "unpublishBody": "The {language} page is removed from the public site straight away. Your draft is kept.",
+    "publishedOn": "Published {date}",
+    "notPublished": "Not on the public site",
+    "lastEdited": "Last edited {date}",
+    "notSavedYet": "Not saved yet",
+    "unpublishedChangesNotice": "This draft has changes that are not live yet. Publish to update the public page.",
+    "missingTranslationNotice": "There is no Urdu text yet. Visitors to the Urdu site see the English page until an Urdu version is published.",
+    "errorSave": "The draft could not be saved. Check your connection and try again.",
+    "errorPublishEmpty": "Add a title or body before publishing.",
+    "errorGeneric": "That did not work. Reload the page and try again.",
+    "previewLink": "Preview draft"
+  },
+  "preview": {
+    "banner": "Private draft preview. Not visible to the public.",
+    "missingNotice": "There is no Urdu text yet. Visitors see the English page instead.",
+    "empty": "This draft has no title or body yet.",
+    "back": "Back to editor"
+  },
+  "events": {
+    "title": "Events",
+    "caption": "Events in the content manager",
+    "intro": "Plan events in English and Urdu. Saving keeps a private draft; the public Events page only shows what you publish.",
+    "new": "New event",
+    "untitled": "Untitled event",
+    "noDate": "No date yet",
+    "empty": {
+      "title": "No events yet",
+      "body": "Create an event to draft it privately, then publish it to the public Events page."
+    },
+    "columns": {
+      "title": "Event",
+      "starts": "Starts (Pakistan time)",
+      "venue": "Venue",
+      "status": "Status"
+    },
+    "editor": {
+      "newTitle": "New event",
+      "editTitle": "Edit event",
+      "back": "All events",
+      "titleEn": "Title (English)",
+      "titleUr": "Title (Urdu)",
+      "summaryEn": "Summary (English)",
+      "summaryUr": "Summary (Urdu)",
+      "details": "Date and place",
+      "location": "Venue",
+      "branch": "Branch",
+      "noBranch": "No branch",
+      "branchInactive": "{name} (not active)",
+      "startsAt": "Starts",
+      "endsAt": "Ends",
+      "pktNote": "Enter times in Pakistan time (PKT, UTC+5). They are stored in UTC and shown here in Pakistan time.",
+      "create": "Create draft",
+      "creating": "Creating",
+      "save": "Save draft",
+      "saving": "Saving",
+      "saved": "Draft saved. The public Events page has not changed.",
+      "publish": "Publish",
+      "publishing": "Publishing",
+      "published": "Published. The event is now on the public Events page.",
+      "unpublish": "Unpublish",
+      "unpublished": "Unpublished. The event is no longer on the public site.",
+      "publishTitle": "Publish this event?",
+      "publishBody": "Visitors will see this event on the public Events page straight away. Unsaved edits are saved first.",
+      "unpublishTitle": "Unpublish this event?",
+      "unpublishBody": "The event is removed from the public Events page straight away. Your draft is kept.",
+      "errorGeneric": "That did not work. Reload the page and try again.",
+      "errorFields": "Some details need attention. Check the highlighted fields.",
+      "errorTitleRequired": "Enter an English title.",
+      "errorEndsBeforeStart": "The end time cannot be before the start time.",
+      "errorRequiredToPublish": "Needed before the event can be published.",
+      "unpublishedChangesNotice": "This draft has changes that are not live yet. Publish to update the public Events page.",
+      "publicLink": "View public Events page"
+    }
+  }
+}

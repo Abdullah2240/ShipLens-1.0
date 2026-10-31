@@ -16,6 +16,12 @@ export const NAMESPACES = [
   'members',
   'content',
   'impact',
+  'trace',
+  'drilldown',
+  'evidence',
+  'unrouted',
+  'exports',
+  'share',
 ] as const;
 
 export default getRequestConfig(async ({ requestLocale }) => {

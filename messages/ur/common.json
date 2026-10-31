@@ -36,5 +36,11 @@
     "closed": "بند",
     "published": "شائع شدہ",
     "voided": "کالعدم"
+  },
+  "pager": {
+    "label": "صفحہ بندی",
+    "previous": "پچھلا",
+    "next": "اگلا",
+    "pageOf": "صفحہ {page} از {pages}"
   }
 }

@@ -17,3 +17,22 @@ export type {
   DraftInput,
 } from './types';
 export { revalidatePublicPages } from './revalidate';
+export {
+  createEvent,
+  getEvent,
+  listBranchOptionsForContent,
+  listEvents,
+  publishEvent,
+  unpublishEvent,
+  updateEvent,
+} from './service-events';
+export {
+  EVENT_LOCATION_MAX,
+  EVENT_SUMMARY_MAX,
+  EVENT_TITLE_MAX,
+  endsBeforeStart,
+  eventInputSchema,
+  eventPatchSchema,
+} from './event-schema';
+export type { EventInput, EventInputDraft, EventPatch, EventPatchDraft } from './event-schema';
+export type { BranchOption, EventStatus, EventView } from './event-types';

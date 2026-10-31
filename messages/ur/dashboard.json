@@ -1,1 +1,21 @@
-{}
+{
+  "chart": {
+    "viewTable": "جدول کی صورت میں دیکھیں",
+    "hideTable": "جدول چھپائیں",
+    "monthAxis": "مہینہ",
+    "amountAxis": "رقم (PKR)",
+    "legend": "رنگوں کی وضاحت",
+    "noData": "اس مدت کے لیے ابھی کوئی اعداد و شمار موجود نہیں۔",
+    "total": "کل",
+    "barTitle": "{month} · {series}: {amount}",
+    "cellContext": "{month}، {series}"
+  },
+  "card": {
+    "viewBreakdown": "تفصیل دیکھیں",
+    "of": "{whole} میں سے {share}"
+  },
+  "identity": {
+    "caption": "{figure} کی تقسیم",
+    "legend": "حیثیت کے لحاظ سے تقسیم"
+  }
+}

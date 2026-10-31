@@ -1,0 +1,109 @@
+{
+  "figures": {
+    "collected": {
+      "label": "Collected",
+      "short": "Collected",
+      "definition": "All money recorded in collections, whatever the state of its weekly report. Voided collections are never counted.",
+      "includes": "Collections in draft, returned, submitted and approved weekly reports.",
+      "excludes": "Voided collections."
+    },
+    "approved": {
+      "label": "Approved",
+      "short": "Approved",
+      "definition": "Money in collections whose weekly report has been approved by a Finance Reviewer. Voided collections are never counted.",
+      "includes": "Collections in approved weekly reports, whether routed to the main account or not.",
+      "excludes": "Collections in draft, returned or submitted reports, and voided collections."
+    },
+    "pending_approval": {
+      "label": "Pending approval",
+      "short": "Pending",
+      "definition": "Money in collections whose weekly report has been submitted and is waiting for a Finance Reviewer.",
+      "includes": "Collections in submitted weekly reports.",
+      "excludes": "Collections in draft, returned or approved reports, and voided collections."
+    },
+    "in_progress": {
+      "label": "In progress",
+      "short": "In progress",
+      "definition": "Money in collections whose weekly report is still being prepared by the branch or was returned for correction.",
+      "includes": "Collections in draft and returned weekly reports.",
+      "excludes": "Collections in submitted or approved reports, and voided collections."
+    },
+    "not_yet_routed": {
+      "label": "Not yet routed",
+      "short": "Not routed",
+      "definition": "Approved money that has not yet been marked as sent to the main account.",
+      "includes": "Approved collections with no routing date.",
+      "excludes": "Collections already marked as routed, money that is not yet approved, and voided collections."
+    },
+    "routed": {
+      "label": "Routed to main account",
+      "short": "Routed",
+      "definition": "Approved money that has been marked as sent to the main account.",
+      "includes": "Approved collections with a routing date.",
+      "excludes": "Approved collections not yet marked as routed, money that is not yet approved, and voided collections."
+    },
+    "active_branches": {
+      "label": "Active branches",
+      "short": "Branches",
+      "definition": "Branches whose status is Active today. Not affected by the month filter.",
+      "includes": "Branches with the Active status.",
+      "excludes": "Forming, paused and closed branches."
+    },
+    "reports_awaiting_review": {
+      "label": "Reports awaiting review",
+      "short": "Awaiting review",
+      "definition": "Weekly reports submitted and waiting for a Finance Reviewer. Filtered by the month of the report week.",
+      "includes": "Weekly reports with the Submitted status.",
+      "excludes": "Draft, returned and approved reports."
+    }
+  },
+  "levels": {
+    "overview": "Overview",
+    "branches": "By branch",
+    "reports": "Weekly reports",
+    "collections": "Collections",
+    "collection": "Collection evidence"
+  },
+  "breadcrumb": {
+    "label": "Trail of figures",
+    "dashboard": "Dashboard"
+  },
+  "explain": {
+    "open": "How is this calculated",
+    "openFor": "How is this calculated: {figure}",
+    "title": "How is this calculated",
+    "value": "Figure",
+    "definition": "Definition",
+    "includes": "Included",
+    "excludes": "Not included",
+    "filters": "Active filters",
+    "recordCount": "Records counted",
+    "asOf": "As of",
+    "timezone": "PKT",
+    "allTime": "No filters: all time, all branches",
+    "identities": "Totals that must agree",
+    "holds": "Adds up",
+    "broken": "Does not add up",
+    "close": "Close"
+  },
+  "table": {
+    "total": "Total",
+    "totalOf": "Total of {count, plural, one {# record} other {# records}}",
+    "matches": "Matches {parent}",
+    "mismatch": "Does not match {parent}",
+    "parentFallback": "the parent figure",
+    "truncated": "Showing the first {shown} of {count} records. The total includes all of them."
+  },
+  "filter": {
+    "legend": "Month range",
+    "from": "From",
+    "to": "To",
+    "apply": "Apply",
+    "clear": "Clear",
+    "allTime": "All time"
+  },
+  "measure": {
+    "amount": "Amount",
+    "count": "Count"
+  }
+}

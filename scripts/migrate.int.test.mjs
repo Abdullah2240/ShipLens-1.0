@@ -101,6 +101,27 @@ describe('migration runner', () => {
     }
   });
 
+  it('treats CRLF and LF checkouts of an applied file as the same migration', async () => {
+    const tmp = await mkdtemp(path.join(os.tmpdir(), 'shiplens-mig-'));
+    try {
+      await cp(MIGRATIONS_DIR, tmp, { recursive: true });
+      const target = path.join(tmp, '202610281000_foundation_identity_audit.sql');
+      const lf = (await readFile(target, 'utf8')).replace(/\r\n/g, '\n');
+      await withFreshDatabase(async (url) => {
+        await writeFile(target, lf.replace(/\n/g, '\r\n'));
+        await runMigrations({ connectionString: url, dir: tmp });
+        await writeFile(target, lf);
+        expect(await runMigrations({ connectionString: url, dir: tmp })).toEqual([]);
+        await writeFile(target, `${lf}-- tampered\n`);
+        await expect(runMigrations({ connectionString: url, dir: tmp })).rejects.toThrow(
+          'was modified after being applied',
+        );
+      });
+    } finally {
+      await rm(tmp, { recursive: true, force: true });
+    }
+  });
+
   it('serialises concurrent runners with the advisory lock', async () => {
     await withFreshDatabase(async (url) => {
       const files = (await readdir(MIGRATIONS_DIR)).filter((f) => f.endsWith('.sql')).sort();
