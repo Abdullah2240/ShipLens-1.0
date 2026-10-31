@@ -1,1 +1,73 @@
-{}
+{
+  "level1": {
+    "eyebrow": "Breakdown by branch",
+    "title": "{figure} by branch",
+    "lead": "Each branch's part of this figure. Open an amount to see the weekly reports behind it.",
+    "columns": {
+      "branch": "Branch",
+      "status": "Status",
+      "reports": "Reports",
+      "records": "Collections",
+      "value": "Amount"
+    },
+    "valueLink": "{branch}, {value}: view weekly reports",
+    "empty": {
+      "title": "No branch adds to this figure",
+      "body": "No collections count towards this figure in the selected months. Try a wider month range."
+    }
+  },
+  "level2": {
+    "eyebrow": "Weekly reports in this branch",
+    "title": "{figure} in <branch>{name}</branch>",
+    "metaTitle": "{figure} in {name}",
+    "lead": "Each weekly report's part of this branch's figure. Open an amount to see its collections.",
+    "branchCode": "Branch code",
+    "columns": {
+      "week": "Week",
+      "status": "Status",
+      "records": "Collections",
+      "frozen": "Total at submission",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "value": "Amount"
+    },
+    "weekRange": "<start></start> to <end></end>",
+    "valueLink": "Week of {week}, {value}: view collections",
+    "tableLabel": "Weekly reports behind {figure} in {name}",
+    "frozenNote": {
+      "wholeWeek": "Whole week",
+      "lastSubmission": "At last submission"
+    },
+    "frozenHint": "Total at submission is fixed when a report is submitted. \"Whole week\" marks a report that the selected months count only in part. \"At last submission\" marks a report changed after it was returned.",
+    "notYet": "Not yet",
+    "empty": {
+      "title": "No weekly reports behind this figure",
+      "body": "None of this branch's reports count towards this figure in the selected months."
+    }
+  },
+  "actions": {
+    "exportLabel": "Export this level",
+    "exportReports": "Reports CSV",
+    "exportCollections": "Collections CSV",
+    "back": "Back to {parent}"
+  },
+  "chips": {
+    "from": "From",
+    "to": "To",
+    "branch": "Branch",
+    "period": "Period",
+    "earliest": "Earliest",
+    "latest": "Latest"
+  },
+  "countFigure": {
+    "reportsLabel": "Reports awaiting review",
+    "branchesLabel": "Branches",
+    "viewApproved": "View approved",
+    "approvedReports": "Approved reports",
+    "awaitingLead": "Submitted weekly reports waiting for a Finance Reviewer, counted per branch. Open a count to see the reports.",
+    "awaitingBranchLead": "Submitted reports from this branch waiting for review. Open an amount to see its collections.",
+    "activeLead": "Branches open for collections today. Open a branch to see its approved figure.",
+    "countLink": "{branch}, {count}: view the reports",
+    "approvedLink": "{branch}: view its approved figure"
+  }
+}
