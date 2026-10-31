@@ -29,3 +29,4 @@ export type {
   CollectionPatch,
   VoidInput,
 } from './types';
+export { markCollectionRouted, unmarkCollectionRouted } from './service-routing';
