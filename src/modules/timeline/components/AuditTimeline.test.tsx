@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import { screen, within } from '@testing-library/react';
+import { within } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 import { formatDate, formatDateTime } from '@/platform/i18n/format';
 import { findPhysicalDirection } from '../../../../scripts/lib/logical-css.mjs';
@@ -79,7 +79,10 @@ const ENTRIES: TimelineEntry[] = [
 ];
 
 const itemFor = (id: string) => {
-  const items = screen.getAllByRole('listitem').filter((li) => li.dataset.entryId === id);
+  // Plain selectors: role queries over the whole tree are slow in jsdom.
+  const items = [...document.querySelectorAll<HTMLElement>('li[data-entry-id]')].filter(
+    (li) => li.dataset.entryId === id,
+  );
   expect(items).toHaveLength(1);
   return items[0]!;
 };
@@ -87,14 +90,12 @@ const itemFor = (id: string) => {
 describe('AuditTimeline (en)', () => {
   it('renders one list item per entry inside an ordered list with a heading', () => {
     renderWithIntl(<AuditTimeline entries={ENTRIES} />, { namespaces: NAMESPACES });
-    expect(screen.getByRole('heading', { level: 2, name: 'Activity' })).toBeInTheDocument();
-    const list = screen.getByRole('list', { name: 'Activity' });
-    expect(list.tagName).toBe('OL');
-    expect(
-      within(list)
-        .getAllByRole('listitem')
-        .filter((li) => li.dataset.entryId),
-    ).toHaveLength(5);
+    const heading = document.querySelector('h2');
+    expect(heading).toHaveTextContent('Activity');
+    const list = document.querySelector('ol');
+    expect(list).not.toBeNull();
+    expect(list).toHaveAttribute('aria-labelledby', heading!.id);
+    expect(list!.querySelectorAll(':scope > li')).toHaveLength(5);
   });
 
   it('shows the localized action, actor and role, and a PKT time with Latin digits', () => {
@@ -189,20 +190,23 @@ describe('AuditTimeline (en)', () => {
     const { unmount } = renderWithIntl(<AuditTimeline entries={[]} />, {
       namespaces: NAMESPACES,
     });
-    expect(screen.getByRole('status')).toHaveTextContent('No activity yet');
-    expect(screen.queryByRole('list')).toBeNull();
+    expect(document.querySelector('[role="status"]')).toHaveTextContent('No activity yet');
+    expect(document.querySelector('ol')).toBeNull();
     unmount();
     renderWithIntl(<AuditTimeline entries={[]} emptyHint="Nothing logged this week." />, {
       namespaces: NAMESPACES,
     });
-    expect(screen.getByRole('status')).toHaveTextContent('Nothing logged this week.');
+    expect(document.querySelector('[role="status"]')).toHaveTextContent(
+      'Nothing logged this week.',
+    );
   });
 
   it('uses the requested heading level', () => {
     renderWithIntl(<AuditTimeline entries={ENTRIES} headingLevel={3} />, {
       namespaces: NAMESPACES,
     });
-    expect(screen.getByRole('heading', { level: 3, name: 'Activity' })).toBeInTheDocument();
+    expect(document.querySelector('h2')).toBeNull();
+    expect(document.querySelector('section > h3')).toHaveTextContent('Activity');
   });
 });
 
@@ -213,7 +217,7 @@ describe('AuditTimeline (ur)', () => {
       namespaces: NAMESPACES,
     });
     expect(container).toHaveAttribute('dir', 'rtl');
-    expect(screen.getByRole('heading', { level: 2, name: 'سرگرمی' })).toBeInTheDocument();
+    expect(container.querySelector('h2')).toHaveTextContent('سرگرمی');
     const amend = itemFor('2');
     expect(within(amend).getByText('وصولی میں ترمیم کی گئی')).toBeInTheDocument();
     expect(amend).toHaveTextContent('بطور شاخ لیڈ');
