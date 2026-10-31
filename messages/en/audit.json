@@ -112,5 +112,48 @@
     "branch_lead": "Branch Lead",
     "hr_lead": "HR Lead",
     "system": "System"
+  },
+  "viewer": {
+    "title": "Audit trail",
+    "lead": "Every recorded change, newest first. Filter by date, person, action or record, and open an event to see exactly what changed.",
+    "restricted": "Showing finance records only: collections, reports, exports and shares.",
+    "filters": {
+      "title": "Filter the trail",
+      "from": "From (PKT)",
+      "to": "To (PKT)",
+      "actor": "Person",
+      "action": "Action",
+      "entity": "Record type",
+      "entityId": "Record ID",
+      "branch": "Branch",
+      "any": "Any",
+      "apply": "Apply filters",
+      "reset": "Reset"
+    },
+    "columns": {
+      "time": "Time (PKT)",
+      "actor": "By",
+      "action": "Action",
+      "entity": "Record",
+      "branch": "Branch"
+    },
+    "diff": {
+      "field": "Field",
+      "before": "Before",
+      "after": "After",
+      "none": "No field changes were recorded for this event.",
+      "empty": "Not set"
+    },
+    "loadOlder": "Load older events",
+    "newest": "Back to newest",
+    "empty": {
+      "title": "No events match these filters",
+      "body": "Try a wider date range or reset the filters."
+    },
+    "requestId": "Request ID",
+    "system": "System",
+    "openTrace": "Open in drill-down",
+    "filterRecord": "All events for this record",
+    "listLabel": "Audit events"
   }
 }
