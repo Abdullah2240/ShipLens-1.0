@@ -30,7 +30,7 @@ export function AppShell({
   return (
     <div className="flex min-h-dvh flex-col">
       <SkipLink />
-      <header className="sticky top-0 z-30 border-b border-border bg-surface-raised">
+      <header className="sticky top-0 z-30 border-b border-border bg-surface-raised print:hidden">
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 md:px-6">
           <BrandLink />
           {items.length > 0 ? (

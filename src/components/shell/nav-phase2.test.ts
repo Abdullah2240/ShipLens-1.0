@@ -11,11 +11,23 @@ const ids = (role: Role | null) => navForRole(appNav, role).map((item) => item.i
 
 describe('people and content navigation', () => {
   it.each([
-    ['super_admin', ['account', 'applications', 'members', 'teams', 'content']],
-    ['hr_lead', ['account', 'applications', 'members', 'teams']],
-    ['branch_lead', ['account', 'members', 'teams']],
+    [
+      'super_admin',
+      [
+        'account',
+        'branches',
+        'collections',
+        'reports',
+        'applications',
+        'members',
+        'teams',
+        'content',
+      ],
+    ],
+    ['hr_lead', ['account', 'branches', 'applications', 'members', 'teams']],
+    ['branch_lead', ['account', 'branches', 'collections', 'reports', 'members', 'teams']],
     ['content_editor', ['account', 'content']],
-    ['finance_reviewer', ['account']],
+    ['finance_reviewer', ['account', 'branches', 'collections', 'reports']],
   ] as const)('shows %s exactly the entries its permissions allow', (role, expected) => {
     expect(ids(role)).toEqual(expected);
   });

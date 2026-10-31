@@ -198,12 +198,22 @@ test.describe('not yet routed page', () => {
     await expectFooterMatchesFigure(page, `?branch=${branchId}`);
   });
 
-  test('is not found for roles outside head office', async ({ page, loginAs, localePath }) => {
+  test('is not found for roles outside head office', async ({
+    page,
+    loginAs,
+    localePath,
+    uiLocale,
+  }) => {
+    // The not-found page title (messages shell.notFound.title).
+    const notFound = { en: 'We could not find that page', ur: 'یہ صفحہ نہیں مل سکا' } as const;
     for (const role of ['branch_lead', 'content_editor'] as const) {
       await page.context().clearCookies();
       await loginAs(role);
       const response = await page.goto(localePath(PATH));
-      expect(response?.status(), `${role} on ${PATH}`).toBe(404);
+      // 404, or 200 when the dashboard loading shell was already streamed before the refusal.
+      expect([200, 404], `${role} on ${PATH}`).toContain(response?.status());
+      await expect(page.getByRole('heading', { name: notFound[uiLocale] })).toBeVisible();
+      await expect(page.getByRole('table')).toHaveCount(0);
     }
   });
 });
