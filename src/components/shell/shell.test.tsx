@@ -108,7 +108,13 @@ describe('navForRole', () => {
   });
 
   it('drops items that are not live', () => {
-    expect(navForRole(appNav, 'super_admin').map((i) => i.id)).toEqual(['account']);
+    expect(navForRole(appNav, 'super_admin').map((i) => i.id)).toEqual([
+      'account',
+      'applications',
+      'members',
+      'teams',
+      'content',
+    ]);
   });
 
   it('keeps an item without a required action for any signed-in role', () => {
