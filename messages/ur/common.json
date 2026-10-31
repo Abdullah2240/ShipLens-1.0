@@ -1,3 +1,39 @@
 {
-  "appName": "ShipLens"
+  "appName": "ShipLens",
+  "tagline": "ہر منظور شدہ عدد، اپنے ماخذ تک قابلِ سراغ۔",
+  "theme": {
+    "label": "ظاہری انداز",
+    "system": "سسٹم کے مطابق",
+    "light": "روشن",
+    "dark": "تاریک"
+  },
+  "actions": {
+    "confirm": "تصدیق کریں",
+    "cancel": "منسوخ کریں",
+    "retry": "دوبارہ کوشش کریں",
+    "close": "بند کریں"
+  },
+  "states": {
+    "emptyTitle": "ابھی یہاں کچھ نہیں",
+    "emptyBody": "ریکارڈ شامل ہوتے ہی یہاں نظر آئیں گے۔",
+    "errorTitle": "کچھ خرابی پیش آ گئی",
+    "errorBody": "یہ لوڈ نہیں ہو سکا۔ براہِ کرم دوبارہ کوشش کریں۔",
+    "loading": "لوڈ ہو رہا ہے"
+  },
+  "status": {
+    "draft": "مسودہ",
+    "submitted": "جمع شدہ",
+    "returned": "واپس کردہ",
+    "approved": "منظور شدہ",
+    "pending": "زیرِ التوا",
+    "accepted": "قبول شدہ",
+    "declined": "مسترد",
+    "active": "فعال",
+    "inactive": "غیر فعال",
+    "forming": "زیرِ تشکیل",
+    "paused": "موقوف",
+    "closed": "بند",
+    "published": "شائع شدہ",
+    "voided": "کالعدم"
+  }
 }

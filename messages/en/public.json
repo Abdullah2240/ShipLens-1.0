@@ -1,1 +1,32 @@
-{}
+{
+  "home": {
+    "eyebrow": "A community-run charity",
+    "title": "Small gifts, carried all the way to the people they are meant for.",
+    "lead": "We bring neighbours, volunteers and donors together, and we keep every rupee in plain sight: from the branch that collects it to the report that accounts for it.",
+    "ctaGetInvolved": "Get involved",
+    "ctaBranches": "Find a branch",
+    "mission": {
+      "title": "Our mission",
+      "body": "To make local giving simple and trustworthy. Each branch is run by people from its own neighbourhood, and every figure we share can be traced back to where it came from."
+    },
+    "programs": {
+      "title": "What we do",
+      "intro": "Three ways our branches serve their communities.",
+      "learnMore": "See all programs",
+      "items": {
+        "education": {
+          "title": "Education support",
+          "body": "School fees, books and tutoring for children whose families cannot cover them."
+        },
+        "health": {
+          "title": "Health camps",
+          "body": "Free check-ups and basic medicines, organised with local doctors and volunteers."
+        },
+        "relief": {
+          "title": "Relief drives",
+          "body": "Food and essentials for families in need, especially in hard seasons and emergencies."
+        }
+      }
+    }
+  }
+}

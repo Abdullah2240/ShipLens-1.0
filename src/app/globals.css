@@ -1,1 +1,176 @@
 @import 'tailwindcss';
+
+/*
+ * Design tokens. Light values live in @theme; dark values override the same
+ * variables below. The default follows the system; an explicit
+ * <html data-theme="light|dark"> (set by ThemeToggle and the theme cookie) wins.
+ *
+ * Every text/background pair is checked for WCAG AA in ui.test.tsx. When you change
+ * a value, keep the dark block and the media-query block identical (also tested).
+ */
+@theme static {
+  --color-surface: #faf6ef;
+  --color-surface-raised: #ffffff;
+  --color-surface-sunken: #f2ebdf;
+  --color-border: #e5dbcb;
+  --color-border-strong: #8a7c6b;
+  --color-text: #2b2420;
+  --color-text-muted: #65594e;
+
+  --color-primary: #0e5c57;
+  --color-primary-hover: #0a4a46;
+  --color-primary-contrast: #ffffff;
+  --color-accent: #a8430c;
+  --color-accent-soft: #fbe6d3;
+  --color-danger: #b42318;
+  --color-danger-hover: #912018;
+  --color-danger-contrast: #ffffff;
+  --color-ring: #0e7c75;
+
+  --color-tone-neutral-bg: #ece5d9;
+  --color-tone-neutral-fg: #4a4036;
+  --color-tone-info-bg: #dbeaf0;
+  --color-tone-info-fg: #1d4b5c;
+  --color-tone-success-bg: #d9eedc;
+  --color-tone-success-fg: #1b5e2f;
+  --color-tone-warning-bg: #fbe9c4;
+  --color-tone-warning-fg: #774700;
+  --color-tone-danger-bg: #f9dcd6;
+  --color-tone-danger-fg: #9a2a18;
+  --color-tone-pending-bg: #e7e1f3;
+  --color-tone-pending-fg: #4a3c7a;
+
+  --radius-card: 0.875rem;
+  --shadow-card: 0 1px 2px rgb(60 40 20 / 0.06), 0 6px 20px rgb(60 40 20 / 0.06);
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+    --color-surface: #15110e;
+    --color-surface-raised: #1f1a16;
+    --color-surface-sunken: #100d0b;
+    --color-border: #382f28;
+    --color-border-strong: #8f8274;
+    --color-text: #f2eadf;
+    --color-text-muted: #b9ac9d;
+
+    --color-primary: #5ccdbe;
+    --color-primary-hover: #7ddbce;
+    --color-primary-contrast: #0a2623;
+    --color-accent: #f0a35e;
+    --color-accent-soft: #3a2616;
+    --color-danger: #f0867a;
+    --color-danger-hover: #f5a096;
+    --color-danger-contrast: #2a0e0a;
+    --color-ring: #7ddbce;
+
+    --color-tone-neutral-bg: #2b241f;
+    --color-tone-neutral-fg: #d8ccbd;
+    --color-tone-info-bg: #17313b;
+    --color-tone-info-fg: #9bd0e4;
+    --color-tone-success-bg: #16301f;
+    --color-tone-success-fg: #9ad9ae;
+    --color-tone-warning-bg: #3a2b0c;
+    --color-tone-warning-fg: #f2c877;
+    --color-tone-danger-bg: #3e1c16;
+    --color-tone-danger-fg: #f5a596;
+    --color-tone-pending-bg: #2a2340;
+    --color-tone-pending-fg: #c9bcf0;
+
+    --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      color-scheme: dark;
+      --color-surface: #15110e;
+      --color-surface-raised: #1f1a16;
+      --color-surface-sunken: #100d0b;
+      --color-border: #382f28;
+      --color-border-strong: #8f8274;
+      --color-text: #f2eadf;
+      --color-text-muted: #b9ac9d;
+
+      --color-primary: #5ccdbe;
+      --color-primary-hover: #7ddbce;
+      --color-primary-contrast: #0a2623;
+      --color-accent: #f0a35e;
+      --color-accent-soft: #3a2616;
+      --color-danger: #f0867a;
+      --color-danger-hover: #f5a096;
+      --color-danger-contrast: #2a0e0a;
+      --color-ring: #7ddbce;
+
+      --color-tone-neutral-bg: #2b241f;
+      --color-tone-neutral-fg: #d8ccbd;
+      --color-tone-info-bg: #17313b;
+      --color-tone-info-fg: #9bd0e4;
+      --color-tone-success-bg: #16301f;
+      --color-tone-success-fg: #9ad9ae;
+      --color-tone-warning-bg: #3a2b0c;
+      --color-tone-warning-fg: #f2c877;
+      --color-tone-danger-bg: #3e1c16;
+      --color-tone-danger-fg: #f5a596;
+      --color-tone-pending-bg: #2a2340;
+      --color-tone-pending-fg: #c9bcf0;
+
+      --shadow-card: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.35);
+    }
+  }
+
+  /* Typography: Latin stack by default, Naskh for Urdu, back to Latin for lang="en" islands. */
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-latin), system-ui, sans-serif;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :lang(ur) body,
+  :lang(ur) {
+    font-family: var(--font-naskh), var(--font-latin), system-ui, sans-serif;
+    line-height: 1.8;
+  }
+
+  :lang(en) {
+    font-family: var(--font-latin), system-ui, sans-serif;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-soft);
+    color: var(--color-text);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* Large public headings only: the Nastaliq variable is provided by the /ur public layout. */
+  .font-display-ur:lang(ur),
+  :lang(ur) .font-display-ur {
+    font-family: var(--font-nastaliq), var(--font-naskh), system-ui, sans-serif;
+    line-height: 2.1;
+  }
+
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}

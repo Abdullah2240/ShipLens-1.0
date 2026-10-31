@@ -1,1 +1,45 @@
-{}
+{
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "ur": "اردو"
+  },
+  "skipToContent": "Skip to main content",
+  "publicNavLabel": "Main",
+  "appNavLabel": "Primary",
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "programs": "Programs",
+    "branches": "Branches",
+    "events": "Events",
+    "getInvolved": "Get involved",
+    "contact": "Contact"
+  },
+  "appNav": {
+    "account": "Account",
+    "dashboard": "Dashboard",
+    "branches": "Branches",
+    "collections": "Collections",
+    "reports": "Reports",
+    "applications": "Applications",
+    "members": "Members",
+    "teams": "Teams",
+    "content": "Content",
+    "audit": "Audit log"
+  },
+  "footer": {
+    "tagline": "Community service you can trace, from every donation to its impact.",
+    "contactPlaceholder": "Contact details will be published here soon."
+  },
+  "notFound": {
+    "title": "We could not find that page",
+    "body": "The page may have moved, or the address may be mistyped.",
+    "home": "Back to the home page"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "This page could not be shown. You can try again or return to the home page.",
+    "home": "Back to the home page"
+  }
+}
