@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import type { Page } from '@playwright/test';
 import { expect, test } from '../support/fixtures';
 
@@ -25,11 +25,11 @@ type PublicImpact = {
   cities: number;
 };
 
-// Repository path from this file; E2E_EXPECTED_JSON overrides it for runners that mount
-// the seed elsewhere.
+// Relative to the runner's working directory (the repository root, or /e2e in the compose
+// runner); E2E_EXPECTED_JSON overrides it for runners that mount the seed elsewhere.
+// Specs load as CommonJS, so import.meta is not available here.
 const EXPECTED_PATH =
-  process.env.E2E_EXPECTED_JSON ??
-  fileURLToPath(new URL('../../../db/seed/expected.json', import.meta.url));
+  process.env.E2E_EXPECTED_JSON ?? path.resolve(process.cwd(), 'db/seed/expected.json');
 
 function loadApproved(): { amount: string; activeBranches: number } | null {
   if (!existsSync(EXPECTED_PATH)) return null;
