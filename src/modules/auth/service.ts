@@ -3,8 +3,10 @@ import { command, type CommandContext } from '../../platform/audit';
 import type { Actor } from '../../platform/authz/actor';
 import { ROLES, type Role } from '../../platform/authz/roles';
 import { logger } from '../../platform/log/logger';
+import type { Queryable } from '../../platform/db';
 import {
   findSessionWithUser,
+  findUserBranchName,
   findUserByEmail,
   insertLoginAttempt,
   insertSession,
@@ -15,7 +17,13 @@ import {
 } from './repo';
 import { absoluteExpiry, hashToken, isSessionLive, newToken, shouldTouch } from './session';
 import { assertNotThrottled } from './throttle';
-import { InvalidCredentials, type LoginInput, type LoginResult, type SessionUser } from './types';
+import {
+  InvalidCredentials,
+  type LoginInput,
+  type LoginResult,
+  type Profile,
+  type SessionUser,
+} from './types';
 
 const MAX_EMAIL_LENGTH = 254;
 const MAX_TOKEN_LENGTH = 256;
@@ -167,4 +175,13 @@ export async function getActorFromToken(
     branch_id: row.branch_id,
   };
   return { actor: actorFor(user), user: toSessionUser(user) };
+}
+
+/**
+ * Read-only profile for the account page: the session user plus their branch name.
+ * Head-office roles have no branch, so branchName is null for them.
+ */
+export async function getProfile(db: Queryable, user: SessionUser): Promise<Profile> {
+  const branchName = user.branchId ? await findUserBranchName(db, user.id) : null;
+  return { ...user, branchName };
 }

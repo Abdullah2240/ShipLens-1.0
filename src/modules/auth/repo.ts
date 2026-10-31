@@ -107,3 +107,14 @@ export async function failureTimes(
   );
   return rows.map((r) => r.attempted_at);
 }
+
+/** The name of the user's own branch through the users-branches join, or null. */
+export async function findUserBranchName(db: Queryable, userId: string): Promise<string | null> {
+  const { rows } = await db.query<{ branch_name: string | null }>(
+    `SELECT b.name AS branch_name
+       FROM users u LEFT JOIN branches b ON b.id = u.branch_id
+      WHERE u.id = $1`,
+    [userId],
+  );
+  return rows[0]?.branch_name ?? null;
+}
