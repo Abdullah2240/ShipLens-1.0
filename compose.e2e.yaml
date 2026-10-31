@@ -69,6 +69,7 @@ services:
     volumes:
       - ./playwright.config.ts:/e2e/playwright.config.ts:ro
       - ./tests/e2e:/e2e/tests/e2e:ro
+      - ./db/seed/expected.json:/e2e/db/seed/expected.json:ro
       - ./test-results:/e2e/test-results
       - ./playwright-report:/e2e/playwright-report
     command: ['npx', 'playwright', 'test']

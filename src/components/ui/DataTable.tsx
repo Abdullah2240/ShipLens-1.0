@@ -40,7 +40,7 @@ export function DataTable<T>({
       role="region"
       aria-label={caption}
       tabIndex={0}
-      className="overflow-x-auto rounded-card border border-border bg-surface-raised shadow-card"
+      className="relative overflow-x-auto rounded-card border border-border bg-surface-raised shadow-card"
     >
       <table className="w-full border-collapse text-sm">
         <caption className={captionHidden ? 'sr-only' : 'px-4 py-3 text-start font-semibold'}>
