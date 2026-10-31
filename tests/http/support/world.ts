@@ -92,6 +92,7 @@ export async function buildWorld(pool: Pool = testPool()): Promise<World> {
     application: { A: '', B: '' },
     team: { A: '', B: '' },
     member: { A: '', B: '' },
+    report_approved: { A: '', B: '' },
     collection_approved: { A: '', B: '' },
     collection_routed: { A: '', B: '' },
   };
@@ -135,6 +136,7 @@ export async function buildWorld(pool: Pool = testPool()): Promise<World> {
         },
       ],
     });
+    records.report_approved![side] = approved.reportId;
     records.collection_approved![side] = approved.collectionIds[0]!;
     records.collection_routed![side] = approved.collectionIds[1]!;
 
