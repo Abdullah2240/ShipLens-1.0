@@ -31,3 +31,8 @@ export class InvalidCredentials extends AppError {
     super(401, 'invalid_credentials', 'Invalid email or password');
   }
 }
+
+/** What the account page shows: the session user plus the name of their branch. */
+export interface Profile extends SessionUser {
+  branchName: string | null;
+}

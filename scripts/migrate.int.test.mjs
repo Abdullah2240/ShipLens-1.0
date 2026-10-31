@@ -26,6 +26,8 @@ const EXPECTED_TABLES = [
   'sessions',
   'teams',
   'users',
+  'v_kpi_collections',
+  'v_report_figures',
   'weekly_reports',
 ];
 

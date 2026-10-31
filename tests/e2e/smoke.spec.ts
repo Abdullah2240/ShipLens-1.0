@@ -1,5 +1,4 @@
 import { expect, test } from './support/fixtures';
-import { PENDING, requireFeature, routeExists } from './support/probe';
 import { demoPassword, ROLES_E2E } from './support/roles';
 
 // Read-only checks, safe against a live deployment (`--grep @smoke`). No test here
@@ -86,12 +85,7 @@ test.describe('smoke', { tag: '@smoke' }, () => {
   test(
     'UI login lands on the account page',
     { tag: '@desktop' },
-    async ({ page, request, localePath, uiLocale }) => {
-      requireFeature(
-        await routeExists(request, 'GET', localePath('/login')),
-        PENDING.loginPage(uiLocale),
-      );
-
+    async ({ page, localePath, uiLocale }) => {
       const { email, name } = ROLES_E2E.branch_lead;
       await page.goto(localePath('/login'));
       await page.locator('input[type="email"]').fill(email);
