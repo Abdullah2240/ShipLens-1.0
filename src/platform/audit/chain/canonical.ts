@@ -5,6 +5,8 @@ import type { ChainRowText } from './types';
  * Select list that reads an audit_events row as ChainRowText. Every value is the text
  * Postgres itself produces (jsonb included), so the hash is recomputed from the same bytes
  * the audit_events_chain trigger hashed; JSON is never re-serialised here.
+ * The chain_seq alias is text: order by the qualified column `audit_events.chain_seq`,
+ * otherwise ORDER BY picks the alias and sorts 10 before 2.
  */
 export const CHAIN_ROW_SELECT = `chain_seq::text AS chain_seq, prev_hash, id::text AS id, to_char(occurred_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') AS occurred_at_utc, request_id, actor_id::text AS actor_id, actor_role, action, entity_type, entity_id, branch_id::text AS branch_id, report_id::text AS report_id, before::text AS before_text, after::text AS after_text, hash`;
 

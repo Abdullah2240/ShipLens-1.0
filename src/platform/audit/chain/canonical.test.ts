@@ -87,7 +87,9 @@ describe('canonicalV1', () => {
 
 describe('hashCanonical', () => {
   it('matches the SHA-256 test vector for abc', () => {
-    expect(hashCanonical('abc')).toBe('ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+    expect(hashCanonical('abc')).toBe(
+      'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad',
+    );
   });
 
   it('returns 64 lowercase hex characters and hashes the UTF-8 bytes', () => {

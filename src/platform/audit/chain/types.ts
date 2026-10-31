@@ -27,7 +27,12 @@ export type ChainBreakReason = 'sequence_gap' | 'link_mismatch' | 'hash_mismatch
 
 export type ChainStatus =
   | { status: 'empty'; checkedEvents: 0; checkedAt: string }
-  | { status: 'intact'; checkedEvents: number; head: { chainSeq: number; hash: string }; checkedAt: string }
+  | {
+      status: 'intact';
+      checkedEvents: number;
+      head: { chainSeq: number; hash: string };
+      checkedAt: string;
+    }
   | {
       status: 'broken';
       checkedEvents: number;
