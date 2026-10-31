@@ -547,13 +547,12 @@ async function loadReport(client, report, collections, branchId, users, stats) {
       throw fail(`report ${report.id}: ${entry.event} is not allowed from ${state.status}`);
     }
     const actor = userFor(users, entry.actorKey);
-    const next = { ...state, status: t.to };
+    const next = { ...state, status: t.to, version: state.version + 1 };
     if (t.to === 'submitted') {
       let total = 0n;
       for (const minor of active.values()) total += minor;
       next.total_amount = formatMinor(total);
       next.collection_count = active.size;
-      next.version = state.version + 1;
       await client.query(
         `UPDATE weekly_reports
             SET status = 'submitted', total_amount = $3, collection_count = $4,
@@ -573,16 +572,17 @@ async function loadReport(client, report, collections, branchId, users, stats) {
       next.return_reason = entry.reason;
       await client.query(
         `UPDATE weekly_reports
-            SET status = 'returned', return_reason = $3, reviewed_at = $4, reviewed_by = $5, updated_at = $4
+            SET status = 'returned', return_reason = $3, reviewed_at = $4, reviewed_by = $5,
+                version = $6, updated_at = $4
           WHERE id = $1 AND status = $2`,
-        [report.id, t.from, entry.reason, entry.at, actor.id],
+        [report.id, t.from, entry.reason, entry.at, actor.id, next.version],
       );
     } else {
       await client.query(
         `UPDATE weekly_reports
-            SET status = 'approved', reviewed_at = $3, reviewed_by = $4, updated_at = $3
+            SET status = 'approved', reviewed_at = $3, reviewed_by = $4, version = $5, updated_at = $3
           WHERE id = $1 AND status = $2`,
-        [report.id, t.from, entry.at, actor.id],
+        [report.id, t.from, entry.at, actor.id, next.version],
       );
     }
     await client.query(

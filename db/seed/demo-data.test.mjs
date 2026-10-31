@@ -210,7 +210,7 @@ describe('fresh load', () => {
       );
       const lastSubmit = submits.at(-1);
       const lastReview = reviews.at(-1);
-      expect(row.version).toBe(submits.length);
+      expect(row.version).toBe(report.history.length);
       if (!lastSubmit) {
         expect(row).toMatchObject({
           total_amount: null,
@@ -415,8 +415,9 @@ describe('fresh load', () => {
     expect(reportRows[1].after).toEqual({
       status: 'returned',
       return_reason: report.history[1].reason,
+      version: 2,
     });
-    expect(reportRows[3].after).toEqual({ status: 'approved' });
+    expect(reportRows[3].after).toEqual({ status: 'approved', version: 4 });
     expect(reportRows[0].after).toMatchObject({ status: 'submitted', version: 1 });
   });
 
