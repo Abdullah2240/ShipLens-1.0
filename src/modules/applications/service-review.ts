@@ -45,7 +45,7 @@ function decisionConflict(error: unknown): never {
   throw error;
 }
 
-/** Prefix plus the sequence value left-padded to the configured width; wider values are kept whole. */
+/** Prefix plus the sequence value zero-padded to the configured width; wider values are kept whole. */
 export function formatMemberCode(sequenceValue: string): string {
   const { prefix, digits } = ID_FORMATS.memberId;
   return `${prefix}${sequenceValue.padStart(digits, '0')}`;
