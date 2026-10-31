@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ExplainDrawer, FigureLink, TraceHeader, type ExplainFilterChip } from '@/components/trace';
-import { Bdi, DateText, IdText, MoneyText } from '@/components/ui/Bidi';
+import { Bdi, IdText, MoneyText } from '@/components/ui/Bidi';
 import { Pager } from '@/components/ui/Pager';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
@@ -22,7 +22,7 @@ import type { Actor } from '@/platform/authz';
 import { PERMISSIONS } from '@/platform/authz/permissions';
 import { getPool } from '@/platform/db';
 import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
-import { formatInt, formatMoney } from '@/platform/i18n/format';
+import { formatDateTime, formatInt, formatMoney } from '@/platform/i18n/format';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -146,7 +146,11 @@ export default async function UnroutedPage({
                 ·
               </span>
               <span>
-                {t.rich('asOf', { time: () => <DateText value={summary.asOf} withTime /> })}
+                <bdi>
+                  {t('asOf', {
+                    time: formatDateTime(new Date(summary.asOf), locale as Locale),
+                  })}
+                </bdi>
               </span>
             </p>
           </div>
