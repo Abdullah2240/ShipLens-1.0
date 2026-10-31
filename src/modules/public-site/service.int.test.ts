@@ -165,9 +165,10 @@ describe('public events', () => {
       startsAt: '2026-10-31T00:00:00.000Z',
       endsAt: '2026-11-02T00:00:00.000Z',
       branchName: null,
-      locale: 'ur',
+      locale: 'en',
     });
     expect(rows[1]?.title).toBe('مستقبل');
+    expect(rows[1]?.locale).toBe('ur');
     expect(rows[1]?.branchName).toBe('Active branch');
     expect(rows[1]?.summary).toBe('Summary future');
   });

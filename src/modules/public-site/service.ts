@@ -53,6 +53,7 @@ export async function listUpcomingEvents(
     startsAt: row.published_starts_at.toISOString(),
     endsAt: row.published_ends_at?.toISOString() ?? null,
     branchName: row.branch_name,
-    locale,
+    // the title decides the language marking: an Urdu page showing an English-only event says so
+    locale: locale === 'ur' && row.published_title_ur == null ? 'en' : locale,
   }));
 }
