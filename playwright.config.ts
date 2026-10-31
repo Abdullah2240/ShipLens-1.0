@@ -2,6 +2,8 @@ import { defineConfig, devices } from '@playwright/test';
 import type { FixtureOptions } from './tests/e2e/support/fixtures';
 
 const CI = !!process.env.CI;
+// Tests tagged @desktop (such as the UI login) run in the desktop projects only.
+const DESKTOP_ONLY = /@desktop/;
 
 export default defineConfig<FixtureOptions>({
   testDir: 'tests/e2e',
@@ -45,10 +47,12 @@ export default defineConfig<FixtureOptions>({
     },
     {
       name: 'mobile-en-dark',
+      grepInvert: DESKTOP_ONLY,
       use: { ...devices['Pixel 7'], colorScheme: 'dark', uiLocale: 'en' },
     },
     {
       name: 'mobile-ur-light',
+      grepInvert: DESKTOP_ONLY,
       use: { ...devices['Pixel 7'], colorScheme: 'light', uiLocale: 'ur' },
     },
   ],
