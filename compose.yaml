@@ -19,5 +19,24 @@ services:
       timeout: 3s
       retries: 20
 
+  # The `full` profile runs the production image against the dev database:
+  #   docker compose --profile full up -d --build --wait
+  # Parallel work uses the isolated E2E stack (compose.e2e.yaml) instead.
+  app:
+    profiles: ['full']
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - '3000:3000'
+    environment:
+      DATABASE_URL: postgres://shiplens:shiplens@db:5432/shiplens
+      APP_ORIGIN: http://localhost:3000
+      SEED_ON_BOOT: 'true'
+      # Throwaway local value; override from the shell. Render uses a dashboard secret.
+      SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-local-demo-only-pass}
+      LOG_LEVEL: info
+
 volumes:
   pgdata:

@@ -12,6 +12,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import pg from 'pg';
 
 const LOCK_KEY = 727274;
+const sha256 = (text) => createHash('sha256').update(text).digest('hex');
 const DEFAULT_DIR = new URL('../db/migrations/', import.meta.url);
 
 function toDirPath(dir) {
@@ -46,9 +47,12 @@ export async function runMigrations({ connectionString, dir = DEFAULT_DIR, log =
 
     for (const name of files) {
       const sql = await readFile(path.join(dirPath, name), 'utf8');
-      const checksum = createHash('sha256').update(sql).digest('hex');
+      // Checksums cover LF-normalised text, so Windows (CRLF) and Linux (LF) checkouts of
+      // the same file agree. Raw-text checksums recorded before this rule still match.
+      const checksum = sha256(sql.replace(/\r\n/g, '\n'));
       if (done.has(name)) {
-        if (done.get(name) !== checksum) {
+        const recorded = done.get(name);
+        if (recorded !== checksum && recorded !== sha256(sql)) {
           throw new Error(`Migration ${name} was modified after being applied`);
         }
         continue;

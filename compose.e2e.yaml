@@ -1,0 +1,74 @@
+name: shiplens-e2e
+
+# Isolated end-to-end stack: its own compose project, its own Postgres on tmpfs (database
+# shiplens_e2e, no host port, no volume), the production image, and a Playwright runner.
+# It never touches the dev database or its volume. Every credential below is a throwaway
+# value for this disposable stack only. Run it through scripts/e2e-docker.mjs; parallel
+# runs set E2E_PROJECT and E2E_PORT.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: shiplens
+      POSTGRES_PASSWORD: shiplens
+      POSTGRES_DB: shiplens_e2e
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U shiplens -d shiplens_e2e']
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    # Same port inside and outside so the browser Origin equals APP_ORIGIN for both
+    # container and host Playwright runs.
+    ports:
+      - '${E2E_PORT:-3100}:${E2E_PORT:-3100}'
+    environment:
+      PORT: '${E2E_PORT:-3100}'
+      DATABASE_URL: postgres://shiplens:shiplens@db:5432/shiplens_e2e
+      APP_ORIGIN: http://localhost:${E2E_PORT:-3100}
+      SEED_ON_BOOT: 'true'
+      SEED_DEMO_PASSWORD: ${E2E_DEMO_PASSWORD:-e2e-throwaway-pass-0}
+      LOG_LEVEL: warn
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 5s
+      timeout: 5s
+      start_period: 90s
+      retries: 6
+
+  playwright:
+    build:
+      context: .
+      dockerfile: tests/e2e/Dockerfile
+    profiles: ['runner']
+    # Shares the app's network namespace, so http://localhost:<E2E_PORT> is the app and
+    # the API's Origin check sees the same origin as APP_ORIGIN.
+    network_mode: service:app
+    depends_on:
+      app:
+        condition: service_healthy
+    working_dir: /e2e
+    ipc: host
+    environment:
+      BASE_URL: http://localhost:${E2E_PORT:-3100}
+      E2E_DEMO_PASSWORD: ${E2E_DEMO_PASSWORD:-e2e-throwaway-pass-0}
+      CI: ${CI:-}
+    volumes:
+      - ./playwright.config.ts:/e2e/playwright.config.ts:ro
+      - ./tests/e2e:/e2e/tests/e2e:ro
+      - ./test-results:/e2e/test-results
+      - ./playwright-report:/e2e/playwright-report
+    command: ['npx', 'playwright', 'test']
