@@ -16,6 +16,7 @@ const PUBLIC_PAGES = [
   '/get-involved',
   '/get-involved/apply',
   '/contact',
+  '/verify',
   '/login',
 ] as const;
 
