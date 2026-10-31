@@ -2,13 +2,17 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import type { ReactNode } from 'react';
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { findPhysicalDirection } from '../../../../scripts/lib/logical-css.mjs';
 import { renderWithIntl } from '../../../../tests/support/render-intl';
+import { formatDate } from '@/platform/i18n/format';
 import type { MemberListItem, TeamItem } from '../types';
+import { MemberEditForm } from './MemberEditForm';
 import { MembersFilters, membersHref } from './MembersFilters';
 import { MembersTable } from './MembersTable';
+import { TeamsPanel } from './TeamsPanel';
 
 const router = vi.hoisted(() => ({ refresh: vi.fn(), push: vi.fn() }));
 
@@ -101,8 +105,34 @@ const MIXED_TEAMS: TeamItem[] = [
   { id: TEAM_OTHER, name: 'Clinic', branchId: BRANCH_B, branchName: 'Karachi', memberCount: 3 },
 ];
 
+const fetchMock = vi.fn<typeof fetch>();
+
+function reply(status: number, body: unknown): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  });
+}
+
+const calls = () =>
+  fetchMock.mock.calls.map(([url, init]) => ({
+    url: String(url),
+    method: init?.method,
+    contentType: new Headers(init?.headers).get('content-type'),
+    body: typeof init?.body === 'string' ? (JSON.parse(init.body) as unknown) : undefined,
+  }));
+
 beforeEach(() => {
   vi.clearAllMocks();
+  fetchMock.mockReset();
+  vi.stubGlobal('fetch', fetchMock);
+  // jsdom has no modal dialog support
+  HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
+    this.setAttribute('open', '');
+  };
+  HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
+    this.removeAttribute('open');
+  };
 });
 
 describe('membersHref', () => {
@@ -304,11 +334,337 @@ describe.each(LOCALES)('MembersTable (%s)', (locale) => {
   });
 });
 
-describe('members component sources', () => {
-  it.each(['MembersFilters.tsx', 'MembersTable.tsx'])('%s uses logical utilities only', (file) => {
-    const source = readFileSync(path.resolve(import.meta.dirname, file), 'utf8');
-    expect(findPhysicalDirection(source, file)).toEqual([]);
+const SAME_BRANCH_TEAMS = TEAMS.map(({ id, name }) => ({ id, name }));
+const MEMBER = member();
+const MEMBER_URL = `/api/v1/members/${MEMBER.id}`;
+
+describe.each(LOCALES)('MemberEditForm (%s)', (locale) => {
+  const m = (key: string, values?: Record<string, string>) => msg(locale, key, values);
+  const status = (key: string) => lookup(locale, 'common', `status.${key}`);
+  const render = (props: Partial<Parameters<typeof MemberEditForm>[0]> = {}) =>
+    renderWithIntl(
+      <MemberEditForm member={MEMBER} teams={SAME_BRANCH_TEAMS} canEdit {...props} />,
+      { locale, namespaces: NAMESPACES },
+    );
+
+  it('shows the profile with contact details isolated left-to-right', () => {
+    const { container } = render();
+    expect(container).toHaveAttribute('dir', locale === 'ur' ? 'rtl' : 'ltr');
+    expect(screen.getByRole('heading', { level: 1, name: 'Ayesha Khan' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: m('detail.back') })).toHaveAttribute(
+      'href',
+      '/people/members',
+    );
+    expect(screen.getByText('ayesha@example.test')).toHaveAttribute('dir', 'ltr');
+    expect(screen.getByText('+92 300 1234567')).toHaveAttribute('dir', 'ltr');
+    for (const code of screen.getAllByText('M00042')) {
+      expect(code.tagName === 'BDI' || code.closest('[dir="ltr"]') !== null).toBe(true);
+    }
+    expect(screen.getByText(formatDate('2026-03-14', locale))).toBeInTheDocument();
+    expect(screen.getByText(m('detail.email'))).toBeInTheDocument();
+    expect(screen.getByText(m('detail.phone'))).toBeInTheDocument();
   });
+
+  it('marks missing contact details as not provided', () => {
+    render({ member: member({ email: null, phone: null, joinedOn: null }) });
+    expect(screen.getAllByText(m('detail.notProvided')).length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('renders read-only values and the notice without a form when editing is not allowed', () => {
+    const { container } = render({ canEdit: false });
+    expect(container.querySelector('form')).toBeNull();
+    expect(screen.queryByRole('combobox')).toBeNull();
+    expect(screen.queryByRole('button', { name: m('edit.save') })).toBeNull();
+    expect(screen.getByText(m('detail.readOnlyNotice'))).toBeInTheDocument();
+    expect(screen.getByText('Food drive')).toBeInTheDocument();
+    expect(screen.getByText(m('roles.team_lead'))).toBeInTheDocument();
+    expect(screen.getAllByText(status('active')).length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('offers only the given teams plus unassigned, every role and every status', () => {
+    render();
+    const team = screen.getByRole('combobox', { name: m('edit.team') });
+    expect(team).toHaveValue(TEAM_FOOD);
+    expect(
+      within(team)
+        .getAllByRole('option')
+        .map((o) => o.textContent),
+    ).toEqual([m('detail.unassigned'), 'Food drive', 'Teaching']);
+    const role = screen.getByRole('combobox', { name: m('edit.role') });
+    expect(role).toHaveValue('team_lead');
+    expect(within(role).getAllByRole('option')).toHaveLength(4);
+    const statusSelect = screen.getByRole('combobox', { name: m('edit.status') });
+    expect(statusSelect).toHaveValue('active');
+    expect(
+      within(statusSelect)
+        .getAllByRole('option')
+        .map((o) => o.textContent),
+    ).toEqual([status('active'), status('inactive'), status('left')]);
+  });
+
+  it('keeps Save disabled until something changes, then sends only the changed fields', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(
+      reply(200, { data: { ...MEMBER, memberRole: 'mentor', teamId: null, teamName: null } }),
+    );
+    render();
+    const save = screen.getByRole('button', { name: m('edit.save') });
+    expect(save).toBeDisabled();
+
+    await user.selectOptions(screen.getByRole('combobox', { name: m('edit.role') }), 'mentor');
+    await user.selectOptions(screen.getByRole('combobox', { name: m('edit.team') }), '');
+    expect(save).toBeEnabled();
+    await user.click(save);
+
+    await waitFor(() => expect(screen.getByText(m('edit.saved'))).toBeInTheDocument());
+    expect(calls()).toEqual([
+      {
+        url: MEMBER_URL,
+        method: 'PATCH',
+        contentType: 'application/json',
+        body: { teamId: null, memberRole: 'mentor' },
+      },
+    ]);
+    expect(router.refresh).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole('button', { name: m('edit.save') })).toBeDisabled();
+  });
+
+  it('shows the team message when the server rejects the team', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(
+      reply(422, {
+        error: {
+          code: 'validation_failed',
+          details: { fields: [{ path: 'teamId', code: 'invalid_team', message: 'invalid_team' }] },
+        },
+      }),
+    );
+    render();
+    await user.selectOptions(screen.getByRole('combobox', { name: m('edit.team') }), TEAM_TEACH);
+    await user.click(screen.getByRole('button', { name: m('edit.save') }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(m('edit.teamInvalid'));
+    expect(router.refresh).not.toHaveBeenCalled();
+  });
+
+  it('shows the generic error for any other failure', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(reply(500, { error: { code: 'internal' } }));
+    render();
+    await user.selectOptions(screen.getByRole('combobox', { name: m('edit.status') }), 'inactive');
+    await user.click(screen.getByRole('button', { name: m('edit.save') }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(m('edit.error'));
+    expect(calls()[0]?.body).toEqual({ status: 'inactive' });
+  });
+
+  it('asks for confirmation before marking a member as left', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(reply(200, { data: { ...MEMBER, status: 'left' } }));
+    render();
+    await user.selectOptions(screen.getByRole('combobox', { name: m('edit.status') }), 'left');
+    await user.click(screen.getByRole('button', { name: m('edit.save') }));
+
+    const dialog = screen.getByRole('dialog', { name: m('edit.leftTitle') });
+    expect(dialog).toHaveAttribute('open');
+    expect(dialog).toHaveTextContent(m('edit.leftBody', { name: 'Ayesha Khan' }));
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    await user.click(within(dialog).getByRole('button', { name: m('edit.leftConfirm') }));
+    await waitFor(() => expect(router.refresh).toHaveBeenCalledTimes(1));
+    expect(calls()).toEqual([
+      {
+        url: MEMBER_URL,
+        method: 'PATCH',
+        contentType: 'application/json',
+        body: { status: 'left' },
+      },
+    ]);
+  });
+
+  it('sends nothing when the left confirmation is cancelled', async () => {
+    const user = userEvent.setup();
+    render();
+    await user.selectOptions(screen.getByRole('combobox', { name: m('edit.status') }), 'left');
+    await user.click(screen.getByRole('button', { name: m('edit.save') }));
+    const dialog = screen.getByRole('dialog', { name: m('edit.leftTitle') });
+    await user.click(
+      within(dialog).getByRole('button', { name: lookup(locale, 'common', 'actions.cancel') }),
+    );
+    expect(dialog).not.toHaveAttribute('open');
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+const BRANCH_OPTIONS = [
+  { id: BRANCH_B, name: 'Karachi' },
+  { id: BRANCH_A, name: 'Lahore' },
+];
+
+describe.each(LOCALES)('TeamsPanel (%s)', (locale) => {
+  const m = (key: string, values?: Record<string, string>) => msg(locale, key, values);
+  const renameInput = () =>
+    screen.queryByRole('textbox', { name: m('teams.renameLabel', { name: 'Teaching' }) });
+
+  it('lists teams with member counts and no controls for read-only roles', () => {
+    const { container } = renderWithIntl(<TeamsPanel teams={TEAMS} canManage={false} />, {
+      locale,
+      namespaces: NAMESPACES,
+    });
+    expect(container).toHaveAttribute('dir', locale === 'ur' ? 'rtl' : 'ltr');
+    const table = screen.getByRole('table', { name: m('teams.caption') });
+    expect(
+      within(table)
+        .getAllByRole('columnheader')
+        .map((h) => h.textContent),
+    ).toEqual([m('teams.name'), m('teams.members')]);
+    const rows = within(table).getAllByRole('row').slice(1);
+    expect(within(rows[0] as HTMLElement).getByText('Food drive')).toBeInTheDocument();
+    expect(within(rows[0] as HTMLElement).getByText('12')).toBeInTheDocument();
+    expect(screen.getByText(m('teams.readOnlyNotice'))).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).toBeNull();
+    expect(screen.queryByRole('button')).toBeNull();
+  });
+
+  it('creates a team in the actor branch and refreshes', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(reply(201, { data: { id: TEAM_OTHER, name: 'Clinic' } }));
+    renderWithIntl(<TeamsPanel teams={TEAMS} canManage />, { locale, namespaces: NAMESPACES });
+    expect(screen.queryByText(m('teams.readOnlyNotice'))).toBeNull();
+    expect(screen.queryByRole('combobox', { name: m('teams.branchLabel') })).toBeNull();
+
+    const name = screen.getByRole('textbox', { name: m('teams.nameLabel') });
+    expect(name).toHaveAttribute('placeholder', m('teams.createPlaceholder'));
+    await user.type(name, '  Clinic ');
+    await user.click(screen.getByRole('button', { name: m('teams.create') }));
+
+    await waitFor(() => expect(screen.getByText(m('teams.created'))).toBeInTheDocument());
+    expect(calls()).toEqual([
+      {
+        url: '/api/v1/teams',
+        method: 'POST',
+        contentType: 'application/json',
+        body: { name: 'Clinic' },
+      },
+    ]);
+    expect(router.refresh).toHaveBeenCalledTimes(1);
+    expect(name).toHaveValue('');
+  });
+
+  it('asks Super Admin for a branch and shows the branch column', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(reply(201, { data: { id: TEAM_OTHER } }));
+    renderWithIntl(<TeamsPanel teams={MIXED_TEAMS} canManage branches={BRANCH_OPTIONS} />, {
+      locale,
+      namespaces: NAMESPACES,
+    });
+    expect(screen.getAllByRole('columnheader').map((h) => h.textContent)).toContain(
+      m('teams.branch'),
+    );
+    const branch = screen.getByRole('combobox', { name: m('teams.branchLabel') });
+    expect(branch).toBeRequired();
+    expect(
+      within(branch)
+        .getAllByRole('option')
+        .map((o) => o.textContent),
+    ).toEqual([m('teams.chooseBranch'), 'Karachi', 'Lahore']);
+    await user.type(screen.getByRole('textbox', { name: m('teams.nameLabel') }), 'Clinic');
+    await user.selectOptions(branch, BRANCH_B);
+    await user.click(screen.getByRole('button', { name: m('teams.create') }));
+    await waitFor(() => expect(router.refresh).toHaveBeenCalled());
+    expect(calls()[0]?.body).toEqual({ name: 'Clinic', branchId: BRANCH_B });
+  });
+
+  it('shows the duplicate message on 409', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(reply(409, { error: { code: 'duplicate_team' } }));
+    renderWithIntl(<TeamsPanel teams={TEAMS} canManage />, { locale, namespaces: NAMESPACES });
+    await user.type(screen.getByRole('textbox', { name: m('teams.nameLabel') }), 'Teaching');
+    await user.click(screen.getByRole('button', { name: m('teams.create') }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(m('teams.duplicate'));
+    expect(router.refresh).not.toHaveBeenCalled();
+  });
+
+  it('checks the name length before sending', async () => {
+    const user = userEvent.setup();
+    renderWithIntl(<TeamsPanel teams={TEAMS} canManage />, { locale, namespaces: NAMESPACES });
+    await user.type(screen.getByRole('textbox', { name: m('teams.nameLabel') }), ' x ');
+    await user.click(screen.getByRole('button', { name: m('teams.create') }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(m('teams.nameInvalid'));
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('renames a team inline', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(reply(200, { data: { id: TEAM_TEACH, name: 'Tutoring' } }));
+    renderWithIntl(<TeamsPanel teams={TEAMS} canManage />, { locale, namespaces: NAMESPACES });
+    await user.click(
+      screen.getByRole('button', { name: m('teams.renameAction', { name: 'Teaching' }) }),
+    );
+    const input = renameInput();
+    expect(input).toHaveValue('Teaching');
+    await user.clear(input as HTMLElement);
+    await user.type(input as HTMLElement, 'Tutoring');
+    await user.click(screen.getByRole('button', { name: m('teams.save') }));
+
+    await waitFor(() => expect(screen.getByText(m('teams.renamed'))).toBeInTheDocument());
+    expect(calls()).toEqual([
+      {
+        url: `/api/v1/teams/${TEAM_TEACH}`,
+        method: 'PATCH',
+        contentType: 'application/json',
+        body: { name: 'Tutoring' },
+      },
+    ]);
+    expect(router.refresh).toHaveBeenCalledTimes(1);
+    expect(renameInput()).toBeNull();
+  });
+
+  it('keeps the rename open on 409 and cancel restores the row', async () => {
+    const user = userEvent.setup();
+    fetchMock.mockResolvedValueOnce(reply(409, { error: { code: 'duplicate_team' } }));
+    renderWithIntl(<TeamsPanel teams={TEAMS} canManage />, { locale, namespaces: NAMESPACES });
+    await user.click(
+      screen.getByRole('button', { name: m('teams.renameAction', { name: 'Teaching' }) }),
+    );
+    const input = renameInput() as HTMLElement;
+    await user.clear(input);
+    await user.type(input, 'Food drive');
+    await user.click(screen.getByRole('button', { name: m('teams.save') }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(m('teams.duplicate'));
+    expect(input).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: m('teams.cancel') }));
+    expect(renameInput()).toBeNull();
+    expect(screen.getByText('Teaching')).toBeInTheDocument();
+    expect(router.refresh).not.toHaveBeenCalled();
+  });
+
+  it('shows the empty state and keeps the create form for managers', () => {
+    renderWithIntl(<TeamsPanel teams={[]} canManage />, { locale, namespaces: NAMESPACES });
+    expect(screen.queryByRole('table')).toBeNull();
+    expect(screen.getByText(m('teams.empty'))).toBeInTheDocument();
+    expect(screen.getByText(m('teams.emptyBody'))).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: m('teams.nameLabel') })).toBeInTheDocument();
+  });
+
+  it('shows the read-only empty state without controls', () => {
+    renderWithIntl(<TeamsPanel teams={[]} canManage={false} />, {
+      locale,
+      namespaces: NAMESPACES,
+    });
+    expect(screen.getByText(m('teams.empty'))).toBeInTheDocument();
+    expect(screen.getByText(m('teams.emptyReadOnly'))).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).toBeNull();
+  });
+});
+
+describe('members component sources', () => {
+  it.each(['MembersFilters.tsx', 'MembersTable.tsx', 'MemberEditForm.tsx', 'TeamsPanel.tsx'])(
+    '%s uses logical utilities only',
+    (file) => {
+      const source = readFileSync(path.resolve(import.meta.dirname, file), 'utf8');
+      expect(findPhysicalDirection(source, file)).toEqual([]);
+    },
+  );
 
   it('keeps the filters free of client scripting', () => {
     const source = readFileSync(path.resolve(import.meta.dirname, 'MembersFilters.tsx'), 'utf8');

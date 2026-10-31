@@ -75,6 +75,7 @@
     "chooseBranch": "شاخ منتخب کریں",
     "created": "ٹیم بن گئی",
     "rename": "نام بدلیں",
+    "renameAction": "{name} کا نام بدلیں",
     "renameLabel": "{name} کا نیا نام",
     "renamed": "ٹیم کا نام بدل دیا گیا",
     "save": "محفوظ کریں",

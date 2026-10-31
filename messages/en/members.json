@@ -75,6 +75,7 @@
     "chooseBranch": "Choose a branch",
     "created": "Team created",
     "rename": "Rename",
+    "renameAction": "Rename {name}",
     "renameLabel": "New name for {name}",
     "renamed": "Team renamed",
     "save": "Save",
