@@ -97,6 +97,10 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
+// userEvent.type enters one character at a time, so the submit flows take a few seconds each;
+// under full-suite load they need more than the 5 s default.
+vi.setConfig({ testTimeout: 20_000 });
+
 describe('ApplicationForm fields', () => {
   it('labels every input and sets autocomplete and direction', () => {
     renderForm();
