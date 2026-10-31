@@ -1,1 +1,29 @@
-{}
+{
+  "csv": {
+    "total": "Total",
+    "figure": "Figure",
+    "value": "Value",
+    "records": "Records",
+    "collectionId": "Collection ID",
+    "branchCode": "Branch code",
+    "branchName": "Branch name",
+    "weekStart": "Week start",
+    "weekEnd": "Week end",
+    "status": "Status",
+    "amount": "Amount (PKR)",
+    "collections": "Collections",
+    "frozenAmount": "Submitted total (PKR)",
+    "submittedAt": "Submitted at",
+    "approvedAt": "Approved at",
+    "collectedOn": "Collected on",
+    "purpose": "Purpose",
+    "routedAt": "Routed at",
+    "daysWaiting": "Days waiting",
+    "statuses": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "returned": "Returned",
+      "approved": "Approved"
+    }
+  }
+}

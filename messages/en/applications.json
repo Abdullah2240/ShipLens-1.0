@@ -60,5 +60,66 @@
     },
     "home": "Back to home",
     "another": "Apply to another branch"
+  },
+  "admin": {
+    "list": {
+      "title": "Applications",
+      "intro": "People who asked to join a branch through the public form. Review each one, then accept or decline it.",
+      "caption": "Membership applications",
+      "tabsLabel": "Filter applications by status",
+      "tabPending": "Pending",
+      "tabAccepted": "Accepted",
+      "tabDeclined": "Declined",
+      "tabAll": "All",
+      "empty": {
+        "title": "No applications here",
+        "body": "Applications that match this view will appear here."
+      }
+    },
+    "columns": {
+      "applicant": "Applicant",
+      "branch": "Branch",
+      "contact": "Contact",
+      "received": "Received",
+      "status": "Status"
+    },
+    "detail": {
+      "title": "Application",
+      "back": "All applications",
+      "applicant": "Applicant",
+      "email": "Email",
+      "phone": "Phone",
+      "branch": "Branch",
+      "notProvided": "Not provided",
+      "message": "Message",
+      "noMessage": "The applicant did not include a message.",
+      "decision": "Decision",
+      "awaiting": "This application is waiting for a decision.",
+      "decidedBy": "Decided by",
+      "decidedOn": "Decided on",
+      "note": "Note",
+      "member": "Member ID",
+      "viewMember": "Open member record",
+      "received": "Received"
+    },
+    "decision": {
+      "prompt": "Review the applicant's details and message, then record a decision. A decision is final.",
+      "accept": "Accept",
+      "decline": "Decline",
+      "acceptTitle": "Accept this application?",
+      "acceptBody": "{name} will become a member of this branch and receive a member ID. A decision cannot be changed later.",
+      "declineTitle": "Decline this application?",
+      "declineBody": "{name}'s application will be closed as declined. A decision cannot be changed later.",
+      "noteLabel": "Note for the record (optional)",
+      "notePlaceholder": "For example, the branch is not taking volunteers for this role",
+      "noteHint": "Kept with the application for staff. Up to 500 characters.",
+      "confirmAccept": "Accept and add member",
+      "confirmDecline": "Decline application",
+      "working": "Saving decision…",
+      "accepted": "Application accepted. {name} is now a member.",
+      "declined": "Application declined.",
+      "alreadyDecided": "This application was already decided, possibly by someone else just now. The page now shows the final decision.",
+      "error": "We could not save the decision. Please try again."
+    }
   }
 }
