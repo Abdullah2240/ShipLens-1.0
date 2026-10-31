@@ -171,6 +171,13 @@ describe('verifyAuditChain', () => {
     });
   });
 
+  it('reports an edited prev_hash that was not re-hashed as a hash mismatch', async () => {
+    const rows = buildChain(3);
+    rows[1] = { ...rows[1]!, prev_hash: 'f'.repeat(64) };
+    const status = await verifyAuditChain(fakeDb(rows));
+    expect(status).toMatchObject({ brokenAt: { chainSeq: 2, reason: 'hash_mismatch' } });
+  });
+
   it('reports only the first failure when several exist', async () => {
     const rows = buildChain(6);
     rows[4] = { ...rows[4]!, action: 'forged' }; // hash mismatch at 5

@@ -22,10 +22,16 @@ function toSeq(raw: string): number {
 
 /**
  * Walks the whole chain in chain_seq order and reports the first failure, checked per row
- * in this order: the sequence continues without a gap (first row is 1), prev_hash equals the
- * previous row's hash (genesis for the first), and the stored hash equals SHA-256 of the
- * row's canonical form v1. `checkedEvents` counts the rows that passed every check, so for a
- * broken chain it is the number of intact rows before the break.
+ * in this order:
+ *   sequence_gap   chain_seq is not the previous one plus 1 (the first must be 1);
+ *   hash_mismatch  the stored hash is not SHA-256 of the row's canonical form v1, so a stored
+ *                  column was edited (prev_hash is part of the canonical form);
+ *   link_mismatch  the row is self-consistent but prev_hash is not the previous row's hash
+ *                  (genesis for the first), so an earlier row was forged and re-hashed.
+ * The content check runs before the link check so that editing any single stored column,
+ * prev_hash included, is reported as hash_mismatch at the edited row.
+ * `checkedEvents` counts the rows that passed every check, so for a broken chain it is the
+ * number of intact rows before the break.
  */
 export async function verifyAuditChain(
   db: Queryable,
@@ -45,13 +51,11 @@ export async function verifyAuditChain(
     const { rows } = await db.query<ChainRowText>(PAGE_SQL, [lastSeq, batchSize]);
     for (const row of rows) {
       const seq = toSeq(row.chain_seq);
+      const { hash, ...content } = row;
       let reason: ChainBreakReason | null = null;
       if (seq !== lastSeq + 1) reason = 'sequence_gap';
+      else if (hashCanonical(canonicalV1(content)) !== hash) reason = 'hash_mismatch';
       else if (row.prev_hash !== prevHash) reason = 'link_mismatch';
-      else {
-        const { hash, ...content } = row;
-        if (hashCanonical(canonicalV1(content)) !== hash) reason = 'hash_mismatch';
-      }
       if (reason) {
         return {
           status: 'broken',
