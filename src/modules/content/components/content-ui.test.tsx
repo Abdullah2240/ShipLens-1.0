@@ -2,12 +2,14 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import type { ReactNode } from 'react';
-import { screen, within } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { findPhysicalDirection } from '../../../../scripts/lib/logical-css.mjs';
 import { renderWithIntl } from '../../../../tests/support/render-intl';
 import { formatDateTime } from '@/platform/i18n/format';
 import type { ContentEntryView } from '../types';
+import { ContentEditor } from './ContentEditor';
 import { ContentEntriesTable } from './ContentEntriesTable';
 import { ContentPreview } from './ContentPreview';
 import { ContentTabs } from './ContentTabs';
@@ -105,10 +107,45 @@ const ENTRIES: ContentEntryView[] = [
   view({ key: 'contact', locale: 'ur', title: '', body: '', translationMissing: true }),
 ];
 
-const SOURCES = ['ContentTabs.tsx', 'ContentEntriesTable.tsx', 'ContentPreview.tsx'];
+const SOURCES = [
+  'ContentTabs.tsx',
+  'ContentEntriesTable.tsx',
+  'ContentPreview.tsx',
+  'ContentEditor.tsx',
+];
+
+function commonMsg(locale: Locale, key: string): string {
+  const file = path.resolve(import.meta.dirname, `../../../../messages/${locale}/common.json`);
+  const value = key
+    .split('.')
+    .reduce<unknown>(
+      (acc, part) => (acc as Record<string, unknown> | undefined)?.[part],
+      JSON.parse(readFileSync(file, 'utf8')) as unknown,
+    );
+  if (typeof value !== 'string') throw new Error(`missing common message ${locale}:${key}`);
+  return value;
+}
+
+const fetchMock = vi.fn<typeof fetch>();
+
+function reply(status: number, body: unknown): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'content-type': 'application/json' },
+  });
+}
+
+const calls = () =>
+  fetchMock.mock.calls.map(([url, init]) => ({
+    url: String(url),
+    method: init?.method,
+    body: typeof init?.body === 'string' ? (JSON.parse(init.body) as unknown) : undefined,
+  }));
 
 beforeEach(() => {
   vi.clearAllMocks();
+  fetchMock.mockReset();
+  vi.stubGlobal('fetch', fetchMock);
   // jsdom has no modal dialog support
   HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
     this.setAttribute('open', '');
@@ -116,6 +153,10 @@ beforeEach(() => {
   HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
     this.removeAttribute('open');
   };
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe.each(LOCALES)('content screens (%s)', (locale) => {
@@ -262,6 +303,240 @@ describe.each(LOCALES)('content screens (%s)', (locale) => {
       const { container } = render(<ContentPreview entry={view({ title: '', body: null })} />);
       expect(screen.getByRole('status')).toHaveTextContent(msg(locale, 'preview.empty'));
       expect(container.querySelector('article')).not.toBeInTheDocument();
+    });
+  });
+  describe('ContentEditor', () => {
+    const URL = '/api/v1/content/entries/about/en';
+    const titleField = () => screen.getByLabelText(msg(locale, 'editor.titleLabel'));
+    const bodyField = () => screen.getByLabelText(msg(locale, 'editor.bodyLabel'));
+    const saveButton = () => screen.getByRole('button', { name: msg(locale, 'editor.save') });
+    const publishButton = () => screen.getByRole('button', { name: msg(locale, 'editor.publish') });
+    const confirmIn = (name: string) =>
+      within(screen.getByRole('dialog')).getByRole('button', { name: msg(locale, name) });
+
+    it('shows the draft in fields that follow the entry language', () => {
+      const { container } = render(<ContentEditor entry={view()} />);
+      expect(container).toHaveAttribute('dir', locale === 'ur' ? 'rtl' : 'ltr');
+      expect(
+        screen.getByRole('heading', {
+          level: 1,
+          name: msg(locale, 'editor.title', { page: msg(locale, 'keys.about') }),
+        }),
+      ).toBeInTheDocument();
+      expect(titleField()).toHaveValue('About us');
+      expect(bodyField()).toHaveValue('We help.');
+      expect(bodyField()).toHaveAttribute('dir', 'ltr');
+      expect(bodyField()).toHaveAttribute('lang', 'en');
+      expect(bodyField()).toHaveAttribute('maxLength', '20000');
+      expect(titleField()).toHaveAttribute('dir', 'ltr');
+    });
+
+    it('uses right-to-left Urdu fields for an Urdu entry in any admin language', () => {
+      render(
+        <ContentEditor
+          entry={view({ key: 'programs', locale: 'ur', title: 'پروگرام', body: 'اردو متن' })}
+        />,
+      );
+      expect(bodyField()).toHaveAttribute('dir', 'rtl');
+      expect(bodyField()).toHaveAttribute('lang', 'ur');
+      expect(titleField()).toHaveAttribute('dir', 'rtl');
+      expect(titleField()).toHaveAttribute('lang', 'ur');
+    });
+
+    it('offers Markdown help that rules out HTML', () => {
+      const { container } = render(<ContentEditor entry={view()} />);
+      const help = container.querySelector('details')!;
+      expect(help.querySelector('summary')).toHaveTextContent(msg(locale, 'editor.bodyHelpTitle'));
+      expect(help).toHaveTextContent(msg(locale, 'editor.bodyHelp'));
+      expect(help.querySelectorAll('li code').length).toBeGreaterThanOrEqual(6);
+      expect(bodyField().getAttribute('aria-describedby')).toContain(
+        help.querySelector('[id]')!.id,
+      );
+    });
+
+    it('links to the private preview and back to the list', () => {
+      render(<ContentEditor entry={view()} />);
+      expect(screen.getByRole('link', { name: msg(locale, 'editor.previewLink') })).toHaveAttribute(
+        'href',
+        '/content/about/en/preview',
+      );
+      expect(screen.getByRole('link', { name: msg(locale, 'editor.back') })).toHaveAttribute(
+        'href',
+        '/content',
+      );
+    });
+
+    it('shows the published state, date and unpublished-changes notice', () => {
+      const publishedAt = '2026-10-19T08:00:00.000Z';
+      render(
+        <ContentEditor
+          entry={view({ status: 'published', publishedAt, hasUnpublishedChanges: true })}
+        />,
+      );
+      expect(screen.getByText(msg(locale, 'state.published'))).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          msg(locale, 'editor.publishedOn', {
+            date: formatDateTime(new Date(publishedAt), locale),
+          }),
+        ),
+      ).toBeInTheDocument();
+      expect(screen.getByText(msg(locale, 'editor.unpublishedChangesNotice'))).toBeInTheDocument();
+    });
+
+    it('flags a missing Urdu entry and says it is not published', () => {
+      render(<ContentEditor entry={absent('about', 'ur')} />);
+      expect(screen.getByText(msg(locale, 'editor.missingTranslationNotice'))).toBeInTheDocument();
+      expect(screen.getByText(msg(locale, 'state.missingTranslation'))).toBeInTheDocument();
+      expect(screen.getByText(msg(locale, 'editor.notPublished'))).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: msg(locale, 'editor.unpublish') })).toBeNull();
+    });
+
+    it('enables Save only after a change and sends title and body with PUT', async () => {
+      const user = userEvent.setup();
+      fetchMock.mockResolvedValueOnce(
+        reply(200, { data: view({ title: 'About us', body: 'We help more.' }) }),
+      );
+      render(<ContentEditor entry={view()} />);
+      expect(saveButton()).toBeDisabled();
+      await user.clear(bodyField());
+      await user.type(bodyField(), 'We help more.');
+      expect(saveButton()).toBeEnabled();
+      await user.click(saveButton());
+
+      await waitFor(() => expect(router.refresh).toHaveBeenCalledTimes(1));
+      expect(calls()).toEqual([
+        { url: URL, method: 'PUT', body: { title: 'About us', body: 'We help more.' } },
+      ]);
+      expect(screen.getByRole('status')).toHaveTextContent(msg(locale, 'editor.saved'));
+      expect(saveButton()).toBeDisabled();
+    });
+
+    it('shows the save error when the server refuses or the network fails', async () => {
+      const user = userEvent.setup();
+      fetchMock
+        .mockResolvedValueOnce(reply(500, { error: { code: 'internal_error' } }))
+        .mockRejectedValueOnce(new TypeError('offline'));
+      render(<ContentEditor entry={view()} />);
+      await user.type(titleField(), '!');
+      await user.click(saveButton());
+      expect(await screen.findByRole('alert')).toHaveTextContent(msg(locale, 'editor.errorSave'));
+      await user.click(saveButton());
+      await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+      expect(await screen.findByRole('alert')).toHaveTextContent(msg(locale, 'editor.errorSave'));
+      expect(router.refresh).not.toHaveBeenCalled();
+    });
+
+    it('publishes after confirmation, saving unsaved edits first', async () => {
+      const user = userEvent.setup();
+      fetchMock
+        .mockResolvedValueOnce(reply(200, { data: view({ title: 'New title' }) }))
+        .mockResolvedValueOnce(
+          reply(200, {
+            data: view({
+              title: 'New title',
+              status: 'published',
+              publishedAt: '2026-10-31T10:00:00.000Z',
+            }),
+          }),
+        );
+      render(<ContentEditor entry={view()} />);
+      await user.clear(titleField());
+      await user.type(titleField(), 'New title');
+      await user.click(publishButton());
+
+      expect(
+        screen.getByRole('dialog', { name: msg(locale, 'editor.publishTitle') }),
+      ).toBeInTheDocument();
+      expect(fetchMock).not.toHaveBeenCalled();
+      await user.click(confirmIn('editor.publish'));
+
+      await waitFor(() => expect(router.refresh).toHaveBeenCalled());
+      expect(calls()).toEqual([
+        { url: URL, method: 'PUT', body: { title: 'New title', body: 'We help.' } },
+        { url: `${URL}/publish`, method: 'POST', body: undefined },
+      ]);
+      expect(screen.getByRole('status')).toHaveTextContent(msg(locale, 'editor.published'));
+      expect(
+        screen.getByRole('button', { name: msg(locale, 'editor.unpublish') }),
+      ).toBeInTheDocument();
+    });
+
+    it('publishes without a save when nothing changed', async () => {
+      const user = userEvent.setup();
+      fetchMock.mockResolvedValueOnce(reply(200, { data: view({ status: 'published' }) }));
+      render(<ContentEditor entry={view()} />);
+      await user.click(publishButton());
+      await user.click(confirmIn('editor.publish'));
+      await waitFor(() => expect(router.refresh).toHaveBeenCalledTimes(1));
+      expect(calls()).toEqual([{ url: `${URL}/publish`, method: 'POST', body: undefined }]);
+    });
+
+    it('does not publish when the confirmation is cancelled', async () => {
+      const user = userEvent.setup();
+      render(<ContentEditor entry={view()} />);
+      await user.click(publishButton());
+      await user.click(
+        within(screen.getByRole('dialog')).getByRole('button', {
+          name: commonMsg(locale, 'actions.cancel'),
+        }),
+      );
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+      expect(fetchMock).not.toHaveBeenCalled();
+    });
+
+    it('explains that empty content cannot be published', async () => {
+      const user = userEvent.setup();
+      fetchMock.mockResolvedValueOnce(
+        reply(422, {
+          error: {
+            code: 'validation_failed',
+            details: {
+              fields: [{ path: 'body', code: 'empty_content', message: 'empty_content' }],
+            },
+          },
+        }),
+      );
+      render(<ContentEditor entry={view({ title: null, body: null })} />);
+      await user.click(publishButton());
+      await user.click(confirmIn('editor.publish'));
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        msg(locale, 'editor.errorPublishEmpty'),
+      );
+    });
+
+    it('cannot publish an entry that was never saved and has no edits', () => {
+      render(<ContentEditor entry={absent('about', 'en')} />);
+      expect(publishButton()).toBeDisabled();
+    });
+
+    it('unpublishes a published entry after a destructive confirmation', async () => {
+      const user = userEvent.setup();
+      fetchMock.mockResolvedValueOnce(reply(200, { data: view({ status: 'draft' }) }));
+      render(<ContentEditor entry={view({ status: 'published' })} />);
+      await user.click(screen.getByRole('button', { name: msg(locale, 'editor.unpublish') }));
+      expect(
+        screen.getByRole('dialog', { name: msg(locale, 'editor.unpublishTitle') }),
+      ).toBeInTheDocument();
+      const confirm = confirmIn('editor.unpublish');
+      expect(confirm.className).toContain('bg-danger');
+      await user.click(confirm);
+      await waitFor(() => expect(router.refresh).toHaveBeenCalledTimes(1));
+      expect(calls()).toEqual([{ url: `${URL}/unpublish`, method: 'POST', body: undefined }]);
+      expect(screen.getByRole('status')).toHaveTextContent(msg(locale, 'editor.unpublished'));
+      expect(screen.queryByRole('button', { name: msg(locale, 'editor.unpublish') })).toBeNull();
+    });
+
+    it('shows the generic error when unpublish is refused', async () => {
+      const user = userEvent.setup();
+      fetchMock.mockResolvedValueOnce(reply(409, { error: { code: 'not_published' } }));
+      render(<ContentEditor entry={view({ status: 'published' })} />);
+      await user.click(screen.getByRole('button', { name: msg(locale, 'editor.unpublish') }));
+      await user.click(confirmIn('editor.unpublish'));
+      expect(await screen.findByRole('alert')).toHaveTextContent(
+        msg(locale, 'editor.errorGeneric'),
+      );
+      expect(router.refresh).not.toHaveBeenCalled();
     });
   });
 });
