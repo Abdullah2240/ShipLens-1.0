@@ -52,12 +52,12 @@ Generated from src/platform/authz/permissions.ts by `npm run permissions:doc`. D
 
 These need no session and are deliberately not in the table.
 
-- POST /api/v1/applications: public membership application submit
-- GET /api/v1/public/content: published public content
+- POST /api/v1/public/applications: public membership application submit, rate limited
 - GET /api/v1/public/impact: public impact page figures
 - GET /api/health: liveness, no database
 - GET /api/health/db: database readiness
 - POST /api/v1/auth/login: login, throttled and same response for unknown email and wrong password
+- GET /api/v1/public/verify/{code}: public verification of an approved weekly report, rate limited, no personal data
 
 ## Defaults pending confirmation
 
