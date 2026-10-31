@@ -74,20 +74,35 @@ export async function runMigrations({ connectionString, dir = DEFAULT_DIR, log =
   return applied;
 }
 
-async function runSeedIfRequested(connectionString) {
-  if (process.env.SEED_ON_BOOT !== 'true') return;
-  const seedFile = new URL('../db/seed/index.mjs', import.meta.url);
+const DEFAULT_SEED_MODULE = new URL('../db/seed/index.mjs', import.meta.url);
+
+/**
+ * Boot hook: after migrating, run the seed when SEED_ON_BOOT is exactly 'true'.
+ * Otherwise the seed module is not even loaded. Errors from the seed propagate, so the
+ * process exits non-zero and the container never starts half-seeded.
+ * @param {{ connectionString: string, env?: Record<string, string | undefined>,
+ *   seedModule?: URL, log?: (msg: string) => void }} options
+ * @returns {Promise<boolean>} true when the seed ran
+ */
+export async function runSeedIfRequested({
+  connectionString,
+  env = process.env,
+  seedModule = DEFAULT_SEED_MODULE,
+  log = console.log,
+}) {
+  if (env.SEED_ON_BOOT !== 'true') return false;
   // Skip only when the module file is absent; errors from the seed itself propagate.
-  if (!existsSync(fileURLToPath(seedFile))) {
-    console.log('SEED_ON_BOOT is true but db/seed/index.mjs does not exist; skipping seed');
-    return;
+  if (!existsSync(fileURLToPath(seedModule))) {
+    log('SEED_ON_BOOT is true but db/seed/index.mjs does not exist; skipping seed');
+    return false;
   }
-  const mod = await import(seedFile.href);
+  const mod = await import(seedModule.href);
   const run = mod.runSeed ?? mod.default;
   if (typeof run !== 'function') {
     throw new Error('db/seed/index.mjs must export runSeed() or a default function');
   }
-  await run({ connectionString });
+  await run({ connectionString, env, log });
+  return true;
 }
 
 async function main() {
@@ -98,7 +113,7 @@ async function main() {
   }
   const applied = await runMigrations({ connectionString, log: (m) => console.log(m) });
   console.log(applied.length ? `Applied: ${applied.join(', ')}` : 'No pending migrations');
-  await runSeedIfRequested(connectionString);
+  await runSeedIfRequested({ connectionString });
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
