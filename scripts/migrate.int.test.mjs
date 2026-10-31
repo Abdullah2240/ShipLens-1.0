@@ -22,6 +22,7 @@ const EXPECTED_TABLES = [
   'login_attempts',
   'members',
   'report_events',
+  'report_verifications',
   'schema_migrations',
   'sessions',
   'teams',
