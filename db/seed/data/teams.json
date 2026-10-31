@@ -1,0 +1,47 @@
+[
+  {
+    "id": "c61713f7-f21b-4b23-b95e-0d27b2f429f2",
+    "branchKey": "islamabad",
+    "name": "Community Kitchen"
+  },
+  {
+    "id": "ac128112-84e4-448c-a172-b87db49ea48d",
+    "branchKey": "islamabad",
+    "name": "Education Support"
+  },
+  {
+    "id": "dbc97af7-a0d7-4f21-bde5-9bcb00057f6a",
+    "branchKey": "islamabad",
+    "name": "Food Drive"
+  },
+  {
+    "id": "a542b6d4-8958-49cb-8213-a8d896f03682",
+    "branchKey": "lahore",
+    "name": "Community Kitchen"
+  },
+  {
+    "id": "da08f1cf-bc9d-4dec-8a69-d2f61fdd4295",
+    "branchKey": "lahore",
+    "name": "Food Drive"
+  },
+  {
+    "id": "84a22a9d-598c-4900-ad30-957bb9b21a1a",
+    "branchKey": "lahore",
+    "name": "Logistics"
+  },
+  {
+    "id": "9fb85e95-e331-46e3-acfa-dba702b914bc",
+    "branchKey": "peshawar",
+    "name": "Medical Outreach"
+  },
+  {
+    "id": "10cdce53-5af6-464d-9bc9-ab50c911da5f",
+    "branchKey": "sample",
+    "name": "Education Support"
+  },
+  {
+    "id": "fde6eb5d-0d55-4611-9239-3bd3edc4182f",
+    "branchKey": "sample",
+    "name": "Food Drive"
+  }
+]

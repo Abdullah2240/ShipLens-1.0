@@ -1,0 +1,122 @@
+[
+  {
+    "key": "admin",
+    "email": "admin@shiplens.test",
+    "name": "Amina Khan",
+    "role": "super_admin",
+    "branchKey": null,
+    "existing": true
+  },
+  {
+    "key": "editor",
+    "email": "editor@shiplens.test",
+    "name": "Sana Malik",
+    "role": "content_editor",
+    "branchKey": null,
+    "existing": true
+  },
+  {
+    "key": "finance",
+    "email": "finance@shiplens.test",
+    "name": "Bilal Ahmed",
+    "role": "finance_reviewer",
+    "branchKey": null,
+    "existing": true
+  },
+  {
+    "key": "hr",
+    "email": "hr@shiplens.test",
+    "name": "Hira Raza",
+    "role": "hr_lead",
+    "branchKey": "sample",
+    "existing": true
+  },
+  {
+    "key": "hr.islamabad",
+    "email": "hr.islamabad@shiplens.test",
+    "name": "Nida Hashmi",
+    "role": "hr_lead",
+    "branchKey": "islamabad",
+    "existing": false
+  },
+  {
+    "key": "hr.lahore",
+    "email": "hr.lahore@shiplens.test",
+    "name": "Mehwish Baig",
+    "role": "hr_lead",
+    "branchKey": "lahore",
+    "existing": false
+  },
+  {
+    "key": "hr.multan",
+    "email": "hr.multan@shiplens.test",
+    "name": "Rubina Naqvi",
+    "role": "hr_lead",
+    "branchKey": "multan",
+    "existing": false
+  },
+  {
+    "key": "hr.peshawar",
+    "email": "hr.peshawar@shiplens.test",
+    "name": "Asma Bukhari",
+    "role": "hr_lead",
+    "branchKey": "peshawar",
+    "existing": false
+  },
+  {
+    "key": "hr.quetta",
+    "email": "hr.quetta@shiplens.test",
+    "name": "Shazia Rizvi",
+    "role": "hr_lead",
+    "branchKey": "quetta",
+    "existing": false
+  },
+  {
+    "key": "lead",
+    "email": "lead@shiplens.test",
+    "name": "Omar Siddiqui",
+    "role": "branch_lead",
+    "branchKey": "sample",
+    "existing": true
+  },
+  {
+    "key": "lead.islamabad",
+    "email": "lead.islamabad@shiplens.test",
+    "name": "Tahir Mirza",
+    "role": "branch_lead",
+    "branchKey": "islamabad",
+    "existing": false
+  },
+  {
+    "key": "lead.lahore",
+    "email": "lead.lahore@shiplens.test",
+    "name": "Faisal Qureshi",
+    "role": "branch_lead",
+    "branchKey": "lahore",
+    "existing": false
+  },
+  {
+    "key": "lead.multan",
+    "email": "lead.multan@shiplens.test",
+    "name": "Kamran Lodhi",
+    "role": "branch_lead",
+    "branchKey": "multan",
+    "existing": false
+  },
+  {
+    "key": "lead.peshawar",
+    "email": "lead.peshawar@shiplens.test",
+    "name": "Zubair Durrani",
+    "role": "branch_lead",
+    "branchKey": "peshawar",
+    "existing": false
+  },
+  {
+    "key": "lead.quetta",
+    "email": "lead.quetta@shiplens.test",
+    "name": "Waqas Jafri",
+    "role": "branch_lead",
+    "branchKey": "quetta",
+    "existing": false
+  }
+]
