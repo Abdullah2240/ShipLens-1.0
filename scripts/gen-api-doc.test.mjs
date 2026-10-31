@@ -81,6 +81,7 @@ beforeAll(() => {
       "import { route } from '@/platform/http/interim-route';",
       'const signupSchema = z.object({ email: z.string(), website: z.string().optional() });',
       "export const POST = route({ auth: 'public', body: signupSchema }, async () => {",
+      '  if (!allowed()) throw new RateLimited(60);',
       '  return { status: 201, data: { ok: true } };',
       '});',
       '',
@@ -154,6 +155,7 @@ describe('buildInventory', () => {
       body: null,
       file: 'src/app/api/v1/things/[id]/route.ts',
       registryId: 'things.get',
+      result: 'getThing',
       params: ['id'],
     });
     expect(by('PATCH /api/v1/things/{id}')).toMatchObject({
@@ -161,11 +163,7 @@ describe('buildInventory', () => {
       action: 'thing.update',
       roles: 'super_admin (all)',
       body: 'thingPatchSchema',
-      bodyFields: [
-        { name: 'name', optional: false },
-        { name: 'city', optional: true },
-        { name: 'note', optional: true },
-      ],
+      bodyFields: ['name', 'city', 'note'],
       registryId: null,
     });
     expect(by('POST /api/v1/public/signups')).toMatchObject({
@@ -175,6 +173,7 @@ describe('buildInventory', () => {
       body: 'signupSchema',
       status: 201,
       response: { kind: 'key', key: 'ok', literal: 'true' },
+      raises: ['RateLimited'],
     });
     expect(by('GET /api/health')).toMatchObject({ auth: 'public', action: null, body: null });
     expect(by('DELETE /api/v1/session')).toMatchObject({

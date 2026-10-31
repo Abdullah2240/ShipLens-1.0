@@ -158,6 +158,14 @@ function servicesCalled(handler, imports) {
   return names.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+/** The imported function whose awaited result the handler returns, if one is visible. */
+function resultOf(handler, imports) {
+  for (const m of handler.matchAll(/\bawait\s+([A-Za-z_$][\w$]*)\s*\(/g)) {
+    if (imports[m[1]]?.startsWith('@/modules/')) return m[1];
+  }
+  return null;
+}
+
 // ---------------------------------------------------------------------------------------
 // Schema field lookup (best effort, read as text)
 
@@ -186,14 +194,12 @@ function objectKeys(objText, fileText) {
     }
     const keyed = entry.match(/^['"]?([A-Za-z_$][\w$]*)['"]?\s*:([\s\S]*)$/);
     const name = keyed ? keyed[1] : entry.match(/^[A-Za-z_$][\w$]*$/)?.[0];
-    if (!name) continue;
-    const value = keyed ? keyed[2] : '';
-    fields.push({ name, optional: /\.(optional|nullish)\(\)/.test(value) });
+    if (name) fields.push(name);
   }
   return fields;
 }
 
-/** Top-level fields of `export const <name> = z...object({ ... })`, or null when unknown. */
+/** Top-level field names of `export const <name> = z...object({ ... })`, or null when unknown. */
 export function schemaFields(root, name, specifier, routeFile) {
   for (const file of moduleFiles(root, specifier, routeFile)) {
     const text = readText(file);
@@ -285,6 +291,10 @@ export async function buildInventory(root, { permissions } = {}) {
         status,
         response: opts ? responseShape(handler, status) : { kind: 'handler' },
         services: servicesCalled(handler, imports),
+        result: resultOf(handler, imports),
+        raises: [
+          ...new Set([...handler.matchAll(/new\s+(NotFound|RateLimited)\b/g)].map((m) => m[1])),
+        ],
         params,
         bodyFields: body ? schemaFields(root, body, imports[body], full) : null,
         registryId: registry[registryKey] ?? null,
@@ -328,7 +338,7 @@ function examplePath(row) {
 }
 
 function exampleBody(fields) {
-  const obj = Object.fromEntries(fields.map((f) => [f.name, `<${f.name}>`]));
+  const obj = Object.fromEntries(fields.map((name) => [name, `<${name}>`]));
   return JSON.stringify(obj);
 }
 
@@ -349,7 +359,7 @@ function exampleResponse(row) {
   if (r.kind === 'empty') return head;
   if (r.kind === 'handler')
     return `${head}\n\n(JSON written directly by the handler in ${row.file})`;
-  const value = r.literal ?? (row.services[0] ? `<result of ${row.services[0].name}>` : '<value>');
+  const value = r.literal ?? (row.result ? `<from ${row.result}>` : '<value>');
   const json = r.literal ? `{ "${r.key}": ${value} }` : `{ "${r.key}": "${value}" }`;
   return `${head}\nContent-Type: application/json\n\n${json}`;
 }
@@ -359,14 +369,16 @@ function errorStatuses(row) {
   if (row.wrapped && row.method !== 'GET') out.push('403 (Origin)');
   if (row.auth === 'session') out.push('401');
   if (row.action) out.push('403');
-  if (row.params.length > 0 && row.auth === 'session') out.push('404');
-  if (row.wrapped && row.method !== 'GET') out.push('409');
+  if ((row.params.length > 0 && row.auth === 'session') || row.raises.includes('NotFound')) {
+    out.push('404');
+  }
   if (row.body || row.query) out.push('422');
+  if (row.raises.includes('RateLimited')) out.push('429');
   return out;
 }
 
 function fieldList(fields) {
-  return fields.map((f) => `\`${f.name}\`${f.optional ? ' (optional)' : ''}`).join(', ');
+  return fields.map((name) => `\`${name}\``).join(', ');
 }
 
 export function renderEndpoints(rows) {
@@ -392,8 +404,9 @@ export function renderEndpoints(rows) {
     }
     if (r.services.length) {
       const names = r.services.map((s) => `\`${s.name}\` (\`${s.from}\`)`).join(', ');
-      out.push(`- Service: ${names}.`);
+      out.push(`- Calls: ${names}.`);
     }
+    // 409 (wrong state) and 500 can come from any service; see the error table above.
     const errors = errorStatuses(r);
     out.push(
       `- Success status: ${r.status}.${errors.length ? ` Error statuses: ${errors.join(', ')}.` : ''}`,
@@ -402,7 +415,7 @@ export function renderEndpoints(rows) {
       `- Access matrix: ${r.registryId ? `registry id \`${r.registryId}\`` : 'not in the endpoint registry'}.`,
     );
     out.push(`- Source: \`${r.file}\`.`);
-    out.push('', '```http', exampleRequest(r), '```', '', '```http', exampleResponse(r), '```', '');
+    out.push('', '```sh', exampleRequest(r), '```', '', '```http', exampleResponse(r), '```', '');
   }
   return out.join('\n').trimEnd();
 }
