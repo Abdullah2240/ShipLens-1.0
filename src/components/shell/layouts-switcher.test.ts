@@ -40,9 +40,28 @@ describe('language switcher on every page type', () => {
     );
   });
 
-  it.each(layouts.map((file) => [rel(file), file]))('%s renders a shell', (_name, file) => {
+  // A route-group layout directly under [locale] must render a shell itself.
+  const isGroupLayout = (file: string) =>
+    path.dirname(path.dirname(file)) === LOCALE_DIR &&
+    /^\(.+\)$/.test(path.basename(path.dirname(file)));
+  const groupLayouts = layouts.filter(isGroupLayout);
+  const nestedLayouts = layouts.filter((file) => !isGroupLayout(file));
+
+  it.each(groupLayouts.map((file) => [rel(file), file]))('%s renders a shell', (_name, file) => {
     expect(usesAnyShell(read(file as string))).toBe(true);
   });
+
+  // A nested layout (e.g. a section layout) is rendered inside its route group's layout,
+  // so the group layout must render a shell; the nested layout must not be the only one.
+  it.each(nestedLayouts.map((file) => [rel(file), file]))(
+    '%s sits inside a route group that renders a shell',
+    (_name, file) => {
+      const relative = path.relative(LOCALE_DIR, file as string).split(path.sep);
+      const group = relative[0] ?? '';
+      expect(group, 'nested layouts must live inside a route group').toMatch(/^\(.+\)$/);
+      expect(usesAnyShell(read(path.join(LOCALE_DIR, group, 'layout.tsx')))).toBe(true);
+    },
+  );
 
   it.each(['not-found.tsx', 'error.tsx'])('%s renders MinimalShell', (name) => {
     expect(read(path.join(LOCALE_DIR, name))).toMatch(/<MinimalShell[\s>]/);
