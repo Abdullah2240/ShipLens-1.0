@@ -44,15 +44,18 @@ afterAll(async () => {
 });
 
 async function insertReport(branchId = branchA, weekStart = WEEK): Promise<string> {
-  const { rows } = await q('INSERT INTO weekly_reports (branch_id, week_start) VALUES ($1, $2) RETURNING id', [
-    branchId,
-    weekStart,
-  ]);
+  const { rows } = await q(
+    'INSERT INTO weekly_reports (branch_id, week_start) VALUES ($1, $2) RETURNING id',
+    [branchId, weekStart],
+  );
   return rows[0].id as string;
 }
 
 function setStatus(reportId: string, status: string) {
-  return q('UPDATE weekly_reports SET status = $2, updated_at = now() WHERE id = $1', [reportId, status]);
+  return q('UPDATE weekly_reports SET status = $2, updated_at = now() WHERE id = $1', [
+    reportId,
+    status,
+  ]);
 }
 
 async function moveTo(reportId: string, path: string[]): Promise<void> {
@@ -61,7 +64,13 @@ async function moveTo(reportId: string, path: string[]): Promise<void> {
 
 function insertCollection(
   reportId: string,
-  opts: { branchId?: string; collectedOn?: string; amount?: string; routedAt?: string | null; createdBy?: string } = {},
+  opts: {
+    branchId?: string;
+    collectedOn?: string;
+    amount?: string;
+    routedAt?: string | null;
+    createdBy?: string;
+  } = {},
 ) {
   return q(
     `INSERT INTO collections (branch_id, report_id, amount, collected_on, purpose, created_by, routed_at)
@@ -87,7 +96,9 @@ function voidCollection(id: string) {
 describe('weekly_reports transitions', () => {
   it('allows draft->submitted, submitted->returned, returned->submitted, submitted->approved', async () => {
     const id = await insertReport();
-    await expect(moveTo(id, ['submitted', 'returned', 'submitted', 'approved'])).resolves.toBeUndefined();
+    await expect(
+      moveTo(id, ['submitted', 'returned', 'submitted', 'approved']),
+    ).resolves.toBeUndefined();
     const { rows } = await q('SELECT status FROM weekly_reports WHERE id = $1', [id]);
     expect(rows[0].status).toBe('approved');
   });
@@ -141,17 +152,19 @@ describe('weekly_reports transitions', () => {
       [id, leadA],
     );
     await expect(
-      q("UPDATE weekly_reports SET return_reason = 'x', reviewed_by = $2, reviewed_at = now(), status = 'returned' WHERE id = $1", [
-        id,
-        finance,
-      ]),
+      q(
+        "UPDATE weekly_reports SET return_reason = 'x', reviewed_by = $2, reviewed_at = now(), status = 'returned' WHERE id = $1",
+        [id, finance],
+      ),
     ).resolves.toBeDefined();
   });
 
   it('rejects changing branch_id or week_start', async () => {
     const id = await insertReport();
     await expectGuard(q('UPDATE weekly_reports SET branch_id = $2 WHERE id = $1', [id, branchB]));
-    await expectGuard(q('UPDATE weekly_reports SET week_start = $2 WHERE id = $1', [id, NEXT_WEEK]));
+    await expectGuard(
+      q('UPDATE weekly_reports SET week_start = $2 WHERE id = $1', [id, NEXT_WEEK]),
+    );
   });
 
   it('rejects DELETE of a report in every status', async () => {
@@ -241,10 +254,16 @@ describe('collections update guard', () => {
     const id = await insertCollection(report);
     await expectGuard(q('UPDATE collections SET report_id = $2 WHERE id = $1', [id, other]));
     await expectGuard(
-      q('UPDATE collections SET branch_id = $2, report_id = $3 WHERE id = $1', [id, branchB, otherBranchReport]),
+      q('UPDATE collections SET branch_id = $2, report_id = $3 WHERE id = $1', [
+        id,
+        branchB,
+        otherBranchReport,
+      ]),
     );
     await expectGuard(q('UPDATE collections SET created_by = $2 WHERE id = $1', [id, leadB]));
-    await expectGuard(q("UPDATE collections SET created_at = now() - interval '1 day' WHERE id = $1", [id]));
+    await expectGuard(
+      q("UPDATE collections SET created_at = now() - interval '1 day' WHERE id = $1", [id]),
+    );
   });
 
   it('in a submitted report rejects amount, purpose, note and status changes but allows updated_at', async () => {
@@ -255,7 +274,9 @@ describe('collections update guard', () => {
     await expectGuard(q("UPDATE collections SET purpose = 'x' WHERE id = $1", [id]));
     await expectGuard(q("UPDATE collections SET note = 'x' WHERE id = $1", [id]));
     await expectGuard(voidCollection(id));
-    await expect(q('UPDATE collections SET updated_at = now() WHERE id = $1', [id])).resolves.toBeDefined();
+    await expect(
+      q('UPDATE collections SET updated_at = now() WHERE id = $1', [id]),
+    ).resolves.toBeDefined();
   });
 
   it('in an approved report allows routed marking on active collections only', async () => {
@@ -266,13 +287,24 @@ describe('collections update guard', () => {
     await moveTo(report, ['submitted', 'approved']);
 
     await expect(
-      q('UPDATE collections SET routed_at = now(), routed_by = $2, updated_at = now() WHERE id = $1', [active, finance]),
+      q(
+        'UPDATE collections SET routed_at = now(), routed_by = $2, updated_at = now() WHERE id = $1',
+        [active, finance],
+      ),
     ).resolves.toBeDefined();
     await expect(
-      q('UPDATE collections SET routed_at = NULL, routed_by = NULL, updated_at = now() WHERE id = $1', [active]),
+      q(
+        'UPDATE collections SET routed_at = NULL, routed_by = NULL, updated_at = now() WHERE id = $1',
+        [active],
+      ),
     ).resolves.toBeDefined();
 
-    await expectGuard(q('UPDATE collections SET routed_at = now(), routed_by = $2 WHERE id = $1', [voided, finance]));
+    await expectGuard(
+      q('UPDATE collections SET routed_at = now(), routed_by = $2 WHERE id = $1', [
+        voided,
+        finance,
+      ]),
+    );
     await expectGuard(q("UPDATE collections SET amount = '9.00' WHERE id = $1", [active]));
   });
 
@@ -315,6 +347,9 @@ describe('harness and indexes', () => {
     const { rows } = await q(
       "SELECT indexname FROM pg_indexes WHERE indexname IN ('weekly_reports_status_submitted_idx', 'collections_report_status_idx') ORDER BY indexname",
     );
-    expect(rows.map((r) => r.indexname)).toEqual(['collections_report_status_idx', 'weekly_reports_status_submitted_idx']);
+    expect(rows.map((r) => r.indexname)).toEqual([
+      'collections_report_status_idx',
+      'weekly_reports_status_submitted_idx',
+    ]);
   });
 });
