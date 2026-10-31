@@ -473,3 +473,15 @@ describe('boot hook in scripts/migrate.mjs', () => {
     expect(await counts()).toEqual({ users: 0, branches: 0, audit: 0 });
   });
 });
+
+describe('docs/test-logins.md', () => {
+  it('lists exactly the five demo emails with their names and the demo branch', async () => {
+    const doc = await readFile(path.join(ROOT, 'docs', 'test-logins.md'), 'utf8');
+    const emails = [...doc.matchAll(/[a-z0-9.+-]+@[a-z0-9.-]+\.test\b/gi)].map((m) => m[0]);
+    expect([...new Set(emails)].sort()).toEqual(DEMO_USERS.map((u) => u.email).sort());
+    for (const user of DEMO_USERS) expect(doc).toContain(user.name);
+    expect(doc).toContain(DEMO_BRANCH.name);
+    expect(doc).toContain('SEED_DEMO_PASSWORD');
+    expect(doc).toContain('SEED_ROTATE_DEMO_PASSWORDS=true');
+  });
+});
