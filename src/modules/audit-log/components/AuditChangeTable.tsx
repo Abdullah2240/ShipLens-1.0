@@ -1,7 +1,9 @@
 import type { ReactNode } from 'react';
-import { useTranslations } from 'next-intl';
-import { Bdi, DateText, Ltr, MoneyText } from '@/components/ui';
+import { useLocale, useTranslations } from 'next-intl';
+import { Bdi, Ltr, MoneyText } from '@/components/ui';
+import type { Locale } from '@/i18n/routing';
 import { diffSnapshots } from '@/modules/timeline';
+import { formatDate, formatDateTime } from '@/platform/i18n/format';
 
 export interface AuditChangeTableProps {
   before: Record<string, unknown> | null;
@@ -29,6 +31,32 @@ const TEXT_FIELDS = new Set([
 ]);
 const MESSAGE_KEY = /^[a-z][a-z0-9_]*$/i;
 
+/**
+ * A PKT date or date-time with automatic direction: Urdu output starts with an Urdu
+ * month name and reads right to left; English output reads left to right. Digits stay Latin.
+ */
+export function LocalDate({ value, withTime }: { value: string; withTime?: boolean }) {
+  const locale: Locale = useLocale() === 'ur' ? 'ur' : 'en';
+  let text = value;
+  let machine = value;
+  try {
+    if (!withTime && BUSINESS_DATE.test(value)) {
+      text = formatDate(value, locale);
+    } else {
+      const instant = new Date(value);
+      text = withTime ? formatDateTime(instant, locale) : formatDate(instant, locale);
+      machine = instant.toISOString();
+    }
+  } catch {
+    // An unparseable value is shown as stored.
+  }
+  return (
+    <bdi className="tabular whitespace-nowrap">
+      <time dateTime={machine}>{text}</time>
+    </bdi>
+  );
+}
+
 type Side = 'before' | 'after';
 
 function useValue() {
@@ -50,10 +78,10 @@ function useValue() {
       return <MoneyText amount={text} className="font-medium" />;
     }
     if (BUSINESS_DATE_FIELDS.has(field) && BUSINESS_DATE.test(text)) {
-      return <DateText value={text} />;
+      return <LocalDate value={text} />;
     }
     if (INSTANT_FIELDS.has(field) && ISO_INSTANT.test(text) && !Number.isNaN(Date.parse(text))) {
-      return <DateText value={text} withTime />;
+      return <LocalDate value={text} withTime />;
     }
     if (field === 'status' && MESSAGE_KEY.test(text) && tStatus.has(text)) {
       return <Bdi>{tStatus(text)}</Bdi>;

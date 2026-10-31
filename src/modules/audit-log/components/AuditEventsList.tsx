@@ -1,8 +1,8 @@
 import { useTranslations } from 'next-intl';
-import { Bdi, DateText, EmptyState, IdText, Ltr } from '@/components/ui';
+import { Bdi, EmptyState, IdText, Ltr } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { AuditListItem } from '../types';
-import { AuditChangeTable } from './AuditChangeTable';
+import { AuditChangeTable, LocalDate } from './AuditChangeTable';
 import { auditEntityHref, isTraceLink } from './audit-entity-link';
 
 export interface AuditEventsListProps {
@@ -96,7 +96,7 @@ function EventRow({ item }: { item: AuditListItem }) {
           className={`flex cursor-pointer list-none flex-wrap items-center gap-x-3 gap-y-1 px-4 py-3 text-sm select-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring [&::-webkit-details-marker]:hidden ${GRID}`}
         >
           <span className="order-2 text-xs text-text-muted md:order-none md:text-sm">
-            <DateText value={item.occurredAt} withTime />
+            <LocalDate value={item.occurredAt} withTime />
           </span>
 
           <span className="order-3 flex min-w-0 items-center gap-1.5 text-xs md:order-none md:text-sm">

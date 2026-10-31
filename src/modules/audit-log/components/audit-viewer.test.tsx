@@ -247,6 +247,11 @@ describe.each(LOCALES)('AuditEventsList (%s)', (locale) => {
     const [approve, system] = rows;
     const summary = approve!.querySelector('summary')!;
     expect(summary.querySelector('time')).toHaveAttribute('dateTime', '2026-10-12T06:30:00.000Z');
+    // Auto direction: an Urdu month name must not be forced into an LTR isolate.
+    const when = summary.querySelector('time')!.closest('bdi');
+    expect(when).not.toHaveAttribute('dir');
+    expect(when?.textContent).toMatch(locale === 'ur' ? /اکتوبر/ : /Oct/);
+    expect(when?.textContent).toMatch(/11:30/);
     expect(summary).toHaveTextContent('Bilal Ahmed');
     expect(summary.querySelector('[data-role-badge]')).toHaveTextContent(
       msg(locale, 'roles.finance_reviewer'),
