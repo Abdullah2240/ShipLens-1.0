@@ -110,6 +110,9 @@ describe('navForRole', () => {
   it('drops items that are not live', () => {
     expect(navForRole(appNav, 'super_admin').map((i) => i.id)).toEqual([
       'account',
+      'branches',
+      'collections',
+      'reports',
       'applications',
       'members',
       'teams',
