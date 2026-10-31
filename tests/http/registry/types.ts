@@ -18,6 +18,8 @@ export interface World {
   weekStart: DateString;
   /** A real login for the public login endpoint (its own user, not one of the role users). */
   login: { email: string; password: string };
+  /** Public verification code (report_verifications.code) of each side's approved report. */
+  verificationCodes: Record<Side, string>;
 }
 
 /**

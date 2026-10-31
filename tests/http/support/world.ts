@@ -97,6 +97,7 @@ export async function buildWorld(pool: Pool = testPool()): Promise<World> {
     collection_routed: { A: '', B: '' },
   };
 
+  const verificationCodes: World['verificationCodes'] = { A: '', B: '' };
   for (const side of ['A', 'B'] as const) {
     const branchId = side === 'A' ? branchA : branchB;
     const lead = side === 'A' ? users.branch_lead : users.branch_lead_b;
@@ -139,6 +140,13 @@ export async function buildWorld(pool: Pool = testPool()): Promise<World> {
     records.report_approved![side] = approved.reportId;
     records.collection_approved![side] = approved.collectionIds[0]!;
     records.collection_routed![side] = approved.collectionIds[1]!;
+    // Approval issues the public verification code in the same transaction (04-02).
+    verificationCodes[side] = (
+      await pool.query<{ code: string }>(
+        'SELECT code FROM report_verifications WHERE report_id = $1',
+        [approved.reportId],
+      )
+    ).rows[0]!.code;
 
     const base = { actorId: lead.id, actorRole: 'branch_lead', branchId };
     await audit(pool, {
@@ -205,6 +213,7 @@ export async function buildWorld(pool: Pool = testPool()): Promise<World> {
     today,
     weekStart,
     login: { email: loginEmail, password: LOGIN_PASSWORD },
+    verificationCodes,
   };
 }
 
