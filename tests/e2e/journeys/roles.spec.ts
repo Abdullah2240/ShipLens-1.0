@@ -138,6 +138,40 @@ test.describe('five-role access journey', { tag: '@smoke' }, () => {
         expect(link.name).toBe(item.label[uiLocale]);
       }
 
+      // From tablet width up the nav wraps instead of scrolling, so every item is on screen
+      // and none is clipped by the nav row (Super Admin has the most items). Phones scroll
+      // the row sideways by design.
+      if ((page.viewportSize()?.width ?? 0) >= 768) {
+        const nav = primaryNav(page, uiLocale);
+        for (const item of expected) {
+          const link = nav.getByRole('link', { name: item.label[uiLocale], exact: true });
+          await expect(link, `${item.href} visible for ${role}`).toBeVisible();
+          await expect(link, `${item.href} fully on screen for ${role}`).toBeInViewport({
+            ratio: 1,
+          });
+        }
+        const clipped = await nav.evaluate((element) => {
+          const box = element.getBoundingClientRect();
+          return Array.from(element.querySelectorAll('a'))
+            .filter((a) => {
+              const r = a.getBoundingClientRect();
+              return (
+                r.width === 0 ||
+                r.left < box.left - 0.5 ||
+                r.right > box.right + 0.5 ||
+                r.top < box.top - 0.5 ||
+                r.bottom > box.bottom + 0.5
+              );
+            })
+            .map((a) => (a.textContent ?? '').trim());
+        });
+        expect(clipped, `navigation items clipped for ${role}`).toEqual([]);
+        expect(
+          await nav.evaluate((element) => element.scrollWidth <= element.clientWidth + 1),
+          `navigation of ${role} needs no sideways scroll`,
+        ).toBe(true);
+      }
+
       if (uiLocale === 'ur') {
         // The email and any other Latin run on the landing screen keep LTR order.
         await expect(page.locator('main bdi[dir="ltr"]', { hasText: user.email })).toHaveCount(1);
