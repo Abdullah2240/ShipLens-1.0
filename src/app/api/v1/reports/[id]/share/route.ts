@@ -1,6 +1,6 @@
 import { shareInputSchema, shareReport } from '@/modules/reporting';
 import { getEnv } from '@/platform/config/env';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 
 export const dynamic = 'force-dynamic';
 // The link origin is the configured APP_ORIGIN, never the request's Host header.

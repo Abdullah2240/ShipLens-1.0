@@ -1,5 +1,5 @@
 import { markCollectionRouted, unmarkCollectionRouted } from '@/modules/collections';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 
 export const dynamic = 'force-dynamic';
 export const POST = route({ auth: 'session', action: 'collection.mark_routed' }, async (c) => ({

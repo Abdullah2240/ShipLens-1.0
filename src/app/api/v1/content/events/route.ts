@@ -1,5 +1,5 @@
 import { createEvent, eventInputSchema, listEvents } from '@/modules/content';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 
 export const dynamic = 'force-dynamic';
 export const GET = route({ auth: 'session', action: 'content.read' }, async (c) => ({

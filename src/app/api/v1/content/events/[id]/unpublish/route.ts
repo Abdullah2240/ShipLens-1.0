@@ -1,5 +1,5 @@
 import { revalidatePublicPages, unpublishEvent } from '@/modules/content';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 
 export const dynamic = 'force-dynamic';
 export const POST = route({ auth: 'session', action: 'content.unpublish' }, async (c) => {

@@ -1,5 +1,5 @@
 import { amendCollection, collectionPatchSchema, getCollection } from '@/modules/collections';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 
 export const dynamic = 'force-dynamic';
 export const GET = route({ auth: 'session', action: 'collection.read' }, async (c) => ({
