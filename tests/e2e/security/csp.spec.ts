@@ -22,12 +22,12 @@ const PUBLIC_PAGES = [
 
 const SAMPLE_BRANCH_REPORT = '72d847f7-686c-4106-b22b-f450dc726a8c';
 
+// Pages Super Admin may open.
 const APP_PAGES = [
   '/account',
   '/dashboard',
   '/dashboard/unrouted',
   '/reports',
-  '/reports/review',
   `/reports/${SAMPLE_BRANCH_REPORT}`,
   `/share/reports/${SAMPLE_BRANCH_REPORT}`,
   '/collections',
@@ -39,6 +39,10 @@ const APP_PAGES = [
   '/content/events',
   '/admin/branches',
 ] as const;
+
+// The review queue needs report.approve, which only the Finance Reviewer holds; every other
+// role, Super Admin included, gets the not-found page there.
+const FINANCE_PAGES = ['/reports/review'] as const;
 
 type Violation = { directive: string; blocked: string; source: string };
 
@@ -114,6 +118,14 @@ test.describe('content security policy in the browser', () => {
     }
   });
 
+  test('finance-only pages run without CSP violations', async ({ page, loginAs, localePath }) => {
+    const consoleLines = await watchCsp(page);
+    await loginAs('finance_reviewer');
+    for (const path of FINANCE_PAGES) {
+      await expectPageRunsUnderCsp(page, localePath(path), consoleLines);
+    }
+  });
+
   test('client components still work: language switch and theme toggle', async ({
     page,
     localePath,
@@ -133,7 +145,14 @@ test.describe('content security policy in the browser', () => {
     if ((await unpressed.count()) > 0) {
       const html = page.locator('html');
       const before = await html.getAttribute('data-theme');
-      const button = unpressed.first();
+      // Pin the chosen button by its label: once it is pressed, "the first unpressed
+      // button" is a different one.
+      const label = await unpressed.first().getAttribute('aria-label');
+      expect(label, 'theme button label').toBeTruthy();
+      const button = page
+        .locator(`[role="group"] button[aria-label="${label}"]`)
+        .filter({ visible: true })
+        .first();
       await button.click();
       await expect(button).toHaveAttribute('aria-pressed', 'true');
       await expect.poll(() => html.getAttribute('data-theme')).not.toBe(before);
