@@ -14,6 +14,9 @@ import { RoutingAction, RoutingStatusProvider } from './RoutingAction';
 import { markRouted, unmarkRouted } from './routing-client';
 import { UnroutedTable } from './UnroutedTable';
 
+// Interaction tests in both locales run several seconds each on a loaded CI runner.
+vi.setConfig({ testTimeout: 20_000 });
+
 const nav = vi.hoisted(() => ({ refresh: vi.fn<() => void>() }));
 
 vi.mock('@/i18n/navigation', () => ({

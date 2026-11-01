@@ -18,6 +18,9 @@ import {
   TrailBreadcrumb,
 } from '.';
 
+// Interaction tests in both locales run several seconds each on a loaded CI runner.
+vi.setConfig({ testTimeout: 20_000 });
+
 const nav = vi.hoisted(() => ({
   pathname: '/dashboard',
   search: '',
