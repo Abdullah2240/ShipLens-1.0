@@ -74,6 +74,20 @@ describe('endpoint registry', () => {
     expect(registry.length).toBeGreaterThan(0);
   });
 
+  it('holds the Phase 3 and Phase 4 endpoints in one file per phase', () => {
+    const files = registryFiles().map((f) => path.basename(f));
+    expect(files).toEqual(expect.arrayContaining(['phase3.registry.ts', 'phase4.registry.ts']));
+    expect(files.filter((f) => /^\d{2}-\d{2}/.test(f))).toEqual([]);
+    const twist = registry.filter((s) =>
+      ['audit/chain', 'reports/[id]/verification', 'public/verify/[code]'].includes(s.route),
+    );
+    expect(twist.map((s) => [s.id, s.action]).sort()).toEqual([
+      ['audit.chain', 'audit.read_finance'],
+      ['public.verify', 'public'],
+      ['reports.verification', 'report.read'],
+    ]);
+  });
+
   it('finds the API route files on disk', () => {
     expect(routes.length).toBeGreaterThan(0);
     expect(exported.length).toBeGreaterThanOrEqual(routes.length);
