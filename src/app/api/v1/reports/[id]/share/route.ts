@@ -1,4 +1,4 @@
-import { shareInputSchema, shareReport } from '@/modules/reporting/service-share';
+import { shareInputSchema, shareReport } from '@/modules/reporting';
 import { getEnv } from '@/platform/config/env';
 import { route } from '@/platform/http/interim-route';
 

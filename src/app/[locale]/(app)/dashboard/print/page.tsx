@@ -12,6 +12,7 @@ import {
   parseReportingFilters,
   toSearchParams,
   type FigureId,
+  getFigureByBranch,
 } from '@/modules/reporting';
 import { filterChipTexts } from '@/modules/reporting/components/dashboard/dashboard-view-model';
 import { PrintButton } from '@/modules/reporting/components/print/PrintButton';
@@ -23,7 +24,6 @@ import {
   PrintTable,
   PrintToolbar,
 } from '@/modules/reporting/components/print/PrintSheet';
-import { getFigureByBranch } from '@/modules/reporting/service-trace';
 import { getPool } from '@/platform/db';
 import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
 import { formatInt } from '@/platform/i18n/format';

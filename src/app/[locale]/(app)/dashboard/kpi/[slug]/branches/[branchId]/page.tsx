@@ -7,7 +7,12 @@ import { TraceHeader } from '@/components/trace';
 import { Bdi, IdText, MoneyText, StatusBadge } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { figureFromSlug, parseReportingFilters, type FigureId } from '@/modules/reporting';
+import {
+  figureFromSlug,
+  parseReportingFilters,
+  type FigureId,
+  getBranchReports,
+} from '@/modules/reporting';
 import { DrillExportLinks } from '@/modules/reporting/components/drill/BranchFigureTable';
 import { LevelExplain } from '@/modules/reporting/components/drill/LevelExplain';
 import { ReportFigureTable } from '@/modules/reporting/components/drill/ReportFigureTable';
@@ -17,7 +22,6 @@ import {
   exportLinks,
   footerRecordCount,
 } from '@/modules/reporting/components/drill/drill-view-model';
-import { getBranchReports } from '@/modules/reporting/service-trace';
 import { getPool } from '@/platform/db';
 import { formatDateTime, formatInt, formatMoney } from '@/platform/i18n/format';
 import { getPageActor, orNotFound, requirePageActor } from '@/platform/http/interim-server';

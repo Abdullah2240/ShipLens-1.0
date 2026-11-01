@@ -8,7 +8,7 @@ import { publicMetadata } from '@/components/public/seo';
 import { DateText } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { getPublicImpact, type PublicImpact } from '@/modules/reporting/service-impact';
+import { getPublicImpact, type PublicImpact } from '@/modules/reporting';
 import { getPool } from '@/platform/db';
 import { formatMoney } from '@/platform/i18n/format';
 import { toMinor } from '@/platform/money';
@@ -195,9 +195,7 @@ export default async function ImpactPage({ params }: PageProps) {
             >
               {t('method.title')}
             </h2>
-            <p className="mt-3 text-base leading-relaxed text-text-muted">
-              {t('method.body')}
-            </p>
+            <p className="mt-3 text-base leading-relaxed text-text-muted">{t('method.body')}</p>
           </div>
         </section>
 

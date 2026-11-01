@@ -1,6 +1,12 @@
-import { figureFromSlug, isMoneyFigure, parseReportingFilters } from '@/modules/reporting';
-import { flattenLabels, isExportKind, type ExportLabels } from '@/modules/reporting/export-rows';
-import { exportCsv } from '@/modules/reporting/service-export';
+import {
+  figureFromSlug,
+  isMoneyFigure,
+  parseReportingFilters,
+  flattenLabels,
+  isExportKind,
+  type ExportLabels,
+  exportCsv,
+} from '@/modules/reporting';
 import { Forbidden, NotFound } from '@/platform/errors';
 import { route } from '@/platform/http/interim-route';
 import enExports from '../../../../../../messages/en/exports.json';

@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Bdi, MoneyText } from '@/components/ui';
 import type { Locale } from '@/i18n/routing';
-import { traceHref, type MoneyFigureId } from '@/modules/reporting';
+import { traceHref, type MoneyFigureId, getPrintableReport } from '@/modules/reporting';
 import { PrintButton } from '@/modules/reporting/components/print/PrintButton';
 import {
   PrintDate,
@@ -12,7 +12,6 @@ import {
   PrintTable,
   PrintToolbar,
 } from '@/modules/reporting/components/print/PrintSheet';
-import { getPrintableReport } from '@/modules/reporting/service-print';
 import { getPool } from '@/platform/db';
 import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
 import { formatDate, formatInt } from '@/platform/i18n/format';

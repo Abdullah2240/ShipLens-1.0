@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound, redirect } from 'next/navigation';
 import { routing, type Locale } from '@/i18n/routing';
-import { resolveSharedReport } from '@/modules/reporting/service-share';
+import { resolveSharedReport } from '@/modules/reporting';
 import { getPool } from '@/platform/db';
 import { getPageActor, orNotFound } from '@/platform/http/interim-server';
 

@@ -7,7 +7,12 @@ import { MoneyText } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { getBranch } from '@/modules/branches';
-import { figureFromSlug, getMonthlyTrend, parseReportingFilters } from '@/modules/reporting';
+import {
+  figureFromSlug,
+  getMonthlyTrend,
+  parseReportingFilters,
+  getFigureByBranch,
+} from '@/modules/reporting';
 import {
   BranchFigureTable,
   DrillExportLinks,
@@ -19,7 +24,6 @@ import {
   exportLinks,
   footerRecordCount,
 } from '@/modules/reporting/components/drill/drill-view-model';
-import { getFigureByBranch } from '@/modules/reporting/service-trace';
 import { getPool } from '@/platform/db';
 import { formatDateTime, formatInt, formatMoney } from '@/platform/i18n/format';
 import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
