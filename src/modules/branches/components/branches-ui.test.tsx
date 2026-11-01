@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
-import type { ReactNode } from 'react';
-import { screen, waitFor, within } from '@testing-library/react';
+import { useState, type ReactNode } from 'react';
+import { act, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { findPhysicalDirection } from '../../../../scripts/lib/logical-css.mjs';
@@ -340,6 +340,43 @@ describe.each(LOCALES)('BranchDetailsForm (%s)', (locale) => {
     expect(router.refresh).toHaveBeenCalledTimes(1);
     expect(summaryBox()).toHaveValue('Food drive and tutoring.');
     expect(save()).toBeDisabled();
+  });
+
+  /** The form under a parent that can hand it new server data, as router.refresh does. */
+  function renderRefreshable() {
+    let refresh!: (next: BranchDetail) => void;
+    function Page() {
+      const [branch, setBranch] = useState(branchDetail());
+      refresh = setBranch;
+      return <BranchDetailsForm branch={branch} canEdit />;
+    }
+    renderWithIntl(<Page />, { locale, namespaces: NAMESPACES });
+    return (next: BranchDetail) => act(() => refresh(next));
+  }
+
+  it('keeps what the user typed when the page data refreshes underneath', async () => {
+    const user = userEvent.setup();
+    const refresh = renderRefreshable();
+    await user.clear(summaryBox());
+    await user.type(summaryBox(), 'Typed before the refresh landed.');
+    expect(save()).toBeEnabled();
+
+    // A status change elsewhere on the page refreshes the server data: new object, new
+    // updatedAt, same saved text. The edit in progress must survive it.
+    refresh(branchDetail({ updatedAt: '2026-11-01T09:00:00.000Z' }));
+    expect(summaryBox()).toHaveValue('Typed before the refresh landed.');
+    expect(save()).toBeEnabled();
+  });
+
+  it('takes the fresh server value for a field the user has not touched', async () => {
+    const user = userEvent.setup();
+    const refresh = renderRefreshable();
+    await user.clear(summaryBox());
+    await user.type(summaryBox(), 'Mine.');
+
+    refresh(branchDetail({ city: 'Karachi' }));
+    expect(cityBox()).toHaveValue('Karachi');
+    expect(summaryBox()).toHaveValue('Mine.');
   });
 
   it('checks the name before sending', async () => {
