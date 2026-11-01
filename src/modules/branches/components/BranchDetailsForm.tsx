@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState, type FormEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { Bdi } from '@/components/ui';
 import { useRouter } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { isBranchReadOnly } from '@/modules/branches/capabilities';
@@ -178,15 +179,21 @@ export function BranchDetailsForm({ branch, canEdit }: BranchDetailsFormProps) {
           {!canEdit ? <InfoNote>{t('detail.readOnlyNotice')}</InfoNote> : null}
           {closed ? <InfoNote>{t('detail.closedNotice')}</InfoNote> : null}
           <dl className="grid gap-5 sm:grid-cols-2">
-            <Fact label={t('create.name')}>{view.name}</Fact>
-            <Fact label={t('create.city')}>{view.city ?? notSet}</Fact>
+            <Fact label={t('create.name')}>
+              <Bdi>{view.name}</Bdi>
+            </Fact>
+            <Fact label={t('create.city')}>
+              {view.city === null ? notSet : <Bdi>{view.city}</Bdi>}
+            </Fact>
             {codeFact}
             {dates}
             <div className="flex flex-col gap-1 sm:col-span-2">
               <dt className="text-xs font-semibold text-text-muted">{t('detail.summary')}</dt>
               <dd className="text-sm leading-relaxed whitespace-pre-line text-text">
-                {view.summary ?? (
+                {view.summary === null ? (
                   <span className="text-text-muted italic">{t('detail.noSummary')}</span>
+                ) : (
+                  <Bdi>{view.summary}</Bdi>
                 )}
               </dd>
             </div>
