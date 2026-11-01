@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
+import type { Pool, PoolClient } from 'pg';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { resetChainStatusCache, verifyAuditChain } from '@/platform/audit/chain/verify';
 import type { CommandContext } from '@/platform/audit/types';
 import type { Actor } from '@/platform/authz';
 import { Forbidden } from '@/platform/errors';
@@ -313,4 +315,65 @@ describe('export audit', () => {
     const { file } = await run('summary', {}, s.actors.superAdmin);
     expect(file.rowCount).toBe(8);
   });
+});
+
+/**
+ * The test pool, except that its checked-out clients run `between` once, right after the
+ * first row read: another audited write commits while the export file is being built.
+ */
+function poolWithWriteDuringRead(between: () => Promise<void>): Pool {
+  let fired = false;
+  const connect = async (): Promise<PoolClient> => {
+    const client = await db.connect();
+    const query = client.query;
+    const release = client.release;
+    const hooked = async (...args: unknown[]) => {
+      const result = await (query as (...a: unknown[]) => Promise<unknown>).apply(client, args);
+      const text = typeof args[0] === 'string' ? args[0] : '';
+      if (!fired && /^\s*(SELECT|WITH)\b/i.test(text)) {
+        fired = true;
+        await between();
+      }
+      return result;
+    };
+    Object.assign(client, {
+      query: hooked,
+      release: (err?: Error | boolean) => {
+        Object.assign(client, { query, release });
+        return release.call(client, err);
+      },
+    });
+    return client;
+  };
+  return new Proxy(db, {
+    get(target, prop) {
+      if (prop === 'connect') return connect;
+      const value: unknown = Reflect.get(target, prop);
+      return typeof value === 'function' ? value.bind(target) : value;
+    },
+  });
+}
+
+describe('export audit under concurrent writes', () => {
+  it.each(['summary', 'reports', 'collections', 'unrouted'] as const)(
+    'records the %s export when another audited write commits while the file is read',
+    async (kind) => {
+      const pool = poolWithWriteDuringRead(async () => {
+        await db.query(
+          `INSERT INTO audit_events (request_id, actor_role, action, entity_type, entity_id)
+           VALUES (NULL, 'system', 'test.concurrent_write', 'system', 'concurrent')`,
+        );
+      });
+      const file = await exportCsv({ ...ctx(s.actors.finance), pool }, kind, {}, LABELS);
+      expect(file.rowCount).toBeGreaterThan(0);
+
+      const rows = await audits();
+      expect(rows.filter((r) => r.action === 'test.concurrent_write')).toHaveLength(1);
+      const exports = rows.filter((r) => r.action === 'export.create');
+      expect(exports).toHaveLength(1);
+      expect(exports[0]!.after).toEqual({ kind, row_count: file.rowCount });
+      resetChainStatusCache();
+      expect((await verifyAuditChain(db)).status).toBe('intact');
+    },
+  );
 });
