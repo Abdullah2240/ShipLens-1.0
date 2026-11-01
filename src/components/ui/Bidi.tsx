@@ -4,8 +4,8 @@ import type { Locale } from '@/i18n/routing';
 import { formatDate, formatDateTime, formatId, formatMoney } from '@/platform/i18n/format';
 
 // Mixed-direction values. Ltr isolates machine values (IDs, codes, emails, phones,
-// request ids, amounts, dates) so they keep their order inside Urdu text. Bdi isolates
-// user-entered names with automatic direction.
+// request ids, amounts) so they keep their order inside Urdu text. Bdi isolates
+// user-entered names with automatic direction; DateText isolates dates the same way.
 
 function cx(...parts: Array<string | false | undefined>): string {
   return parts.filter(Boolean).join(' ');
@@ -67,9 +67,11 @@ export function DateText({
     : formatDate(value as string, locale);
   const machine = asInstant ? asInstant.toISOString() : (value as string);
 
+  // Automatic direction: an Urdu date starts with digits then an Urdu month name and
+  // must read right to left; an English date reads left to right. Digits stay Latin.
   return (
-    <Ltr className={cx('tabular whitespace-nowrap', className)}>
+    <bdi dir="auto" className={cx('[unicode-bidi:isolate] tabular whitespace-nowrap', className)}>
       <time dateTime={machine}>{text}</time>
-    </Ltr>
+    </bdi>
   );
 }
