@@ -243,10 +243,9 @@ jobs:
           node-version-file: .nvmrc
       - name: Tool names appear only in the disclosure file
         run: node scripts/check-tool-mentions.mjs
-      # Advisory until plan 04-18 regenerates docs/api.md after the last route lands; that
-      # plan removes continue-on-error. The permissions doc drift check runs in `static`.
-      - name: api doc drift (advisory until 04-18)
-        continue-on-error: true
+      # docs/api.md must match the route files; regenerate it with
+      # `node scripts/gen-api-doc.mjs`. The permissions doc drift check runs in `static`.
+      - name: api doc drift
         run: node scripts/gen-api-doc.mjs --check
 
   ci-ok:
