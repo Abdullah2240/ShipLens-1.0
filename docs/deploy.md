@@ -40,7 +40,7 @@ What is different from the Render setup:
 | Variables from Neon      | `DATABASE_URL` (pooled, used by the app), `DATABASE_URL_UNPOOLED` (direct, used for migrations)                                        |
 | Variables set by hand    | `APP_ORIGIN` = `https://shiplens-two.vercel.app` (Production). `NODE_ENV` is set by Vercel                                             |
 | Migrations and seed      | Run once from a developer machine against `DATABASE_URL_UNPOOLED`; the seed took about 460 s from Pakistan (round trips to US East)    |
-| Deploy method            | `vercel deploy --prod` from a clean checkout of `main`; no Git connection yet                                                          |
+| Deploy method            | Git connected on 2026-11-01: a merge to `main` deploys to production; `vercel.json` turns off builds for every other branch            |
 | Post-deploy verification | `scripts/verify-deploy.mjs --markdown`: 102/102 PASS on 2026-11-01T07:37:03Z (health 2, smoke 41, headers 44, chain 2, verify 13)      |
 | Cold start               | 821 ms                                                                                                                                 |
 | Keep-warm                | Inactive (no `RENDER_EXTERNAL_URL` on Vercel)                                                                                          |
@@ -147,8 +147,10 @@ is no longer needed. Two cautions:
 
 - Migrations still do not run on deploy. Run step 5 before merging a pull request that adds
   a migration.
-- Pushes to other branches create preview deployments. Previews have no `APP_ORIGIN`, so
-  they fail the environment check until you set one for the Preview environment.
+- `vercel.json` sets `git.deploymentEnabled` so only `main` builds. Without it, every other
+  branch (Dependabot included) would get a preview deployment, and the Neon variables are
+  shared with Preview, so previews would run against the production database. To allow
+  previews again, give Preview its own Neon branch first, then remove the `"**": false` rule.
 
 ## Vercel: re-seeding, redeploying and rolling back
 
