@@ -3,6 +3,7 @@ import {
   CATEGORIES,
   PAGES,
   LOCALES,
+  medianRun,
   buildTargets,
   evaluate,
   parseLighthouseArgs,
@@ -177,6 +178,7 @@ describe('targets and arguments', () => {
       baseUrl: 'http://localhost:60320',
       only: undefined,
       formFactor: 'mobile',
+      runs: 1,
     });
     expect(
       parseLighthouseArgs([
@@ -186,10 +188,31 @@ describe('targets and arguments', () => {
         '--form-factor',
         'desktop',
       ]),
-    ).toEqual({ baseUrl: 'http://h', only: '/ur/events', formFactor: 'desktop' });
+    ).toEqual({ baseUrl: 'http://h', only: '/ur/events', formFactor: 'desktop', runs: 1 });
     expect(() => parseLighthouseArgs([])).toThrow(/--base-url/);
     expect(() => parseLighthouseArgs(['--base-url', 'http://h', '--form-factor', 'tv'])).toThrow(
       /form-factor/,
     );
+  });
+});
+
+describe('medianRun', () => {
+  const run = (performance) => ({ categories: { performance: { score: performance } } });
+
+  it('picks the run with the median performance score', () => {
+    const runs = [run(0.81), run(0.95), run(0.9)];
+    expect(medianRun(runs)).toBe(runs[2]);
+    expect(medianRun([run(0.7)])).toEqual(run(0.7));
+  });
+
+  it('takes the lower middle run for an even count', () => {
+    const runs = [run(0.9), run(0.8), run(0.95), run(0.85)];
+    expect(medianRun(runs)).toBe(runs[3]);
+  });
+
+  it('accepts --runs as a positive whole number', () => {
+    expect(parseLighthouseArgs(['--base-url', 'http://h', '--runs', '3']).runs).toBe(3);
+    expect(parseLighthouseArgs(['--base-url', 'http://h']).runs).toBe(1);
+    expect(() => parseLighthouseArgs(['--base-url', 'http://h', '--runs', '0'])).toThrow(/runs/);
   });
 });

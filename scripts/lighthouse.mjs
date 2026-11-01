@@ -4,6 +4,7 @@
 //   node scripts/lighthouse.mjs --base-url http://localhost:60320
 //   node scripts/lighthouse.mjs --base-url <url> --only /en/impact
 //   node scripts/lighthouse.mjs --base-url <url> --form-factor desktop
+//   node scripts/lighthouse.mjs --base-url <url> --runs 3       (median of three runs)
 //
 // Point it at the production build (the E2E Docker stack), never at `next dev`.
 // Lighthouse is not a project dependency: it runs through a pinned `npx` call and
@@ -20,6 +21,7 @@ import {
   CATEGORIES,
   DEFAULT_FLOOR,
   evaluate,
+  medianRun,
   parseLighthouseArgs,
   summarise,
 } from './lib/lighthouse-eval.mjs';
@@ -51,7 +53,8 @@ function lighthouseArgs(url, formFactor) {
 /** Runs one Lighthouse audit and resolves with the parsed result. */
 function runLighthouse(url, formFactor, chromePath) {
   return new Promise((resolve, reject) => {
-    const child = spawn('npx', lighthouseArgs(url, formFactor).map(shellQuote), {
+    const command = ['npx', ...lighthouseArgs(url, formFactor)].map(shellQuote).join(' ');
+    const child = spawn(command, {
       shell: true,
       env: { ...process.env, CHROME_PATH: chromePath },
       stdio: ['ignore', 'pipe', 'inherit'],
@@ -74,7 +77,7 @@ function runLighthouse(url, formFactor, chromePath) {
 const slug = (page) => (page ? page.replace(/\//g, '-') : 'home');
 
 async function main(argv) {
-  const { baseUrl, only, formFactor } = parseLighthouseArgs(argv);
+  const { baseUrl, only, formFactor, runs } = parseLighthouseArgs(argv);
   const targets = buildTargets(baseUrl, only);
   const { chromium } = await import('@playwright/test');
   const chromePath = chromium.executablePath();
@@ -86,7 +89,19 @@ async function main(argv) {
     console.log(`lighthouse ${formFactor} ${target.url}`);
     let row;
     try {
-      const lhr = await runLighthouse(target.url, formFactor, chromePath);
+      const lhrs = [];
+      for (let run = 0; run < runs; run += 1) {
+        lhrs.push(await runLighthouse(target.url, formFactor, chromePath));
+      }
+      const lhr = medianRun(lhrs);
+      // The host CPU benchmark explains most run-to-run performance variance.
+      const perRun = lhrs
+        .map(
+          (l) =>
+            `${Math.round((l.categories?.performance?.score ?? 0) * 100)} (cpu ${Math.round(l.environment?.benchmarkIndex ?? 0)})`,
+        )
+        .join(', ');
+      console.log(`  performance per run: ${perRun}`);
       writeFileSync(
         path.join(outDir, `${target.locale}-${slug(target.page)}.json`),
         JSON.stringify(lhr),
@@ -113,7 +128,7 @@ async function main(argv) {
   const table = summarise(results);
   writeFileSync(
     path.join(outDir, 'summary.md'),
-    `# Lighthouse ${LIGHTHOUSE_VERSION} (${formFactor}) against ${baseUrl}\n\n${table}\n`,
+    `# Lighthouse ${LIGHTHOUSE_VERSION} (${formFactor}, median of ${runs}) against ${baseUrl}\n\n${table}\n`,
   );
   console.log(`\n${table}`);
   return results.every((r) => r.pass) ? 0 : 1;

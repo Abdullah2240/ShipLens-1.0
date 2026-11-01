@@ -93,11 +93,28 @@ export function buildTargets(baseUrl, only) {
   return match;
 }
 
+/**
+ * The run with the median performance score (the lower middle one for an even count).
+ * Performance varies between runs of the same build; the median of several runs is the
+ * figure Lighthouse's own guidance recommends reporting.
+ * @template T
+ * @param {T[]} runs
+ * @returns {T}
+ */
+export function medianRun(runs) {
+  const score = (lhr) => lhr.categories?.performance?.score ?? 0;
+  const sorted = runs
+    .map((lhr, index) => ({ lhr, index }))
+    .sort((a, b) => score(a.lhr) - score(b.lhr) || a.index - b.index);
+  return sorted[Math.floor((sorted.length - 1) / 2)].lhr;
+}
+
 /** @param {string[]} argv */
 export function parseLighthouseArgs(argv) {
   let baseUrl;
   let only;
   let formFactor = 'mobile';
+  let runs = '1';
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     const [name, inline] = arg.includes('=') ? arg.split(/=(.*)/s) : [arg, undefined];
@@ -105,6 +122,7 @@ export function parseLighthouseArgs(argv) {
     if (name === '--base-url') baseUrl = value();
     else if (name === '--only') only = value();
     else if (name === '--form-factor') formFactor = value();
+    else if (name === '--runs') runs = value();
     else throw new Error(`unknown argument: ${arg}`);
   }
   if (!baseUrl || !/^https?:\/\/[^/\s]+/.test(baseUrl)) {
@@ -113,5 +131,6 @@ export function parseLighthouseArgs(argv) {
   if (!FORM_FACTORS.includes(formFactor)) {
     throw new Error('--form-factor must be mobile or desktop');
   }
-  return { baseUrl: baseUrl.replace(/\/+$/, ''), only, formFactor };
+  if (!/^[1-9]\d*$/.test(String(runs))) throw new Error('--runs must be a positive whole number');
+  return { baseUrl: baseUrl.replace(/\/+$/, ''), only, formFactor, runs: Number(runs) };
 }
