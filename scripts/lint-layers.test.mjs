@@ -34,6 +34,19 @@ describe('layer rules (no-restricted-imports)', { timeout: 180_000 }, () => {
     expect(found.length).toBeGreaterThan(0);
   });
 
+  it.each([
+    'src/platform/rate-limit/index.ts',
+    'src/platform/keepwarm/index.ts',
+    'src/platform/csv/index.ts',
+    'src/platform/i18n/format.ts',
+  ])('rejects framework imports in the kernel file %s', async (filePath) => {
+    const found = await messagesFor(
+      "import { useTranslations } from 'next-intl';\nexport const x = useTranslations;\n",
+      filePath,
+    );
+    expect(found.length).toBeGreaterThan(0);
+  });
+
   it('rejects app code importing a repository', async () => {
     const found = await messagesFor(
       "import { list } from '@/modules/branches/repo';\nexport const x = list;\n",
