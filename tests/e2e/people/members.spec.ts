@@ -95,8 +95,11 @@ test.describe('members list', () => {
 
       const row = page.locator('table tbody tr').filter({ hasText: SEEDED_MEMBER.fullName });
       await expect(row).toHaveCount(1);
-      const code = row.locator('bdi[dir="ltr"]');
+      // The member code is the first cell; the email and phone checked below are LTR
+      // isolates of their own in the contact cell.
+      const code = row.locator('td').first().locator('bdi[dir="ltr"]');
       await expect(code).toHaveCount(1);
+      await expect(code).toHaveText(/^M\d{5,}$/);
       expect(await laidOutLtr(code)).toBe(true);
       const email = row.getByText(SEEDED_MEMBER.email, { exact: true });
       await expect(email).toHaveAttribute('dir', 'ltr');
