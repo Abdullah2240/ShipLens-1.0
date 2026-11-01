@@ -6,7 +6,7 @@ import { BranchCreateForm } from '@/modules/branches/components/BranchCreateForm
 import { BranchesTable } from '@/modules/branches/components/BranchesTable';
 import { InfoNote } from '@/modules/branches/components/form-kit';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function BranchesPage({ params }: { params: Params }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const caps = branchCapabilities(actor.role);
   const [t, branches] = await Promise.all([
     getTranslations('branches'),

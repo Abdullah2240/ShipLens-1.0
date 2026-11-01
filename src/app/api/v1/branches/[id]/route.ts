@@ -1,5 +1,5 @@
 import { branchPatchSchema, getBranch, updateBranch } from '@/modules/branches';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 
 export const dynamic = 'force-dynamic';
 export const GET = route({ auth: 'session', action: 'branch.read' }, async (c) => ({

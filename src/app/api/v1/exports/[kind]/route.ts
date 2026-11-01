@@ -8,7 +8,7 @@ import {
   exportCsv,
 } from '@/modules/reporting';
 import { Forbidden, NotFound } from '@/platform/errors';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 import enExports from '../../../../../../messages/en/exports.json';
 import enTrace from '../../../../../../messages/en/trace.json';
 import urExports from '../../../../../../messages/ur/exports.json';

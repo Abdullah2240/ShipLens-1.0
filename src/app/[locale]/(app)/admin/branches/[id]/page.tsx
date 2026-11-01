@@ -9,7 +9,7 @@ import { BranchLeadsPanel } from '@/modules/branches/components/BranchLeadsPanel
 import { BranchStatusControl } from '@/modules/branches/components/BranchStatusControl';
 import { BRANCHES_PATH, BranchCode } from '@/modules/branches/components/BranchesTable';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the branch on every request.
 export const dynamic = 'force-dynamic';
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function BranchPage({ params }: { params: Params }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const caps = branchCapabilities(actor.role);
   const [t, branch, candidates] = await Promise.all([
     getTranslations('branches'),

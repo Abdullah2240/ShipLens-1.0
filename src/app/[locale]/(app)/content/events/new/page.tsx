@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { listBranchOptionsForContent } from '@/modules/content';
 import { EventEditor } from '@/modules/content/components/EventEditor';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the Active branches on every request.
 export const dynamic = 'force-dynamic';
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function NewContentEventPage({ params }: { params: Params }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   // Also keeps roles without content.read out with the standard not-found page.
   const branches = await orNotFound(listBranchOptionsForContent(getPool(), actor));
 

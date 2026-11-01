@@ -1,5 +1,5 @@
 import { printBodySchema, recordPrint } from '@/modules/reporting';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 
 export const dynamic = 'force-dynamic';
 

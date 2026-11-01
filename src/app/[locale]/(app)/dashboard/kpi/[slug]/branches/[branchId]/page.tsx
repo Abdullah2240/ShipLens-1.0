@@ -24,7 +24,7 @@ import {
 } from '@/modules/reporting/components/drill/drill-view-model';
 import { getPool } from '@/platform/db';
 import { formatDateTime, formatInt, formatMoney } from '@/platform/i18n/format';
-import { getPageActor, orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { getCurrentActor, orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -34,7 +34,7 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
 /** One read per request, shared by the page and its metadata. Null when signed out. */
 const loadLevel = cache(async (figure: FigureId, branchId: string, from?: string, to?: string) => {
-  const found = await getPageActor();
+  const found = await getCurrentActor();
   if (!found) return null;
   return getBranchReports(getPool(), found.actor, figure, branchId, { from, to });
 });
@@ -74,7 +74,7 @@ export default async function BranchReportsPage({
   const { locale: rawLocale, slug, branchId } = await params;
   setRequestLocale(rawLocale);
   const locale = rawLocale as Locale;
-  await requirePageActor();
+  await requireActor();
   const figure = figureFromSlug(slug);
   if (!figure) notFound();
 

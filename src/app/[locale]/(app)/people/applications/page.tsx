@@ -9,7 +9,7 @@ import {
 } from '@/modules/applications/components/ApplicationStatusTabs';
 import { ApplicationsTable } from '@/modules/applications/components/ApplicationsTable';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -34,7 +34,7 @@ export default async function ApplicationsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const sp = await searchParams;
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
 
   // Pending is the default view; `all` lifts the status filter.
   const tab = applicationTabFrom(sp.status);

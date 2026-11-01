@@ -16,7 +16,7 @@ import { getCollectionTimeline } from '@/modules/timeline';
 import { AuditTimeline } from '@/modules/timeline/components/AuditTimeline';
 import { LOCK_DAYS } from '@/platform/config/constants';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 import { formatDate, formatDateTime } from '@/platform/i18n/format';
 import { addDays, pktDate, systemClock } from '@/platform/time';
 
@@ -62,7 +62,7 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
 export default async function CollectionPage({ params }: { params: Params }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const caps = collectionCapabilities(actor.role);
   const pool = getPool();
   const collection = await orNotFound(getCollection(pool, actor, systemClock, id));

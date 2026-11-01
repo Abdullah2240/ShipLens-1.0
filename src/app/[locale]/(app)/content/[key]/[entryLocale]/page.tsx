@@ -4,7 +4,7 @@ import { getEntry, parseEntryParams } from '@/modules/content';
 import { ContentEditor } from '@/modules/content/components/ContentEditor';
 import { isContentKey } from '@/modules/public-site/keys';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the draft on every request.
 export const dynamic = 'force-dynamic';
@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function ContentEntryPage({ params }: { params: Params }) {
   const { locale, key, entryLocale } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const entryParams = await orNotFound(
     Promise.resolve().then(() => parseEntryParams(key, entryLocale)),
   );

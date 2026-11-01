@@ -1,5 +1,5 @@
 import { assignLead, assignLeadSchema } from '@/modules/branches';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 
 export const dynamic = 'force-dynamic';
 export const POST = route(

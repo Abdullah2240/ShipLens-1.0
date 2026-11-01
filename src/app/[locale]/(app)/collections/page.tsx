@@ -19,7 +19,7 @@ import {
 import { CurrentWeekCard } from '@/modules/collections/components/CurrentWeekCard';
 import { LOCK_DAYS } from '@/platform/config/constants';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { formatInt, formatMoney } from '@/platform/i18n/format';
@@ -66,7 +66,7 @@ export default async function CollectionsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const sp = await searchParams;
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const caps = collectionCapabilities(actor.role);
   if (!caps.canLog && !caps.canSeeAll) notFound();
 

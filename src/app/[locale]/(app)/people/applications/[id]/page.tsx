@@ -4,7 +4,7 @@ import { getApplication } from '@/modules/applications';
 import { ApplicationDecision } from '@/modules/applications/components/ApplicationDecision';
 import { ApplicationDetailView } from '@/modules/applications/components/ApplicationDetailView';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the application on every request.
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function ApplicationPage({ params }: { params: Params }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const application = await orNotFound(getApplication(getPool(), actor, id));
 
   return (

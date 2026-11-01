@@ -4,7 +4,7 @@ import {
   submitApplication,
 } from '@/modules/applications';
 import { RateLimited } from '@/platform/errors';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 import { logger } from '@/platform/log/logger';
 
 export const dynamic = 'force-dynamic';
