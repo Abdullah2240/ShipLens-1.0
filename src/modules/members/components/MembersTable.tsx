@@ -1,5 +1,5 @@
 import { useTranslations } from 'next-intl';
-import { DataTable, EmptyState, StatusBadge, type Column } from '@/components/ui';
+import { Bdi, DataTable, EmptyState, Ltr, StatusBadge, type Column } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import { MEMBER_ROLES, type MemberListItem } from '@/modules/members/types';
 import { formatId } from '@/platform/i18n/format';
@@ -13,12 +13,9 @@ export function isKnownRole(role: string): role is (typeof MEMBER_ROLES)[number]
 
 export function MemberCode({ code }: { code: string }) {
   return (
-    <bdi
-      dir="ltr"
-      className="inline-block rounded-md bg-surface-sunken px-1.5 py-0.5 font-mono text-xs font-medium text-text-muted tabular"
-    >
+    <Ltr className="inline-block rounded-md bg-surface-sunken px-1.5 py-0.5 font-mono text-xs font-medium text-text-muted tabular">
       {formatId(code)}
-    </bdi>
+    </Ltr>
   );
 }
 
@@ -46,7 +43,7 @@ export function MembersTable({ members, showBranch = false }: MembersTableProps)
           href={memberHref(row.id)}
           className="font-semibold text-text underline-offset-4 hover:text-primary hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          {row.fullName}
+          <Bdi>{row.fullName}</Bdi>
         </Link>
       ),
       className: 'min-w-40',
@@ -56,7 +53,7 @@ export function MembersTable({ members, showBranch = false }: MembersTableProps)
       header: t('columns.team'),
       render: (row) =>
         row.teamName ? (
-          <span className="text-text">{row.teamName}</span>
+          <Bdi className="text-text">{row.teamName}</Bdi>
         ) : (
           <span className="text-text-muted italic">{t('detail.unassigned')}</span>
         ),
@@ -76,16 +73,8 @@ export function MembersTable({ members, showBranch = false }: MembersTableProps)
       header: t('columns.contact'),
       render: (row) => (
         <span className="flex flex-col items-start gap-0.5 text-xs text-text-muted">
-          {row.email ? (
-            <span dir="ltr" className="max-w-56 truncate">
-              {row.email}
-            </span>
-          ) : null}
-          {row.phone ? (
-            <span dir="ltr" className="whitespace-nowrap tabular">
-              {row.phone}
-            </span>
-          ) : null}
+          {row.email ? <Ltr className="max-w-56 truncate">{row.email}</Ltr> : null}
+          {row.phone ? <Ltr className="whitespace-nowrap tabular">{row.phone}</Ltr> : null}
           {!row.email && !row.phone ? <span aria-hidden="true">—</span> : null}
         </span>
       ),
@@ -96,7 +85,7 @@ export function MembersTable({ members, showBranch = false }: MembersTableProps)
     columns.push({
       key: 'branch',
       header: t('columns.branch'),
-      render: (row) => <span className="whitespace-nowrap text-text">{row.branchName}</span>,
+      render: (row) => <Bdi className="whitespace-nowrap text-text">{row.branchName}</Bdi>,
     });
   }
 

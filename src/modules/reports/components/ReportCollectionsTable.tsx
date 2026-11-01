@@ -1,5 +1,6 @@
 import { useLocale, useTranslations } from 'next-intl';
-import { EmptyState, StatusBadge } from '@/components/ui';
+import { Bdi, EmptyState, Ltr, StatusBadge } from '@/components/ui';
+import { fillSlots, slot } from '@/components/ui/Bidi';
 import { Link } from '@/i18n/navigation';
 import type { ReportCollectionRow } from '../types';
 import { Panel } from './Panel';
@@ -70,9 +71,9 @@ export function ReportCollectionsTable({
                         voided ? 'text-text-muted' : 'text-text'
                       }`}
                     >
-                      <time dateTime={row.collectedOn} className="tabular">
-                        {safeDate(row.collectedOn, locale)}
-                      </time>
+                      <Bdi className="tabular">
+                        <time dateTime={row.collectedOn}>{safeDate(row.collectedOn, locale)}</time>
+                      </Bdi>
                     </Link>
                   </td>
                   <td className={`${cell} min-w-48`}>
@@ -84,17 +85,18 @@ export function ReportCollectionsTable({
                     </span>
                     {voided && row.voidReason ? (
                       <span dir="auto" className="mt-1 block text-xs text-tone-danger-fg">
-                        {t('detail.voidedBecause', { reason: row.voidReason })}
+                        {fillSlots(t('detail.voidedBecause', { reason: slot() }), [
+                          <Bdi key="reason">{row.voidReason}</Bdi>,
+                        ])}
                       </span>
                     ) : null}
                   </td>
                   <td className={`${cell} text-end whitespace-nowrap`}>
-                    <span
-                      dir="ltr"
+                    <Ltr
                       className={`tabular ${voided ? 'text-text-muted line-through' : 'font-medium text-text'}`}
                     >
                       {safeMoney(row.amount, locale)}
-                    </span>
+                    </Ltr>
                   </td>
                   <td className={cell}>
                     <StatusBadge status={row.status} />
@@ -112,12 +114,8 @@ export function ReportCollectionsTable({
                 </span>
               </th>
               <td className="px-5 py-3 text-end whitespace-nowrap">
-                <span
-                  dir="ltr"
-                  data-testid="collections-total"
-                  className="font-semibold text-text tabular"
-                >
-                  {safeMoney(total, locale)}
+                <span data-testid="collections-total" className="font-semibold text-text tabular">
+                  <Ltr>{safeMoney(total, locale)}</Ltr>
                 </span>
               </td>
               <td />

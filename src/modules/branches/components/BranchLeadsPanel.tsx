@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState, type FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
+import { Bdi, Ltr } from '@/components/ui';
 import { useRouter } from '@/i18n/navigation';
 import {
   LEAD_ROLES,
@@ -139,11 +140,11 @@ export function BranchLeadsPanel({
                         </span>
                         <span className="flex min-w-0 flex-col">
                           <span className="truncate text-sm font-medium text-text">
-                            {lead.name}
+                            <Bdi>{lead.name}</Bdi>
                           </span>
-                          <span dir="ltr" className="truncate text-start text-xs text-text-muted">
+                          <Ltr className="truncate text-start text-xs text-text-muted">
                             {lead.email}
-                          </span>
+                          </Ltr>
                         </span>
                       </li>
                     ))}

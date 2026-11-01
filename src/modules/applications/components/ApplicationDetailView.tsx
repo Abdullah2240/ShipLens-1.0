@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { StatusBadge } from '@/components/ui';
+import { Bdi, Ltr, StatusBadge } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import type { ApplicationDetail } from '@/modules/applications/review-types';
@@ -69,12 +69,12 @@ export function ApplicationDetailView({ application: app, decision }: Applicatio
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight break-words text-text">
-              {app.fullName}
+              <Bdi>{app.fullName}</Bdi>
             </h1>
             <StatusBadge status={app.status} />
           </div>
           <p className="flex flex-wrap items-center gap-x-2 text-sm text-text-muted">
-            <span>{app.branchName}</span>
+            <Bdi>{app.branchName}</Bdi>
             <span aria-hidden="true">·</span>
             <span>
               {t('received')} <Instant value={app.createdAt} locale={locale} />
@@ -88,20 +88,14 @@ export function ApplicationDetailView({ application: app, decision }: Applicatio
           <Card title={t('applicant')}>
             <dl className="grid gap-5 sm:grid-cols-2">
               <Fact label={t('email')}>
-                <span dir="ltr" className="break-all">
-                  {app.email}
-                </span>
+                <Ltr className="break-all">{app.email}</Ltr>
               </Fact>
               <Fact label={t('phone')}>
-                {app.phone ? (
-                  <span dir="ltr" className="tabular">
-                    {app.phone}
-                  </span>
-                ) : (
-                  notProvided
-                )}
+                {app.phone ? <Ltr className="tabular">{app.phone}</Ltr> : notProvided}
               </Fact>
-              <Fact label={t('branch')}>{app.branchName}</Fact>
+              <Fact label={t('branch')}>
+                <Bdi>{app.branchName}</Bdi>
+              </Fact>
               <Fact label={t('received')}>
                 <Instant value={app.createdAt} locale={locale} />
               </Fact>
@@ -129,7 +123,9 @@ export function ApplicationDetailView({ application: app, decision }: Applicatio
           ) : null}
           {decided ? (
             <dl className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-              <Fact label={t('decidedBy')}>{app.decidedByName ?? notProvided}</Fact>
+              <Fact label={t('decidedBy')}>
+                {app.decidedByName != null ? <Bdi>{app.decidedByName}</Bdi> : notProvided}
+              </Fact>
               <Fact label={t('decidedOn')}>
                 {app.decidedAt ? <Instant value={app.decidedAt} locale={locale} /> : notProvided}
               </Fact>

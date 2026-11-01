@@ -2,7 +2,7 @@
 
 import { useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { ConfirmDialog, StatusBadge } from '@/components/ui';
+import { Bdi, ConfirmDialog, Ltr, StatusBadge } from '@/components/ui';
 import { Link, useRouter } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import type { MemberPatch } from '@/modules/members/schema';
@@ -225,14 +225,18 @@ export function MemberEditForm({ member, teams, canEdit }: MemberEditFormProps) 
             {t('detail.title')}
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-text">{view.fullName}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-text">
+              <Bdi>{view.fullName}</Bdi>
+            </h1>
             <MemberCode code={view.memberCode} />
             <StatusBadge status={view.status} />
           </div>
           <p className="text-sm text-text-muted">
-            {[view.branchName, teamName ?? t('detail.unassigned'), roleLabel(view.memberRole)].join(
-              ' · ',
-            )}
+            <Bdi>{view.branchName}</Bdi>
+            {' · '}
+            {teamName != null ? <Bdi>{teamName}</Bdi> : t('detail.unassigned')}
+            {' · '}
+            {roleLabel(view.memberRole)}
           </p>
         </header>
       </div>
@@ -243,30 +247,20 @@ export function MemberEditForm({ member, teams, canEdit }: MemberEditFormProps) 
             <Fact label={t('columns.code')}>
               <MemberCode code={view.memberCode} />
             </Fact>
-            <Fact label={t('columns.branch')}>{view.branchName}</Fact>
+            <Fact label={t('columns.branch')}>
+              <Bdi>{view.branchName}</Bdi>
+            </Fact>
             <Fact label={t('detail.email')}>
-              {view.email ? (
-                <span dir="ltr" className="break-all">
-                  {view.email}
-                </span>
-              ) : (
-                notProvided
-              )}
+              {view.email ? <Ltr className="break-all">{view.email}</Ltr> : notProvided}
             </Fact>
             <Fact label={t('detail.phone')}>
-              {view.phone ? (
-                <span dir="ltr" className="tabular">
-                  {view.phone}
-                </span>
-              ) : (
-                notProvided
-              )}
+              {view.phone ? <Ltr className="tabular">{view.phone}</Ltr> : notProvided}
             </Fact>
             <Fact label={t('columns.joined')}>
               {view.joinedOn ? (
-                <time dateTime={view.joinedOn} className="tabular">
-                  {safeDate(view.joinedOn, locale)}
-                </time>
+                <Bdi className="tabular">
+                  <time dateTime={view.joinedOn}>{safeDate(view.joinedOn, locale)}</time>
+                </Bdi>
               ) : (
                 notProvided
               )}
@@ -393,7 +387,9 @@ export function MemberEditForm({ member, teams, canEdit }: MemberEditFormProps) 
             <div className="flex flex-col gap-5">
               <dl className="grid gap-5 sm:grid-cols-3">
                 <Fact label={t('edit.team')}>
-                  {teamName ?? (
+                  {teamName != null ? (
+                    <Bdi>{teamName}</Bdi>
+                  ) : (
                     <span className="text-text-muted italic">{t('detail.unassigned')}</span>
                   )}
                 </Fact>

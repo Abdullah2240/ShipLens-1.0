@@ -1,5 +1,5 @@
 import { useLocale, useTranslations } from 'next-intl';
-import { DataTable, EmptyState, StatusBadge, type Column } from '@/components/ui';
+import { Bdi, DataTable, EmptyState, StatusBadge, type Column } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import type { EventView } from '@/modules/content/event-types';
@@ -60,7 +60,7 @@ function NewEventLink() {
 
 function EventTitle({ event }: { event: EventView }) {
   const t = useTranslations('content.events');
-  if (event.titleEn) return <>{event.titleEn}</>;
+  if (event.titleEn) return <Bdi>{event.titleEn}</Bdi>;
   if (event.titleUr) {
     return (
       <span lang="ur" dir="rtl">
@@ -98,7 +98,7 @@ export function EventsTable({ events }: { events: EventView[] }) {
             <EventTitle event={event} />
           </Link>
           {event.branchName ? (
-            <span className="text-xs text-text-muted">{event.branchName}</span>
+            <Bdi className="text-xs text-text-muted">{event.branchName}</Bdi>
           ) : null}
         </span>
       ),
@@ -120,7 +120,7 @@ export function EventsTable({ events }: { events: EventView[] }) {
       header: t('events.columns.venue'),
       render: (event) =>
         event.location ? (
-          <span className="text-text">{event.location}</span>
+          <Bdi className="text-text">{event.location}</Bdi>
         ) : (
           <span className="text-text-muted">—</span>
         ),

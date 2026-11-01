@@ -54,10 +54,12 @@ export default async function ReportPage({ params }: { params: Params }) {
   const frozen = report.status === 'submitted' || report.status === 'approved';
   const displayedTotal = frozen ? (report.frozenAmount ?? report.liveAmount) : report.liveAmount;
   const note = noteKey(report, caps);
-  const hasActions = report.allowedActions.length > 0;
+  // On phones the actions panel is a fixed bottom bar; a Branch Lead always gets it (the share
+  // button shows even when no action is allowed), so leave room for it.
+  const showsActionBar = report.allowedActions.length > 0 || actor.role === 'branch_lead';
 
   return (
-    <div className={`flex flex-col gap-6 ${hasActions ? 'pb-32 lg:pb-0' : ''}`}>
+    <div className={`flex flex-col gap-6 ${showsActionBar ? 'pb-32 lg:pb-0' : ''}`}>
       <ReportSummary report={report} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]">

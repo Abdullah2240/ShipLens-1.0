@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { useLocale } from 'next-intl';
 import type { Locale } from '@/i18n/routing';
 import { formatDate, formatDateTime, formatId, formatMoney } from '@/platform/i18n/format';
@@ -73,5 +73,24 @@ export function DateText({
     <bdi dir="auto" className={cx('[unicode-bidi:isolate] tabular whitespace-nowrap', className)}>
       <time dateTime={machine}>{text}</time>
     </bdi>
+  );
+}
+
+// Translated sentences with an isolated value: pass slot(n) as the message value, then
+// fillSlots puts the nodes (for example <Bdi>{name}</Bdi>) where the markers landed. The
+// visible text is unchanged; only the value gets its own isolate. Markers are private-use
+// characters that never occur in messages.
+const SLOT_BASE = 0xe000;
+const SLOT_RE = /([\ue000-\ue00f])/;
+
+export function slot(index = 0): string {
+  return String.fromCharCode(SLOT_BASE + index);
+}
+
+export function fillSlots(text: string, nodes: ReactNode[]): ReactNode {
+  const parts = text.split(SLOT_RE);
+  if (parts.length === 1) return text;
+  return parts.map((part, i) =>
+    i % 2 === 1 ? <Fragment key={i}>{nodes[part.charCodeAt(0) - SLOT_BASE]}</Fragment> : part,
   );
 }
