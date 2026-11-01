@@ -205,6 +205,11 @@ test.describe('drill-down levels 1 and 2', () => {
     expect((await page.goto(base))?.status()).toBe(200);
 
     const from = page.locator('main form select[name="from"]');
+    // The dashboard segment streams a loading shell. Once that shell has painted, React holds
+    // the page's reveal for up to 300 ms, which can end after the load event goto waits for;
+    // until then the filter sits in a hidden container outside main. evaluateAll does not
+    // retry, so wait for the filter itself.
+    await expect(from).toBeVisible();
     const months = (
       await from
         .locator('option')
