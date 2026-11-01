@@ -148,10 +148,16 @@ BASE_URL="$URL" SMOKE_DEMO_PASSWORD="$DEMO_PW" node scripts/smoke.mjs
 # 3. Playwright read-only checks in the official browser container, all four projects
 #    (English and Urdu, light and dark, desktop and mobile).
 E2E_DEMO_PASSWORD="$DEMO_PW" npm run e2e:run -- --base-url "$URL" --grep @smoke
+
+# 4. Full post-deploy verification: health with cold-start time, the smoke checks, every
+#    security header, the audit chain and the public report verification. Prints a
+#    Markdown summary for the recorded facts; exit code 0 means every check passed.
+BASE_URL="$URL" SMOKE_DEMO_PASSWORD="$DEMO_PW" node scripts/verify-deploy.mjs --markdown
 ```
 
 Expected: the smoke script prints one `PASS` line per check and ends with exit code 0;
-Playwright reports every `@smoke` test passed. Copy the summary lines (never the
+Playwright reports every `@smoke` test passed; the verification script ends with exit
+code 0 and prints its Markdown block. Copy the summary lines and that block (never the
 password) into [Recorded facts](#recorded-facts).
 
 If the deployed branch does not yet contain the login and account pages, the smoke
