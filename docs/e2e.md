@@ -11,7 +11,7 @@ the dev database in `compose.yaml`:
 | Service      | What it does                                                                                                                                                                                                                             |
 | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `db`         | Postgres 16 on `tmpfs`, database `shiplens_e2e`. No host port, no volume: it disappears with the stack.                                                                                                                                  |
-| `app`        | The production image from `Dockerfile`. On start it applies migrations, seeds the five demo users with a throwaway password (`SEED_ON_BOOT=true`), then starts the server on `E2E_PORT` (default 3100) inside and outside the container. |
+| `app`        | The production image from `Dockerfile`. On start it applies migrations, seeds the five demo users with a throwaway password and the fictional demo dataset (`SEED_ON_BOOT=true`), then starts the server on `E2E_PORT` (default 3100) inside and outside the container. |
 | `playwright` | The official Playwright image at the same version as the `@playwright/test` devDependency. It shares the app's network, so `http://localhost:<E2E_PORT>` is the app and the browser `Origin` equals `APP_ORIGIN`.                        |
 
 Specs and `playwright.config.ts` are mounted into the runner, so editing a spec needs no
@@ -23,6 +23,11 @@ image rebuild.
 # Everything in one go: build, start, wait for health, run all projects, tear down.
 # Exits with Playwright's exit code; the stack and its database are always removed.
 npm run e2e:docker
+
+# The full suite as CI runs it: exact-value specs first on a fresh stack, then the rest
+# (see "Tags and order" below).
+npm run e2e:docker -- --grep @pristine --pass-with-no-tests
+npm run e2e:docker -- --grep-invert @pristine
 
 # Keep the stack up between runs (for example while writing a spec).
 npm run e2e:up
@@ -84,6 +89,28 @@ Tests tagged `@desktop` run in the desktop projects only.
 - Application submissions run in `desktop-en-light` only, because of the per-IP rate
   limit. Specs that change shared global state run in one project and in serial mode.
 
+## Tags and order
+
+- `@smoke`: read-only checks, safe to run against the live deployment.
+- `@pristine`: specs that compare the screen with the exact values of the demo dataset in
+  `db/seed/expected.json` (mounted into the runner; `E2E_EXPECTED_JSON` overrides the
+  path). Other specs approve reports and change data, so run `@pristine` first on a
+  fresh stack and everything else afterwards, as CI does. A single
+  `npm run e2e:docker` runs both kinds side by side and can turn the exact-value checks
+  red.
+- Host-only: `tests/e2e/journeys/tamper.spec.ts` edits a past audit event through
+  `docker compose exec`, checks that the audit chain badge and the public verification
+  page break, restores the exact row and checks that both heal. It skips unless
+  `E2E_DB_EXEC=1`, so container runs and CI skip it. Run it from the host against a stack
+  that is up:
+
+  ```sh
+  E2E_PROJECT=shiplens-e2e E2E_PORT=3100 npm run e2e:up
+  E2E_DB_EXEC=1 E2E_PROJECT=shiplens-e2e E2E_DEMO_PASSWORD=e2e-throwaway-pass-0 \
+    BASE_URL=http://localhost:3100 npx playwright test tests/e2e/journeys/tamper.spec.ts --project desktop-en-light
+  npm run e2e:down
+  ```
+
 ## Parallel stacks
 
 Set `E2E_PROJECT` and `E2E_PORT` so stacks do not collide, for example:
@@ -96,9 +123,12 @@ The wrapper refuses the project name `shiplens`, which holds the dev database vo
 
 ## CI
 
-CI runs `npm run e2e:docker` on every push (with `CI=true`: two workers, one retry,
-`test.only` forbidden, GitHub annotations). The wrapper uses only Node built-ins, so it
-runs before `npm ci`.
+On every push the CI `e2e` job brings the stack up (`npm run e2e:up`), runs the smoke
+script, the security header check (`scripts/check-headers.mjs`) and a non-root check
+against it, then `npm run e2e:run -- --grep @pristine --pass-with-no-tests` followed by
+`npm run e2e:run -- --grep-invert @pristine`, and tears the stack down (with `CI=true`:
+two workers, one retry, `test.only` forbidden, GitHub annotations). The wrapper uses only
+Node built-ins, so it runs before `npm ci`.
 
 ## Reports
 

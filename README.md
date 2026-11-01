@@ -92,7 +92,7 @@ the seed works and what it creates: [db/seed/README.md](db/seed/README.md).
 npm test                    # unit tests
 npm run test:integration    # integration tests against Postgres (TEST_DATABASE_URL, default localhost:5434/shiplens_test)
 npm run test:coverage       # all tests with the coverage thresholds
-npm run e2e:docker          # Playwright against the production image, see docs/e2e.md
+npm run e2e:docker          # Playwright against the production image; full-suite order in docs/e2e.md
 BASE_URL=http://localhost:3100 node scripts/check-headers.mjs   # security headers of a running production build
 npm run lint && npm run typecheck
 npm run permissions:check && npm run i18n:check   # generated permission table, translation parity
