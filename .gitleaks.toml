@@ -1,0 +1,9 @@
+# Secret scan configuration, used by the `secrets` job in CI over the full git history.
+#
+# The default rule set applies unchanged. A full-history scan of every branch found no
+# findings, so there is no allowlist. Add an entry only for a proven false positive, as
+# narrow as possible (one path or one exact value), and give it a description saying why
+# the value is not a secret. Never allowlist a real credential: rotate it instead.
+
+[extend]
+useDefault = true
