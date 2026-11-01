@@ -38,7 +38,7 @@ const TEXT = {
       super_admin: 'سپر ایڈمن',
       finance_reviewer: 'مالیاتی جائزہ کار',
       content_editor: 'مواد ایڈیٹر',
-      branch_lead: 'شاخ لیڈ',
+      branch_lead: 'شاخ کے سربراہ',
       hr_lead: 'ایچ آر لیڈ',
     },
   },
