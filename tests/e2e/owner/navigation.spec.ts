@@ -29,7 +29,7 @@ const ITEMS: Record<
   },
   reports: {
     href: '/reports',
-    label: { en: 'Reports', ur: 'رپورٹس' },
+    label: { en: 'Reports', ur: 'رپورٹیں' },
     heading: { en: 'Weekly reports', ur: 'ہفتہ وار رپورٹیں' },
   },
 };

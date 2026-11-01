@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { getTranslations } from 'next-intl/server';
+import { Bdi } from '@/components/ui/Bidi';
 import { LogoutButton } from '@/modules/auth/ui/LogoutButton';
 import type { Role } from '@/platform/authz/roles';
 import { getCurrentActor } from '@/platform/http/server';
@@ -25,7 +26,7 @@ export async function getShellSession(): Promise<ShellSession> {
     userSlot: (
       <div className="flex items-center gap-3 border-s border-border ps-3">
         <div className="hidden min-w-0 flex-col text-end leading-tight sm:flex">
-          <span className="max-w-44 truncate text-sm font-semibold text-text">{user.name}</span>
+          <Bdi className="max-w-44 truncate text-sm font-semibold text-text">{user.name}</Bdi>
           <span className="truncate text-xs text-text-muted">{t(`roles.${actor.role}`)}</span>
         </div>
         <LogoutButton variant="compact" />

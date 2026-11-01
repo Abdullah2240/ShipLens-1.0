@@ -27,8 +27,8 @@
       "status": "حیثیت",
       "records": "وصولیاں",
       "frozen": "جمع کراتے وقت کا میزان",
-      "submitted": "جمع کرائی گئی",
-      "approved": "منظور ہوئی",
+      "submitted": "جمع کی گئی",
+      "approved": "منظور کی گئی",
       "value": "رقم"
     },
     "weekRange": "<start></start> تا <end></end>",

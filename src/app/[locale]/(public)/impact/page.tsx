@@ -4,6 +4,7 @@ import { TrendChart, TrendTable, formatMonth, type TrendPoint } from '@/componen
 import { ImpactBranches } from '@/components/public/ImpactBranches';
 import { ImpactFigures } from '@/components/public/ImpactFigures';
 import { PublicHero } from '@/components/public/PublicHero';
+import { publicMetadata } from '@/components/public/seo';
 import { DateText } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
@@ -26,7 +27,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     getTranslations({ locale, namespace: 'impact.meta' }),
     getTranslations({ locale, namespace: 'common' }),
   ]);
-  return { title: `${t('title')} | ${common('appName')}`, description: t('description') };
+  return publicMetadata({
+    locale,
+    path: '/impact',
+    title: t('title'),
+    description: t('description'),
+    appName: common('appName'),
+  });
 }
 
 function peakMonth(monthly: PublicImpact['monthly']) {
@@ -188,7 +195,7 @@ export default async function ImpactPage({ params }: PageProps) {
             >
               {t('method.title')}
             </h2>
-            <p className="mt-3 text-base leading-relaxed text-pretty text-text-muted">
+            <p className="mt-3 text-base leading-relaxed text-text-muted">
               {t('method.body')}
             </p>
           </div>
@@ -207,6 +214,7 @@ export default async function ImpactPage({ params }: PageProps) {
           <p className="text-text-muted">{t('cta.lead')}</p>
           <div className="mt-1 flex flex-wrap gap-3">
             <Link
+              prefetch={false}
               href="/get-involved"
               data-impact-cta="getInvolved"
               className="inline-flex h-12 items-center rounded-xl bg-primary px-6 text-base font-semibold text-primary-contrast shadow-card transition-colors hover:bg-primary-hover"
@@ -214,6 +222,7 @@ export default async function ImpactPage({ params }: PageProps) {
               {t('cta.getInvolved')}
             </Link>
             <Link
+              prefetch={false}
               href="/branches"
               data-impact-cta="branches"
               className="inline-flex h-12 items-center rounded-xl border border-border-strong bg-surface-raised px-6 text-base font-semibold text-text transition-colors hover:bg-surface-sunken"

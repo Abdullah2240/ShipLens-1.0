@@ -25,7 +25,9 @@ export function FilterChips({ chips, label }: { chips: ExplainFilterChip[]; labe
           className="inline-flex items-center gap-1.5 rounded-full border border-border bg-surface-raised px-3 py-1 text-xs leading-5"
         >
           <dt className="text-text-muted">{chip.label}</dt>
-          <dd className="font-semibold text-text">{chip.value}</dd>
+          <dd className="font-semibold text-text">
+            <bdi>{chip.value}</bdi>
+          </dd>
         </div>
       ))}
     </dl>

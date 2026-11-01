@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { BranchesByCity } from '@/components/public/BranchesByCity';
 import { PublicHero } from '@/components/public/PublicHero';
+import { publicMetadata } from '@/components/public/seo';
 import { type ContentLocale, listPublicBranches } from '@/modules/public-site';
 import { getPool } from '@/platform/db';
 
@@ -16,7 +17,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     getTranslations({ locale, namespace: 'public.branches' }),
     getTranslations({ locale, namespace: 'common' }),
   ]);
-  return { title: `${t('title')} | ${common('appName')}`, description: t('lead') };
+  return publicMetadata({
+    locale,
+    path: '/branches',
+    title: t('title'),
+    description: t('lead'),
+    appName: common('appName'),
+  });
 }
 
 export default async function BranchesPage({ params }: PageProps) {

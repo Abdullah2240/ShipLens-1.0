@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { publicMetadata } from '@/components/public/seo';
 import { Link } from '@/i18n/navigation';
 
 const PROGRAMS = [
@@ -16,7 +18,24 @@ const PROGRAMS = [
   },
 ] as const;
 
-export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+type PageProps = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const [t, common] = await Promise.all([
+    getTranslations({ locale, namespace: 'public.meta.home' }),
+    getTranslations({ locale, namespace: 'common' }),
+  ]);
+  return publicMetadata({
+    locale,
+    path: '',
+    title: t('title'),
+    description: t('description'),
+    appName: common('appName'),
+  });
+}
+
+export default async function HomePage({ params }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('public.home');
@@ -39,12 +58,14 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
           <p className="max-w-2xl text-lg text-text-muted md:text-xl">{t('lead')}</p>
           <div className="mt-2 flex flex-wrap gap-3">
             <Link
+              prefetch={false}
               href="/get-involved"
               className="inline-flex h-12 items-center rounded-xl bg-primary px-6 text-base font-semibold text-primary-contrast shadow-card transition-colors hover:bg-primary-hover"
             >
               {t('ctaGetInvolved')}
             </Link>
             <Link
+              prefetch={false}
               href="/branches"
               className="inline-flex h-12 items-center rounded-xl border border-border-strong bg-surface-raised px-6 text-base font-semibold text-text transition-colors hover:bg-surface-sunken"
             >
@@ -97,6 +118,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
             ))}
           </ul>
           <Link
+            prefetch={false}
             href="/programs"
             className="mt-8 inline-flex items-center gap-1.5 font-semibold text-primary underline-offset-4 hover:text-primary-hover hover:underline"
           >

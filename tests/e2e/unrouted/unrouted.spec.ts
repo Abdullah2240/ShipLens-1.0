@@ -17,7 +17,7 @@ const TEXT = {
     undone: 'Routing undone: ',
   },
   ur: {
-    tabs: { label: 'منتقلی کی فہرستیں', open: 'منتقلی باقی', recent: 'حال ہی میں منتقل شدہ' },
+    tabs: { label: 'منتقلی کی فہرستیں', open: 'ابھی منتقل نہیں ہوئی', recent: 'حال ہی میں منتقل شدہ' },
     markFor: 'منتقل شدہ نشان زد کریں: ',
     undoFor: 'منتقلی واپس لیں: ',
     confirmMarkTitle: 'مرکزی اکاؤنٹ میں منتقل شدہ نشان زد کریں؟',

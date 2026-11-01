@@ -142,7 +142,7 @@ export function PublicContentPage({
           />
           <SafeMarkdown
             source={body}
-            className="text-base text-pretty md:text-lg [&_a]:font-medium [&_blockquote]:text-text-muted [&_h2]:pt-4 [&_h2]:font-bold [&_h2]:tracking-tight [&_h3]:pt-2 [&_li]:mt-2 [&_li]:marker:text-accent [&>p:first-child]:text-lg [&>p:first-child]:text-text md:[&>p:first-child]:text-xl"
+            className="text-base md:text-lg [&_a]:font-medium [&_blockquote]:text-text-muted [&_h2]:pt-4 [&_h2]:font-bold [&_h2]:tracking-tight [&_h3]:pt-2 [&_li]:mt-2 [&_li]:marker:text-accent [&>p:first-child]:text-lg [&>p:first-child]:text-text md:[&>p:first-child]:text-xl"
           />
         </article>
         {children ? <div className="mt-12 md:mt-16">{children}</div> : null}

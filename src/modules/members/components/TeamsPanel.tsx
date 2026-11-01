@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { DataTable, EmptyState, type Column } from '@/components/ui';
+import { Bdi, DataTable, EmptyState, type Column } from '@/components/ui';
 import { useRouter } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import type { TeamItem } from '@/modules/members/types';
@@ -204,7 +204,7 @@ export function TeamsPanel({ teams, canManage, branches }: TeamsPanelProps) {
             {renameError ? <ErrorText>{t(renameError)}</ErrorText> : null}
           </form>
         ) : (
-          <span className="font-semibold text-text">{nameOf(team)}</span>
+          <Bdi className="font-semibold text-text">{nameOf(team)}</Bdi>
         ),
     },
   ];
@@ -213,9 +213,7 @@ export function TeamsPanel({ teams, canManage, branches }: TeamsPanelProps) {
     columns.push({
       key: 'branch',
       header: t('branch'),
-      render: (team) => (
-        <span className="whitespace-nowrap text-text-muted">{team.branchName}</span>
-      ),
+      render: (team) => <Bdi className="whitespace-nowrap text-text-muted">{team.branchName}</Bdi>,
     });
   }
 
