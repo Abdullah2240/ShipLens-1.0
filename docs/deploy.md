@@ -143,20 +143,28 @@ times in a row (five failures for one email lock it for 15 minutes).
 ## Vercel: full live browser run (2026-11-01)
 
 Run from a developer machine in Pakistan against `https://shiplens-two.vercel.app`, with the
-Playwright image and the five demo logins. Tests that create or change data are guarded to
-the `desktop-en-light` project, which was **not** run in full on the live site; in that
-project only the 25 spec files that never write were run.
+Playwright image and the five demo logins, in all four projects (English and Urdu, light and
+dark, desktop and mobile). Tests that create or change data are guarded to `desktop-en-light`;
+they were run there last, on the live site, and left their rows behind.
 
-| Pass  | Projects                                                       | Result                                                                 |
-| ----- | -------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| 1     | desktop-ur-dark, mobile-en-dark, mobile-ur-light (all specs)   | 440 passed, 167 skipped by design, 16 failed on the default 30 s limit |
-| 2     | desktop-en-light (25 write-free spec files)                    | 129 passed, 21 skipped by design, 2 failed on the default 30 s limit   |
-| Retry | the 18 failures, one worker, 120 s limit, assertions unchanged | 17 passed on the first retry; the last passed 6 of 6 when run alone    |
+| Pass          | Scope                                                              | Result                                                                   |
+| ------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| 1             | desktop-ur-dark, mobile-en-dark, mobile-ur-light, all specs        | 440 passed, 167 skipped by design, 16 failed on the default 30 s limit   |
+| 2             | desktop-en-light, the 25 spec files that never write               | 129 passed, 21 skipped by design, 2 failed on the default 30 s limit     |
+| 3             | desktop-en-light, the 14 spec files that write data                | 58 passed, 8 skipped by design, 1 failed (real bug), 2 not run behind it |
+| Retries       | every failure above, one worker, 120 s limit, assertions unchanged | all passed; the one URL assertion that failed twice passed 6 of 6 alone  |
+| After the fix | whole branch-register file, 3 repeats                              | 18 of 18 passed                                                          |
 
-Every failure was a timeout, a dropped connection or a slow page transition (one URL
-assertion with a 7 s window). Vercel logs showed no 5xx in the window, and the page HTML
-answered in about 1 to 2 s; static files and audit pages from Pakistan to US East are
-slower. No test failed on what it checks.
+The 18 timeout failures were slow requests (Pakistan to US East) and dropped connections;
+Vercel logs showed no 5xx in the window. The one real bug was in the branch details form: a
+page refresh after a status change reset every field, so text typed just before it landed was
+wiped and Save changes went back to disabled. It is fixed in PR #14 (62411c1), with two
+regression tests. The tamper journey needs host Docker access and was not run live; it runs
+in CI. `verify-deploy` passed 102 of 102 on the Git-deployed build.
+
+The data-writing pass left test rows on the live database (branches, members, content,
+approved reports, audit rows). To return to the demo state, wipe the schema and run step 5
+again; every report ID and verification code is regenerated.
 
 ## Vercel: connect Git (optional)
 
