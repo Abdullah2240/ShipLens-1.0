@@ -62,7 +62,8 @@ test.describe('branch register', () => {
 
     const row = page.locator('tbody tr', { hasText: name });
     await expect(row).toBeVisible();
-    await expect(row.locator('bdi')).toHaveText(/^BR\d{3,}$/);
+    // The code is the LTR isolate in the first cell; name, city and date are isolates too.
+    await expect(row.locator('td').first().locator('bdi[dir="ltr"]')).toHaveText(/^BR\d{3,}$/);
     await expect(row).toContainText('Forming');
     await expect(row).toContainText('Hyderabad');
 
