@@ -14,7 +14,7 @@ export default defineConfig([
     files: [
       'src/modules/**/service*.ts',
       'src/modules/**/repo*.ts',
-      'src/platform/{authz,audit,db,time,money,errors,config,log}/**',
+      'src/platform/{authz,audit,db,time,money,errors,config,log,csv,rate-limit,keepwarm,i18n}/**',
     ],
     rules: {
       'no-restricted-imports': [

@@ -15,6 +15,8 @@ export interface ReportShareSummary {
   amount: string;
   collectionCount: number;
   amountIsFrozen: boolean;
+  /** Public verification link of an approved report (no sign-in); null for any other status. */
+  verifyUrl?: string | null;
 }
 
 /** A translator bound to the `share` namespace (next-intl `t` or `createTranslator`). */
@@ -48,7 +50,10 @@ const UNSAFE_TEXT = /[\r\n\u2028\u2029\u202a-\u202e\u2066-\u2069]+/g;
 
 const clean = (value: string) => value.replace(UNSAFE_TEXT, ' ').replace(/\s+/g, ' ').trim();
 
-/** The share message: five lines (branch, week, status, total, link), plus any appended lines. */
+/**
+ * The share message: five lines (branch, week, status, total, link), then the public
+ * verification line when the summary has a verifyUrl, plus any appended lines.
+ */
 export function buildShareText(
   t: Translate,
   s: ReportShareSummary,
@@ -69,7 +74,9 @@ export function buildShareText(
     // Never isolated: a trailing control character could be swallowed into the link.
     link,
   });
-  return [body, ...(options.appendLines ?? [])].join('\n');
+  // Not isolated either, for the same reason as the share link.
+  const verify = s.verifyUrl ? [t('verifyLine', { url: s.verifyUrl })] : [];
+  return [body, ...verify, ...(options.appendLines ?? [])].join('\n');
 }
 
 /** A wa.me link with the message prefilled; WhatsApp lets the user pick the chat. */

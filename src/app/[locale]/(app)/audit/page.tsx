@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { AuditChainSection } from '@/components/verification/AuditChainSection';
 import { Link } from '@/i18n/navigation';
 import { getAuditFacets, listAuditEvents, parseAuditQuery } from '@/modules/audit-log';
 import {
@@ -9,7 +10,7 @@ import {
 import { AuditFilters } from '@/modules/audit-log/components/AuditFilters';
 import { auditHref, olderHref } from '@/modules/audit-log/components/audit-entity-link';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -33,8 +34,9 @@ export default async function AuditPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const query = parseAuditQuery(await searchParams);
-  const { actor } = await requirePageActor();
+  const search = await searchParams;
+  const query = parseAuditQuery(search);
+  const { actor } = await requireActor();
   const pool = getPool();
   // Roles without audit access get Forbidden from the service: the not-found page.
   const [[page, facets], t] = await Promise.all([
@@ -51,7 +53,13 @@ export default async function AuditPage({
             <p className="max-w-2xl text-sm leading-relaxed text-text-muted">{t('lead')}</p>
           </div>
           {/* Status badges for the trail itself sit here, at the inline end of the title. */}
-          <div data-audit-header-badges className="flex flex-wrap items-center gap-2" />
+          <div data-audit-header-badges className="flex flex-wrap items-center gap-2">
+            <AuditChainSection
+              locale={locale}
+              fresh={search.chain === 'fresh'}
+              path={auditHref(query)}
+            />
+          </div>
         </div>
         {page.restricted ? <AuditRestrictedNotice /> : null}
       </header>

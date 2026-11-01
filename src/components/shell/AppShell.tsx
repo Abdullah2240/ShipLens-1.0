@@ -33,12 +33,21 @@ export function AppShell({
       <header className="sticky top-0 z-30 border-b border-border bg-surface-raised print:hidden">
         <div className="mx-auto flex w-full max-w-7xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-2 md:px-6">
           <BrandLink />
+          <div className="ms-auto flex items-center gap-2">
+            <LanguageSwitcher />
+            <ThemeToggle />
+            {userSlot}
+          </div>
+          {/* The primary nav is its own full-width row under the brand and controls: Super
+              Admin's ten items do not fit beside them at desktop widths. Phones scroll the
+              row sideways; from md up the items wrap onto another line rather than being
+              clipped. It follows the controls in the DOM, so focus order matches the view. */}
           {items.length > 0 ? (
             <nav
               aria-label={t('appNavLabel')}
-              className="order-last -mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4 pb-1 md:order-none md:mx-0 md:w-auto md:flex-1 md:px-0 md:pb-0"
+              className="-mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4 pb-1 md:mx-0 md:w-full md:overflow-visible md:px-0 md:pb-0"
             >
-              <ul className="flex min-w-max items-center gap-1">
+              <ul className="flex min-w-max items-center gap-1 md:min-w-0 md:flex-wrap">
                 {items.map((item) => {
                   const active = isActive(pathname, item.href);
                   return (
@@ -46,7 +55,7 @@ export function AppShell({
                       <Link
                         href={item.href}
                         aria-current={active ? 'page' : undefined}
-                        className={`inline-flex h-9 items-center rounded-lg px-3 text-sm transition-colors ${
+                        className={`inline-flex h-9 items-center rounded-lg px-3 text-sm whitespace-nowrap transition-colors ${
                           active
                             ? 'bg-accent-soft font-semibold text-text'
                             : 'text-text-muted hover:bg-surface-sunken hover:text-text'
@@ -60,11 +69,6 @@ export function AppShell({
               </ul>
             </nav>
           ) : null}
-          <div className="ms-auto flex items-center gap-2">
-            <LanguageSwitcher />
-            <ThemeToggle />
-            {userSlot}
-          </div>
         </div>
       </header>
       <main

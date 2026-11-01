@@ -1,5 +1,5 @@
 import { getPublicImpact } from '@/modules/reporting';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 
 // Reads the database on every request (through the short impact cache); never at build time.
 export const dynamic = 'force-dynamic';

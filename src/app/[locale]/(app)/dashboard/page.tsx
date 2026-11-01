@@ -16,7 +16,7 @@ import {
 } from '@/modules/reporting/components/dashboard/dashboard-view-model';
 import { getPool } from '@/platform/db';
 import { formatDateTime } from '@/platform/i18n/format';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -41,7 +41,7 @@ export default async function DashboardPage({
   const { locale: rawLocale } = await params;
   setRequestLocale(rawLocale);
   const locale = rawLocale as Locale;
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const filters = parseReportingFilters(await searchParams);
   const pool = getPool();
   const ranged = Boolean(filters.from || filters.to);

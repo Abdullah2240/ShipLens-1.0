@@ -160,6 +160,64 @@ describe('buildShareText content rules', () => {
   });
 });
 
+describe('buildShareText verification line', () => {
+  const VERIFY = 'https://shiplens.example/verify/7K2QH-M9XWD?s=0123456789abcdef';
+  const approved: ReportShareSummary = { ...SUMMARY, status: 'approved', verifyUrl: VERIFY };
+
+  it('adds the public check line after the link for an approved report (English)', () => {
+    const lines = build('en', approved).split('\n');
+    expect(lines).toHaveLength(6);
+    expect(lines[4]).toBe(`Open (login required): ${LINK}`);
+    expect(lines[5]).toBe(`Check this report (no login needed): ${VERIFY}`);
+  });
+
+  it('adds the line in Urdu with the link unwrapped and isolates still balanced', () => {
+    const text = build('ur', approved);
+    const lines = text.split('\n');
+    expect(lines).toHaveLength(6);
+    expect(lines[5]).toBe(`اس رپورٹ کی تصدیق کریں (سائن اِن کی ضرورت نہیں): ${VERIFY}`);
+    expect(lines[5]).not.toMatch(/[⁦-⁩]/);
+    expect(text.split(FSI).length).toBe(text.split(PDI).length);
+  });
+
+  it('adds nothing when verifyUrl is null or absent', () => {
+    expect(build('en', { ...SUMMARY, verifyUrl: null }).split('\n')).toHaveLength(5);
+    expect(build('ur', { ...SUMMARY, verifyUrl: null })).toBe(build('ur'));
+  });
+
+  it('keeps appended lines after the verification line', () => {
+    const text = buildShareText(
+      translator('en'),
+      approved,
+      LINK,
+      { amount: 'a', weekStart: 'b', weekEnd: 'c', status: 'd' },
+      { appendLines: ['Extra line'] },
+    );
+    expect(text.split('\n').slice(4)).toEqual([
+      `Open (login required): ${LINK}`,
+      `Check this report (no login needed): ${VERIFY}`,
+      'Extra line',
+    ]);
+  });
+
+  it('carries only the two links and no personal data', () => {
+    for (const locale of ['en', 'ur'] as const) {
+      const text = build(locale, approved);
+      expect(text.match(/https?:\/\/\S+/g)).toEqual([LINK, VERIFY]);
+      expect(text).not.toContain('@');
+    }
+  });
+
+  it('round-trips through the wa.me link with the extra line', () => {
+    for (const locale of ['en', 'ur'] as const) {
+      const text = build(locale, approved);
+      const url = whatsappUrl(text);
+      expect(new URL(url).searchParams.get('text')).toBe(text);
+      expect(url.slice('https://wa.me/?text='.length)).not.toMatch(/[\s?&#]/);
+    }
+  });
+});
+
 describe('whatsappUrl', () => {
   it('encodes newlines, Urdu text and the link so they round-trip', () => {
     for (const locale of ['en', 'ur'] as const) {

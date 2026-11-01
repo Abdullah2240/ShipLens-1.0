@@ -13,7 +13,9 @@ import { hashPassword } from '../../scripts/lib/password.mjs';
 
 // Different from the migrator's key (727274): the boot hook calls the seed right after
 // migrating, and a separate key can never deadlock against the migrator's session.
-const SEED_LOCK_KEY = 727275;
+// Different from the audit chain trigger's key (727275) too: sharing it would make every
+// audited write of a running instance wait for the whole seed.
+const SEED_LOCK_KEY = 727276;
 const MIN_PASSWORD_LENGTH = 12;
 const DEFAULT_STEPS_DIR = new URL('./steps/', import.meta.url);
 

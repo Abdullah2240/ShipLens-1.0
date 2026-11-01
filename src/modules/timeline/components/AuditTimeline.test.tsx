@@ -220,7 +220,7 @@ describe('AuditTimeline (ur)', () => {
     expect(container.querySelector('h2')).toHaveTextContent('سرگرمی');
     const amend = itemFor('2');
     expect(within(amend).getByText('وصولی میں ترمیم کی گئی')).toBeInTheDocument();
-    expect(amend).toHaveTextContent('بطور شاخ لیڈ');
+    expect(amend).toHaveTextContent('بطور شاخ کے سربراہ');
     expect(within(amend).getByText('PKR 1,500.50')).toBeInTheDocument();
     expect(
       within(amend).getByText(formatDateTime(new Date('2026-10-27T09:30:00.000Z'), 'ur')),

@@ -5,6 +5,7 @@
   "opened": "WhatsApp opens in a new tab with the message ready to send.",
   "openAgain": "Open WhatsApp again",
   "text": "{branch} ({code}) weekly report\nWeek: {weekStart} to {weekEnd}\nStatus: {status}\nTotal: {amount} from {count, plural, one {{countText} collection} other {{countText} collections}}\nOpen (login required): {link}",
+  "verifyLine": "Check this report (no login needed): {url}",
   "errors": {
     "forbidden": "Only the lead of this branch can share its reports.",
     "not_found": "This report could not be found. It may belong to another branch.",

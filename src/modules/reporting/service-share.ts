@@ -2,6 +2,7 @@
 // branch's weekly reports; the summary read and its report.share audit row commit in one
 // transaction. The link points at an ordinary scoped page that requires a sign-in.
 import { z } from 'zod';
+import { getReportVerification } from '@/modules/verification';
 import { command } from '@/platform/audit/command';
 import type { CommandContext } from '@/platform/audit/types';
 import { authorize, type Actor } from '@/platform/authz';
@@ -29,6 +30,25 @@ export interface ShareResult {
 /** The sign-in protected landing page for a shared report. */
 export function shareLink(appOrigin: string, locale: ShareLocale, reportId: string): string {
   return `${appOrigin.replace(/\/+$/, '')}/${locale}/share/reports/${reportId}`;
+}
+
+/**
+ * The public verification link of an approved report (opens without a sign-in). Read after
+ * the share is recorded, so the audit row is unchanged. Any other status gets null.
+ */
+async function verifyUrlOf(
+  ctx: CommandContext,
+  summary: ReportShareSummary,
+  appOrigin: string,
+): Promise<string | null> {
+  if (summary.status !== 'approved' || !ctx.actor) return null;
+  try {
+    const { path } = await getReportVerification(ctx.pool, ctx.actor, summary.reportId);
+    return `${appOrigin.replace(/\/+$/, '')}${path}`;
+  } catch (err) {
+    if (err instanceof NotFound) return null;
+    throw err;
+  }
 }
 
 /**
@@ -69,7 +89,10 @@ export async function shareReport(
     return result;
   });
 
-  return { summary, link: shareLink(opts.appOrigin, opts.locale, summary.reportId) };
+  return {
+    summary: { ...summary, verifyUrl: await verifyUrlOf(ctx, summary, opts.appOrigin) },
+    link: shareLink(opts.appOrigin, opts.locale, summary.reportId),
+  };
 }
 
 /**

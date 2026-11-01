@@ -78,6 +78,7 @@ describe('POST /api/v1/reports/:id/share', () => {
       amount: '300.00',
       collectionCount: 1,
       amountIsFrozen: true,
+      verifyUrl: null,
     });
     expect(body.data.link).toBe(`${origin()}/ur/share/reports/${s.reports.aSubmitted}`);
     const rows = await shareAudits();

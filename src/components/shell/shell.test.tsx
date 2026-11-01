@@ -199,6 +199,25 @@ describe.each(LOCALES)('shells in %s', (locale) => {
     expectChrome();
   });
 
+  it('AppShell puts the primary nav after the header controls, as its own row', () => {
+    renderWithIntl(
+      <AppShell
+        items={navForRole(allLive(appNav), 'super_admin')}
+        userSlot={<span data-testid="user">Amina</span>}
+      >
+        x
+      </AppShell>,
+      { locale, namespaces: NAMESPACES },
+    );
+    const primary = screen.getByRole('navigation', { name: text(locale, 'appNavLabel') });
+    // Focus order follows the view: brand and controls first, then the nav row below them.
+    expect(
+      screen.getByTestId('user').compareDocumentPosition(primary) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(within(primary).getAllByRole('link')).toHaveLength(10);
+  });
+
   it('AppShell without items renders no primary nav but keeps the switcher', () => {
     renderWithIntl(<AppShell items={[]}>x</AppShell>, { locale, namespaces: NAMESPACES });
     expect(screen.queryByRole('navigation', { name: text(locale, 'appNavLabel') })).toBeNull();
@@ -210,7 +229,7 @@ describe.each(LOCALES)('shells in %s', (locale) => {
       <PublicShell>
         <h1>page</h1>
       </PublicShell>,
-      { locale, namespaces: NAMESPACES },
+      { locale, namespaces: [...NAMESPACES, 'verify'] },
     );
 
     const main = screen.getByRole('navigation', { name: text(locale, 'publicNavLabel') });
@@ -219,7 +238,21 @@ describe.each(LOCALES)('shells in %s', (locale) => {
         .getAllByRole('link')
         .map((a) => a.getAttribute('href')),
     ).toEqual(publicNav.map((i) => i.href));
-    expect(screen.getByRole('contentinfo')).toHaveTextContent(text(locale, 'footer.tagline'));
+    const footer = screen.getByRole('contentinfo');
+    expect(footer).toHaveTextContent(text(locale, 'footer.tagline'));
+    const verifyFooter = (
+      JSON.parse(
+        readFileSync(
+          path.resolve(import.meta.dirname, `../../../messages/${locale}/verify.json`),
+          'utf8',
+        ),
+      ) as { footer: { link: string; hint: string } }
+    ).footer;
+    expect(footer).toHaveTextContent(verifyFooter.hint);
+    expect(within(footer).getByRole('link', { name: verifyFooter.link })).toHaveAttribute(
+      'href',
+      `/${locale}/verify`,
+    );
     expectChrome();
   });
 

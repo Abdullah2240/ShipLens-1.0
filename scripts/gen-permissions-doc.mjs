@@ -44,7 +44,10 @@ function render() {
   lines.push('- Identical 404 when a permitted role asks for a missing or out-of-scope record.');
   lines.push('- 409 for a wrong state.');
   lines.push('- 422 for invalid input.');
-  lines.push('- 429 for login throttling.');
+  lines.push(
+    '- 429 with `Retry-After` for login throttling and for the rate-limited public endpoints ' +
+      '(POST /api/v1/public/applications, GET /api/v1/public/verify/{code}).',
+  );
   lines.push('- Role and branch always come from the server session.');
   lines.push('');
   lines.push('## Public endpoints');

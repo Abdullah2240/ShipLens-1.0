@@ -1,5 +1,5 @@
 import { listAuditEvents, parseAuditQuery } from '@/modules/audit-log';
-import { route } from '@/platform/http/interim-route';
+import { route } from '@/platform/http/route';
 
 // audit.read_finance admits exactly the roles with any audit viewer access (Super Admin and
 // Finance Reviewer); the service then decides between full and finance-only access.

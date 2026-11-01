@@ -18,8 +18,8 @@ await runSeed({ connectionString, env: process.env, log: console.log }); // -> {
   current run did not insert (the only exception is the password rotation below).
 - **One transaction.** All steps of a run share one transaction. A step that throws rolls
   back everything the run wrote, so a container never starts half-seeded.
-- **Serialised.** The runner holds the session advisory lock `727275` (the migrator uses
-  `727274`), so concurrent boots seed once.
+- **Serialised.** The runner holds the session advisory lock `727276` (the migrator uses
+  `727274`, the audit chain trigger `727275`), so concurrent boots seed once.
 - **Allowed imports.** Node built-ins, `pg`, files under `db/seed/`, and
   `scripts/lib/password.mjs`. Nothing else exists in the runtime image; in particular
   nothing from `src/` (TypeScript is not compiled there).

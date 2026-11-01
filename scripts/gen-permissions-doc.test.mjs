@@ -43,4 +43,15 @@ describe('gen-permissions-doc', () => {
     expect(run('--out', out)).toBe(0);
     expect(readFileSync(out, 'utf8')).toContain('| report.approve |');
   });
+
+  it('names every rate-limited endpoint in the 429 rule', () => {
+    const out = path.join(tmp, 'rules.md');
+    expect(run('--out', out)).toBe(0);
+    const rule = readFileSync(out, 'utf8')
+      .split(/\r?\n/)
+      .find((line) => line.startsWith('- 429'));
+    expect(rule).toContain('login');
+    expect(rule).toContain('/api/v1/public/applications');
+    expect(rule).toContain('/api/v1/public/verify/{code}');
+  });
 });

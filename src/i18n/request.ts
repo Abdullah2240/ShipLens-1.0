@@ -22,6 +22,7 @@ export const NAMESPACES = [
   'unrouted',
   'exports',
   'share',
+  'verify',
 ] as const;
 
 export default getRequestConfig(async ({ requestLocale }) => {

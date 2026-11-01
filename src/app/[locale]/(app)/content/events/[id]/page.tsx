@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { getEvent, listBranchOptionsForContent } from '@/modules/content';
 import { EventEditor } from '@/modules/content/components/EventEditor';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the draft on every request.
 export const dynamic = 'force-dynamic';
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function ContentEventPage({ params }: { params: Params }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const pool = getPool();
   const [event, branches] = await orNotFound(
     Promise.all([getEvent(pool, actor, id), listBranchOptionsForContent(pool, actor)]),

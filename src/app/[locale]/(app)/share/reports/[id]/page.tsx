@@ -4,7 +4,7 @@ import { notFound, redirect } from 'next/navigation';
 import { routing, type Locale } from '@/i18n/routing';
 import { resolveSharedReport } from '@/modules/reporting';
 import { getPool } from '@/platform/db';
-import { getPageActor, orNotFound } from '@/platform/http/interim-server';
+import { getCurrentActor, orNotFound } from '@/platform/http/server';
 
 // The link inside a WhatsApp share (WA-02). An ordinary scoped page: signed out it sends the
 // visitor to the login page with this path as `next`; signed in it checks report.read in
@@ -29,7 +29,7 @@ export default async function SharedReportPage({ params }: { params: Params }) {
   if (!UUID.test(id)) notFound();
   const reportId = id.toLowerCase();
 
-  const found = await getPageActor();
+  const found = await getCurrentActor();
   if (!found) {
     // A locale-prefixed next path: the login page navigates to it without re-prefixing.
     const next = `/${locale}/share/reports/${reportId}`;

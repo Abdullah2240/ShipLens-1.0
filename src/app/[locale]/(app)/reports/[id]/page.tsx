@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { ReportVerificationSection } from '@/components/verification/ReportVerificationSection';
 import { getReport, type ReportDetail } from '@/modules/reports';
 import { reportCapabilities, type ReportCapabilities } from '@/modules/reports/capabilities';
 import { Panel } from '@/modules/reports/components/Panel';
@@ -11,7 +12,7 @@ import { ShareReportButton } from '@/modules/reporting/components/share/ShareRep
 import { getReportTimeline } from '@/modules/timeline';
 import { AuditTimeline } from '@/modules/timeline/components/AuditTimeline';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session, the report and its timeline on every request.
 export const dynamic = 'force-dynamic';
@@ -40,7 +41,7 @@ function noteKey(report: ReportDetail, caps: ReportCapabilities) {
 export default async function ReportPage({ params }: { params: Params }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const caps = reportCapabilities(actor.role);
   const pool = getPool();
   const [t, report, timeline] = await Promise.all([
@@ -64,7 +65,7 @@ export default async function ReportPage({ params }: { params: Params }) {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]">
         {/* Totals first on phones; a sticky side column on wide screens. */}
-        <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
+        <aside className="flex flex-col gap-4 lg:sticky lg:top-32 lg:col-start-2 lg:row-start-1">
           <ReportTotals report={report} note={note ? t(note) : undefined} />
           <ReportActions
             reportId={report.id}
@@ -87,6 +88,9 @@ export default async function ReportPage({ params }: { params: Params }) {
             totalIsFrozen={frozen}
           />
           <ReportHistory events={report.events} />
+          {report.status === 'approved' ? (
+            <ReportVerificationSection reportId={report.id} actor={actor} locale={locale} />
+          ) : null}
           {timeline ? (
             <Panel title={t('timeline')} description={t('timelineBody')}>
               <AuditTimeline entries={timeline} headingLevel={3} />

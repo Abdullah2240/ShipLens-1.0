@@ -1,0 +1,23 @@
+version: 2
+
+# Weekly update proposals for npm packages, the Docker base images and the pinned
+# workflow actions. Every proposal goes through the full CI gate like any other change.
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

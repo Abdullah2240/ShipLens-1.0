@@ -1,7 +1,10 @@
 // Audited CSV exports (EXP-01, EXP-02, EXP-04). The reads run through the same canonical
-// queries as the dashboard and the drill-down, inside the export.create command, so the
-// file and its audit row commit together: a failed audit produces no file. The audit
-// event records only the kind and the row count, never exported values.
+// queries as the dashboard and the drill-down, in one READ ONLY REPEATABLE READ snapshot.
+// The export.create command then records the export at READ COMMITTED (the audit chain
+// trigger must see the newest chain head after it takes its lock, which an earlier
+// repeatable-read snapshot cannot), and the file is returned only after that audit row
+// commits: a failed audit produces no file. The audit event records only the kind and the
+// row count, never exported values.
 import { randomUUID } from 'node:crypto';
 import { command } from '@/platform/audit/command';
 import type { CommandContext } from '@/platform/audit/types';
@@ -23,7 +26,7 @@ import {
 import { isMoneyFigure } from './figures';
 import { normaliseFilters } from './filters';
 import { selectFigureCollections, selectFigureReports, selectUnrouted } from './repo-kpi';
-import { getDashboardSummary } from './service-dashboard';
+import { getDashboardSummary, withReadSnapshot } from './service-dashboard';
 import type { MoneyFigureId, ReportingFilters } from './types';
 
 export type { ExportKind, ExportLabels } from './export-rows';
@@ -132,31 +135,28 @@ export async function exportCsv(
   const reportId = typeof q.reportId === 'string' ? q.reportId : undefined;
   const at = ctx.clock.now();
 
-  const built = await command(ctx, 'export.create', async (tx, audit) => {
-    // One snapshot for every read in the file; it must be the first statement.
-    await tx.query('SET TRANSACTION ISOLATION LEVEL REPEATABLE READ');
-    let result: Built;
+  // One read-only snapshot for every read in the file.
+  const built = await withReadSnapshot(ctx.pool, async (snapshot): Promise<Built> => {
     switch (kind) {
       case 'summary':
-        result = await buildSummary(tx, actor, f, labels);
-        break;
+        return buildSummary(snapshot, actor, f, labels);
       case 'reports':
-        result = await buildReports(tx, scope, figure, f, labels);
-        break;
+        return buildReports(snapshot, scope, figure, f, labels);
       case 'collections':
-        result = await buildCollections(tx, scope, figure, f, reportId, labels);
-        break;
+        return buildCollections(snapshot, scope, figure, f, reportId, labels);
       case 'unrouted':
-        result = await buildUnrouted(tx, scope, f, pktDate(at), labels);
-        break;
+        return buildUnrouted(snapshot, scope, f, pktDate(at), labels);
     }
+  });
+
+  // Recorded at READ COMMITTED (never inside the snapshot above); no file without its row.
+  await command(ctx, 'export.create', async (_tx, audit) => {
     audit({
       action: 'export.create',
       entityType: 'export',
       entityId: randomUUID(),
-      after: { kind, row_count: result.rowCount },
+      after: { kind, row_count: built.rowCount },
     });
-    return result;
   });
 
   const usesFigure = kind === 'reports' || kind === 'collections';
