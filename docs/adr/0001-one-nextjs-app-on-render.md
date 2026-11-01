@@ -1,6 +1,6 @@
 # 0001 One Next.js full-stack app plus Postgres, one Docker image on Render
 
-- Status: Accepted
+- Status: Accepted; hosting superseded by [0017](0017-production-on-vercel-and-neon.md) (production runs on Vercel + Neon; this single-container design remains the Render alternative)
 - Date: 2026-10-28
 
 ## Context
