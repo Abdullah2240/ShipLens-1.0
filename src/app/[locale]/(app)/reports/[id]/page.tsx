@@ -65,7 +65,7 @@ export default async function ReportPage({ params }: { params: Params }) {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]">
         {/* Totals first on phones; a sticky side column on wide screens. */}
-        <aside className="flex flex-col gap-4 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1">
+        <aside className="flex flex-col gap-4 lg:sticky lg:top-32 lg:col-start-2 lg:row-start-1">
           <ReportTotals report={report} note={note ? t(note) : undefined} />
           <ReportActions
             reportId={report.id}

@@ -381,7 +381,7 @@ export function ContentEditor({ entry }: { entry: ContentEntryView }) {
           </div>
         </form>
 
-        <aside className="lg:sticky lg:top-24">
+        <aside className="lg:sticky lg:top-32">
           <details
             open
             className="group rounded-card border border-border bg-surface-sunken p-5 text-sm text-text-muted"
