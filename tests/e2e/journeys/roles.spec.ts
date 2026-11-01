@@ -54,7 +54,7 @@ const APP_NAV: readonly NavEntry[] = [
   },
   {
     href: '/reports',
-    label: { en: 'Reports', ur: 'رپورٹس' },
+    label: { en: 'Reports', ur: 'رپورٹیں' },
     roles: ['super_admin', 'finance_reviewer', 'branch_lead'],
     live: true,
   },
@@ -66,7 +66,7 @@ const APP_NAV: readonly NavEntry[] = [
   },
   {
     href: '/people/members',
-    label: { en: 'Members', ur: 'ارکان' },
+    label: { en: 'Members', ur: 'اراکین' },
     roles: ['super_admin', 'hr_lead', 'branch_lead'],
     live: true,
   },
@@ -84,7 +84,7 @@ const APP_NAV: readonly NavEntry[] = [
   },
   {
     href: '/audit',
-    label: { en: 'Audit log', ur: 'آڈٹ لاگ' },
+    label: { en: 'Audit log', ur: 'آڈٹ ریکارڈ' },
     roles: ['finance_reviewer', 'super_admin'],
     live: true,
   },
