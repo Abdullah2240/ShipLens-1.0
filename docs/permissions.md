@@ -45,7 +45,7 @@ Generated from src/platform/authz/permissions.ts by `npm run permissions:doc`. D
 - Identical 404 when a permitted role asks for a missing or out-of-scope record.
 - 409 for a wrong state.
 - 422 for invalid input.
-- 429 for login throttling.
+- 429 with `Retry-After` for login throttling and for the rate-limited public endpoints (POST /api/v1/public/applications, GET /api/v1/public/verify/{code}).
 - Role and branch always come from the server session.
 
 ## Public endpoints
