@@ -25,8 +25,8 @@ type NavEntry = {
 
 // Mirror of appNav in src/components/shell/nav.ts with the grants from
 // src/platform/authz/permissions.ts; labels from messages/<locale>/shell.json (appNav.*).
-// Dashboard and Audit log are `pending`: plan 03-17 flips them live. Until it merges they
-// may be absent, and they may never appear for a role the permission table does not grant.
+// An item marked `pending` may be absent, and may never appear for a role the permission
+// table does not grant. Every item is live now, so the check is exact.
 const APP_NAV: readonly NavEntry[] = [
   {
     href: '/account',
@@ -38,7 +38,7 @@ const APP_NAV: readonly NavEntry[] = [
     href: '/dashboard',
     label: { en: 'Dashboard', ur: 'ڈیش بورڈ' },
     roles: ['super_admin', 'finance_reviewer'],
-    live: 'pending',
+    live: true,
   },
   {
     href: '/admin/branches',
@@ -86,7 +86,7 @@ const APP_NAV: readonly NavEntry[] = [
     href: '/audit',
     label: { en: 'Audit log', ur: 'آڈٹ لاگ' },
     roles: ['finance_reviewer', 'super_admin'],
-    live: 'pending',
+    live: true,
   },
 ];
 

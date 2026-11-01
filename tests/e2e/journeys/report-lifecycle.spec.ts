@@ -56,8 +56,8 @@ const LIFECYCLE = [
   { label: 'Report approved', actor: EN.finance },
 ] as const;
 
-// Plan 04-07 adds the verification panel to the report page. Flip this when it merges.
-const VERIFICATION_PANEL_ON_REPORT_PAGE = false;
+// The approved report page shows the public verification panel.
+const VERIFICATION_PANEL_ON_REPORT_PAGE = true;
 
 const RUN = uniqueSuffix();
 const PURPOSE = `Journey school fees ${RUN}`;

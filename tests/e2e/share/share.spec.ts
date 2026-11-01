@@ -19,6 +19,7 @@ const TEXT = {
     password: 'Password',
     submit: 'Sign in',
     notFound: 'We could not find that page',
+    verifyLine: 'Check this report (no login needed): ',
   },
   ur: {
     share: 'واٹس ایپ پر شیئر کریں',
@@ -27,6 +28,7 @@ const TEXT = {
     password: 'پاس ورڈ',
     submit: 'سائن اِن کریں',
     notFound: 'یہ صفحہ نہیں مل سکا',
+    verifyLine: 'اس رپورٹ کی تصدیق کریں (سائن اِن کی ضرورت نہیں): ',
   },
 } as const;
 
@@ -119,7 +121,7 @@ test.describe('WhatsApp share', () => {
     );
     await button.click();
     const reply = (await (await shared).json()) as {
-      data: { summary: { reportId: string }; link: string };
+      data: { summary: { reportId: string; verifyUrl: string | null }; link: string };
     };
 
     await expect
@@ -133,7 +135,8 @@ test.describe('WhatsApp share', () => {
     expect(href.startsWith('https://wa.me/?text=')).toBe(true);
     const text = decodeURIComponent(href.slice('https://wa.me/?text='.length));
     const lines = text.split('\n');
-    expect(lines).toHaveLength(5);
+    // An approved report adds the public verification link (no sign-in) as a sixth line.
+    expect(lines).toHaveLength(6);
 
     expect(text).toContain(report.branchCode);
     expect(text).toContain(await formatDateIn(page, report.weekStart, uiLocale));
@@ -143,6 +146,14 @@ test.describe('WhatsApp share', () => {
     expect(text).toContain(`${report.count} collection`);
     expect(lines[4]!.endsWith(`/${uiLocale}/share/reports/${SAMPLE_BRANCH_REPORT}`)).toBe(true);
     expect(lines[4]).toContain(reply.data.link);
+    const verifyUrl = reply.data.summary.verifyUrl;
+    expect(verifyUrl).toMatch(/\/verify\/[0-9A-Z]{5}-[0-9A-Z]{5}(\?s=[0-9a-f]{16})?$/);
+    expect(lines[5]).toBe(`${TEXT[uiLocale].verifyLine}${verifyUrl}`);
+    // The public check page answers on this stack (the redirect adds the locale).
+    const publicUrl = new URL(verifyUrl!);
+    const check = await page.request.get(`${publicUrl.pathname}${publicUrl.search}`);
+    expect(check.status()).toBe(200);
+    expect(new URL(check.url()).pathname).toMatch(/^\/(en|ur)\/verify\/[0-9A-Z]{5}-[0-9A-Z]{5}$/);
     for (const c of report.collections) {
       expect(text).not.toContain(c.id);
       if (c.purpose.trim().length > 3) expect(text).not.toContain(c.purpose);
