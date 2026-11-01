@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { PublicNavLinks } from '@/components/public/PublicNavLinks';
 import { ThemeToggle } from '@/components/ui';
+import { Icon } from '@/components/verification/parts';
 import { BrandLink, SkipLink } from './MinimalShell';
 import { publicNav } from './nav';
 
@@ -14,6 +15,8 @@ import { publicNav } from './nav';
 
 export function PublicShell({ children }: { children: ReactNode }) {
   const t = useTranslations('shell');
+  const verify = useTranslations('verify.footer');
+  const locale = useLocale();
   const items = publicNav.map((item) => ({
     id: item.id,
     href: item.href,
@@ -46,6 +49,16 @@ export function PublicShell({ children }: { children: ReactNode }) {
           <div className="flex max-w-sm flex-col gap-3">
             <BrandLink />
             <p className="text-sm text-text-muted">{t('footer.tagline')}</p>
+            <p className="text-sm text-text-muted">
+              {verify('hint')}{' '}
+              <a
+                href={`/${locale}/verify`}
+                className="inline-flex items-center gap-1.5 rounded-sm font-semibold text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+              >
+                <Icon name="shieldCheck" className="size-4 shrink-0" />
+                {verify('link')}
+              </a>
+            </p>
           </div>
           <p className="max-w-xs text-sm text-text-muted">{t('footer.contactPlaceholder')}</p>
         </div>

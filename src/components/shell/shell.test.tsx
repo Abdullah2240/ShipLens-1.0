@@ -210,7 +210,7 @@ describe.each(LOCALES)('shells in %s', (locale) => {
       <PublicShell>
         <h1>page</h1>
       </PublicShell>,
-      { locale, namespaces: NAMESPACES },
+      { locale, namespaces: [...NAMESPACES, 'verify'] },
     );
 
     const main = screen.getByRole('navigation', { name: text(locale, 'publicNavLabel') });
@@ -219,7 +219,21 @@ describe.each(LOCALES)('shells in %s', (locale) => {
         .getAllByRole('link')
         .map((a) => a.getAttribute('href')),
     ).toEqual(publicNav.map((i) => i.href));
-    expect(screen.getByRole('contentinfo')).toHaveTextContent(text(locale, 'footer.tagline'));
+    const footer = screen.getByRole('contentinfo');
+    expect(footer).toHaveTextContent(text(locale, 'footer.tagline'));
+    const verifyFooter = (
+      JSON.parse(
+        readFileSync(
+          path.resolve(import.meta.dirname, `../../../messages/${locale}/verify.json`),
+          'utf8',
+        ),
+      ) as { footer: { link: string; hint: string } }
+    ).footer;
+    expect(footer).toHaveTextContent(verifyFooter.hint);
+    expect(within(footer).getByRole('link', { name: verifyFooter.link })).toHaveAttribute(
+      'href',
+      `/${locale}/verify`,
+    );
     expectChrome();
   });
 

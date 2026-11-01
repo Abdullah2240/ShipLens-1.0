@@ -100,5 +100,9 @@
     "howItWorksTitle": "How this check works",
     "howItWorks": "Every change in ShipLens is written to an audit chain in which each event carries a fingerprint of the one before it, so editing or deleting any event breaks the chain. The seal in your link comes from this report's approval event, so it stops matching if the history is ever rewritten.",
     "privacy": "No personal information is shown on this page."
+  },
+  "footer": {
+    "link": "Verify a report",
+    "hint": "Have a code from a weekly report?"
   }
 }
