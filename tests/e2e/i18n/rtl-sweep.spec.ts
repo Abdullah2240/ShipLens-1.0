@@ -28,8 +28,10 @@ type Findings = {
 
 /** Runs in the page: collects what a reader of the Urdu screen would see in the wrong shape. */
 function inspect(tokens: string[]): Findings {
+  // Isolates (bdi, dir ltr or auto), code, form fields, decorative glyphs, text in another
+  // declared language, and chart tick labels the chart itself sets to LTR (Latin numbers).
   const SKIP =
-    'script, style, noscript, template, code, pre, kbd, samp, input, textarea, select, option, bdi, [dir="ltr"], [aria-hidden="true"], [lang]:not([lang="ur"])';
+    'script, style, noscript, template, code, pre, kbd, samp, input, textarea, select, option, bdi, [dir="ltr"], [dir="auto"], [direction="ltr"], [aria-hidden="true"], [lang]:not([lang="ur"])';
   const tokenPattern = new RegExp(`(?<![A-Za-z])(?:${tokens.join('|')})(?![A-Za-z])`, 'g');
   const visible = (el: Element) => {
     const style = getComputedStyle(el);
@@ -54,6 +56,9 @@ function inspect(tokens: string[]): Findings {
     'h1, h2, h3, h4, h5, h6, button, [role="button"]',
   )) {
     if (!visible(el)) continue;
+    // Visually hidden (sr-only) headings are clipped on purpose.
+    const box = el.getBoundingClientRect();
+    if (box.width <= 1 || box.height <= 1) continue;
     const style = getComputedStyle(el);
     const hides = ['hidden', 'clip'].includes(style.overflowX) || style.textOverflow === 'ellipsis';
     if (hides && el.scrollWidth > el.clientWidth + 1) {
