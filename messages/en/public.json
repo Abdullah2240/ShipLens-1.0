@@ -71,6 +71,7 @@
   "events": {
     "title": "Upcoming events",
     "lead": "Health camps, relief drives and community days organised by our branches. Everyone is welcome.",
+    "listTitle": "Event calendar",
     "timezone": "All times are Pakistan time (PKT).",
     "when": "When",
     "where": "Where",

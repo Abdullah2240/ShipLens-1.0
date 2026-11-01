@@ -129,6 +129,7 @@ export function BranchesByCity({ branches }: BranchesByCityProps) {
                   </p>
                 ) : null}
                 <Link
+                  prefetch={false}
                   href={`/get-involved/apply?branch=${branch.id}`}
                   className="relative mt-auto inline-flex w-fit items-center gap-1.5 pt-2 font-semibold text-primary underline-offset-4 hover:text-primary-hover hover:underline"
                 >

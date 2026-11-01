@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { NextIntlClientProvider } from 'next-intl';
+import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { publicMetadata } from '@/components/public/seo';
 import { EmptyState } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
@@ -37,10 +38,11 @@ export default async function ApplyPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [{ branch }, t, branches] = await Promise.all([
+  const [{ branch }, t, branches, messages] = await Promise.all([
     searchParams,
     getTranslations('applications.form'),
     listPublicBranches(getPool()),
+    getMessages(),
   ]);
 
   const defaultBranchId =
@@ -74,6 +76,7 @@ export default async function ApplyPage({
             body={t('errors.noBranches')}
             action={
               <Link
+                prefetch={false}
                 href="/get-involved"
                 className="inline-flex h-11 items-center rounded-xl border border-border-strong bg-surface-raised px-5 font-semibold text-text transition-colors hover:bg-surface-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
@@ -98,10 +101,15 @@ export default async function ApplyPage({
               </svg>
               <span>{t('privacy')}</span>
             </p>
-            <ApplicationForm
-              branches={branches.map(({ id, name, city }) => ({ id, name, city }))}
-              defaultBranchId={defaultBranchId}
-            />
+            {/* The form is the only client part that needs the applications strings. */}
+            <NextIntlClientProvider
+              messages={{ common: messages.common, applications: messages.applications }}
+            >
+              <ApplicationForm
+                branches={branches.map(({ id, name, city }) => ({ id, name, city }))}
+                defaultBranchId={defaultBranchId}
+              />
+            </NextIntlClientProvider>
           </div>
         )}
       </div>

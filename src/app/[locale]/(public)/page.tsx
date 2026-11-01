@@ -58,12 +58,14 @@ export default async function HomePage({ params }: PageProps) {
           <p className="max-w-2xl text-lg text-text-muted md:text-xl">{t('lead')}</p>
           <div className="mt-2 flex flex-wrap gap-3">
             <Link
+              prefetch={false}
               href="/get-involved"
               className="inline-flex h-12 items-center rounded-xl bg-primary px-6 text-base font-semibold text-primary-contrast shadow-card transition-colors hover:bg-primary-hover"
             >
               {t('ctaGetInvolved')}
             </Link>
             <Link
+              prefetch={false}
               href="/branches"
               className="inline-flex h-12 items-center rounded-xl border border-border-strong bg-surface-raised px-6 text-base font-semibold text-text transition-colors hover:bg-surface-sunken"
             >
@@ -116,6 +118,7 @@ export default async function HomePage({ params }: PageProps) {
             ))}
           </ul>
           <Link
+            prefetch={false}
             href="/programs"
             className="mt-8 inline-flex items-center gap-1.5 font-semibold text-primary underline-offset-4 hover:text-primary-hover hover:underline"
           >

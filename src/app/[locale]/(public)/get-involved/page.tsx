@@ -71,6 +71,7 @@ export default async function GetInvolvedPage({ params }: PageProps) {
           <div className="mt-3 flex flex-wrap gap-3">
             {/* This link precedes the application form route, which ships separately. */}
             <Link
+              prefetch={false}
               href="/get-involved/apply"
               className="inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-base font-semibold text-primary-contrast shadow-card transition-colors hover:bg-primary-hover"
             >
@@ -80,6 +81,7 @@ export default async function GetInvolvedPage({ params }: PageProps) {
               </span>
             </Link>
             <Link
+              prefetch={false}
               href="/branches"
               className="inline-flex h-12 items-center rounded-xl border border-border-strong bg-surface-raised px-6 text-base font-semibold text-text transition-colors hover:bg-surface-sunken"
             >

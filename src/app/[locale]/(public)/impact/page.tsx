@@ -195,7 +195,7 @@ export default async function ImpactPage({ params }: PageProps) {
             >
               {t('method.title')}
             </h2>
-            <p className="mt-3 text-base leading-relaxed text-pretty text-text-muted">
+            <p className="mt-3 text-base leading-relaxed text-text-muted">
               {t('method.body')}
             </p>
           </div>
@@ -214,6 +214,7 @@ export default async function ImpactPage({ params }: PageProps) {
           <p className="text-text-muted">{t('cta.lead')}</p>
           <div className="mt-1 flex flex-wrap gap-3">
             <Link
+              prefetch={false}
               href="/get-involved"
               data-impact-cta="getInvolved"
               className="inline-flex h-12 items-center rounded-xl bg-primary px-6 text-base font-semibold text-primary-contrast shadow-card transition-colors hover:bg-primary-hover"
@@ -221,6 +222,7 @@ export default async function ImpactPage({ params }: PageProps) {
               {t('cta.getInvolved')}
             </Link>
             <Link
+              prefetch={false}
               href="/branches"
               data-impact-cta="branches"
               className="inline-flex h-12 items-center rounded-xl border border-border-strong bg-surface-raised px-6 text-base font-semibold text-text transition-colors hover:bg-surface-sunken"

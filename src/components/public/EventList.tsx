@@ -151,7 +151,7 @@ function EventItem({ event, locale }: { event: PublicEvent; locale: ContentLocal
             ) : null}
           </dl>
           {event.summary?.trim() ? (
-            <p {...contentLanguage} className="whitespace-pre-line text-pretty text-text-muted">
+            <p {...contentLanguage} className="whitespace-pre-line text-text-muted">
               {event.summary}
             </p>
           ) : null}
@@ -191,7 +191,10 @@ export function EventList({ events, locale }: EventListProps) {
         aria-hidden="true"
         className="absolute inset-y-4 start-8 w-px bg-linear-to-b from-accent/50 via-border to-transparent md:start-10"
       />
-      <ol className="relative flex flex-col gap-6 md:gap-8">
+      <h2 id="events-list-title" className="sr-only">
+        {t('listTitle')}
+      </h2>
+      <ol aria-labelledby="events-list-title" className="relative flex flex-col gap-6 md:gap-8">
         {events.map((event) => (
           <EventItem key={event.slug} event={event} locale={locale} />
         ))}

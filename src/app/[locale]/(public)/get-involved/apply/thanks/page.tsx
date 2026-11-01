@@ -77,12 +77,14 @@ export default async function ApplicationThanksPage({
 
         <div className="mt-4 flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
           <Link
+            prefetch={false}
             href="/"
             className="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-6 text-base font-semibold text-primary-contrast shadow-card transition-colors hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             {t('home')}
           </Link>
           <Link
+            prefetch={false}
             href="/get-involved/apply"
             className="inline-flex h-12 items-center justify-center rounded-xl border border-border-strong bg-surface-raised px-6 text-base font-semibold text-text transition-colors hover:bg-surface-sunken focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >

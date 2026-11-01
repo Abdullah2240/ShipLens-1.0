@@ -1,20 +1,24 @@
-'use client';
-
 import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { PublicNavLinks } from '@/components/public/PublicNavLinks';
 import { ThemeToggle } from '@/components/ui';
-import { Link, usePathname } from '@/i18n/navigation';
 import { BrandLink, SkipLink } from './MinimalShell';
 import { publicNav } from './nav';
 
 // Public pages: warmer and more spacious than the app shell. Page headings opt into the
 // Nastaliq display face with `font-display-ur`; it applies under lang="ur" only and
-// needs the nastaliq font variable from the public layout wrapper.
+// needs the nastaliq font variable from the public layout wrapper. The shell renders on
+// the server; only the nav items (current page), the language switch and the theme
+// toggle run in the browser.
 
 export function PublicShell({ children }: { children: ReactNode }) {
   const t = useTranslations('shell');
-  const pathname = usePathname();
+  const items = publicNav.map((item) => ({
+    id: item.id,
+    href: item.href,
+    label: t(item.labelKey),
+  }));
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -26,29 +30,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
             aria-label={t('publicNavLabel')}
             className="order-last -mx-4 w-[calc(100%+2rem)] overflow-x-auto px-4 pb-1 md:order-none md:mx-0 md:w-auto md:flex-1 md:px-0 md:pb-0"
           >
-            <ul className="flex min-w-max items-center gap-1">
-              {publicNav.map((item) => {
-                const active =
-                  item.href === '/'
-                    ? pathname === '/'
-                    : pathname === item.href || pathname.startsWith(`${item.href}/`);
-                return (
-                  <li key={item.id}>
-                    <Link
-                      href={item.href}
-                      aria-current={active ? 'page' : undefined}
-                      className={`inline-flex h-9 items-center rounded-full px-3.5 text-sm transition-colors ${
-                        active
-                          ? 'bg-accent-soft font-semibold text-text'
-                          : 'text-text-muted hover:bg-surface-sunken hover:text-text'
-                      }`}
-                    >
-                      {t(item.labelKey)}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
+            <PublicNavLinks items={items} />
           </nav>
           <div className="ms-auto flex items-center gap-2">
             <LanguageSwitcher />
