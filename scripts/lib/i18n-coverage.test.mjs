@@ -170,23 +170,31 @@ describe('check-i18n CLI', () => {
     expect(lines[1]).toMatch(/^i18n coverage ok \(1 files scanned\)$/);
   });
 
-  it('exits 1 with findings grouped by namespace and file', () => {
+  it('exits 1 with findings grouped by namespace and file, public side included', () => {
     const result = run(
-      { 'en/common.json': { a: 'Save', b: 'Open' }, 'ur/common.json': { a: 'Save', b: 'کھولیں' } },
+      {
+        'en/common.json': { a: 'Save', b: 'Open' },
+        'ur/common.json': { a: 'Save', b: 'کھولیں' },
+        'en/public.json': { title: 'Welcome' },
+        'ur/public.json': { title: 'Welcome' },
+      },
       {
         'app/page.tsx': 'export const P = () => <p>Hello</p>;\n',
-        'components/public/Home.tsx': 'export const H = () => <p>Skipped</p>;\n',
+        'components/public/Home.tsx': 'export const H = () => <p>Public text</p>;\n',
       },
     );
     expect(result.status).toBe(1);
     const out = result.stdout;
     expect(out).toContain('untranslated: common (1)');
     expect(out).toContain('  common.a [identical] "Save"');
+    expect(out).toContain('untranslated: public (1)');
+    expect(out).toContain('  public.title [identical] "Welcome"');
     expect(out).toMatch(/hard-coded text: .*app\/page\.tsx \(1\)/);
     expect(out).toContain('  1 [jsx-text] "Hello"');
-    expect(out).not.toContain('Skipped');
+    expect(out).toMatch(/hard-coded text: .*components\/public\/Home\.tsx \(1\)/);
+    expect(out).toContain('  1 [jsx-text] "Public text"');
     expect(result.stderr).toContain(
-      'i18n coverage failed (1 untranslated values, 1 hard-coded texts)',
+      'i18n coverage failed (2 untranslated values, 2 hard-coded texts)',
     );
   });
 
