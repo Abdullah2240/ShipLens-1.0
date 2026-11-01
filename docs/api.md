@@ -13,11 +13,14 @@ action that the permission table does not define.
 
 - Base path: `/api/v1`. Health checks live outside it at `/api/health` and
   `/api/health/db`.
-- JSON in, JSON out. Request bodies must be sent with `Content-Type: application/json`
-  and are limited to 64 KiB.
+- JSON in, JSON out, except the CSV export (`GET /api/v1/exports/{kind}`, see
+  [CSV exports](#csv-exports)). Request bodies must be sent with
+  `Content-Type: application/json` and are limited to 64 KiB.
 - Same origin only. The browser app and the API share one origin; there is no CORS.
 - Every response carries `X-Request-Id` (an incoming `X-Request-Id` made of letters,
   digits, `_` and `-`, at most 64 characters, is reused) and `X-Content-Type-Options: nosniff`.
+  API responses also carry `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`
+  and the site-wide security headers ([security.md](security.md#security-headers)).
 
 ## Authentication
 
@@ -123,7 +126,12 @@ query parameters and answer:
   Unknown email and wrong password give the same response, so the endpoint does not
   reveal which accounts exist.
 - Public membership application: 5 submissions per IP address per hour.
+- Public report verification (`GET /api/v1/public/verify/{code}`): 30 lookups per IP address
+  per minute, shared with the `/{locale}/verify/{code}` page. Malformed codes count too.
 - Rate-limited responses carry `Retry-After` in seconds.
+- The login limit is stored in the database. The application and verification limits are
+  kept in memory per server process (one instance on the free plan), so a restart resets
+  them. The IP address is the first `X-Forwarded-For` entry.
 
 ## Caching
 
@@ -137,6 +145,57 @@ auth endpoints answer `{ "user": ... }`, the public application form answers
 `{ "ok": true }`, logout answers 204 with no body, and the health checks answer
 `{ "status": "ok" }` (plus `"db": "up"` for the readiness check, or 503 with
 `"db": "down"`).
+
+## CSV exports
+
+`GET /api/v1/exports/{kind}` (`kind` is `summary`, `reports`, `collections` or `unrouted`)
+answers `200` with `Content-Type: text/csv; charset=utf-8` and
+`Content-Disposition: attachment; filename="..."`: UTF-8 with a byte order mark, CRLF line
+ends, and every text cell that a spreadsheet could read as a formula prefixed so it stays
+text. It takes the dashboard filters plus `figure`, `reportId` and `locale` (`en` or `ur`
+for the column headings). A download started by another site (`Sec-Fetch-Site` other than
+`same-origin` or `none`) is refused with 403. Each export writes one `export.create` audit
+event holding only the kind and the row count; the file is sent only after that event is
+stored.
+
+## Report verification
+
+The twist endpoints ("Proof, not promises", [verification.md](verification.md)):
+
+- `GET /api/v1/public/verify/{code}[?s=<seal>]`, public. `code` may be typed in any case,
+  with or without the hyphen. The answer is the public projection only:
+
+  ```json
+  {
+    "data": {
+      "code": "7KQ2M-X9D4P",
+      "branch": { "name": "Islamabad North (Demo)", "city": "Islamabad" },
+      "weekStart": "2026-08-10",
+      "weekEnd": "2026-08-16",
+      "approvedTotal": "65500.00",
+      "collectionCount": 3,
+      "approvedOn": "2026-08-18",
+      "integrity": "verified",
+      "anchor": { "chainSeq": 412, "seal": "0123456789abcdef" },
+      "sealCheck": "match",
+      "chain": { "status": "intact", "checkedEvents": 512, "brokenAtSeq": null, "checkedAt": "2026-11-01T04:00:00.000Z" }
+    }
+  }
+  ```
+
+  `integrity` is `verified`, `mismatch`, `unanchored` or `chain_broken`; `sealCheck` is
+  `match`, `mismatch` or `not_provided`. Unknown, malformed and not yet approved codes are
+  the same 404. No names, contact details or individual collections are ever included.
+- `GET /api/v1/reports/{id}/verification`, action `report.read` (scoped): the code, the
+  locale-free public path and the seal of an approved report,
+  `{ "data": { "code": "7KQ2M-X9D4P", "path": "/verify/7KQ2M-X9D4P?s=0123456789abcdef", "seal": "0123456789abcdef" } }`.
+  A report that is not approved is the identical 404.
+- `GET /api/v1/audit/chain[?fresh=1]`, action `audit.read_finance`: the audit chain
+  status, `intact` (with `checkedEvents` and the head event), `broken` (with `brokenAt`:
+  event number, event id and reason `sequence_gap`, `hash_mismatch` or `link_mismatch`) or
+  `empty`, plus `checkedAt`. Cached for 60 seconds; `?fresh=1` walks the whole chain again.
+- `POST /api/v1/reports/{id}/share` returns the share text and a `summary`; for an approved
+  report `summary.verifyUrl` is the absolute public verification link (otherwise `null`).
 
 ## Endpoint inventory
 
@@ -152,6 +211,7 @@ Generated from the route files by `node scripts/gen-api-doc.mjs`. Do not edit be
 | POST | `/api/v1/applications/{id}/accept` | session | `application.decide` | hr_lead (own branch), super_admin (all) | - |
 | POST | `/api/v1/applications/{id}/decline` | session | `application.decide` | hr_lead (own branch), super_admin (all) | `declineInputSchema` |
 | GET | `/api/v1/audit` | session | `audit.read_finance` | finance_reviewer (all), super_admin (all) | - |
+| GET | `/api/v1/audit/chain` | session | `audit.read_finance` | finance_reviewer (all), super_admin (all) | - |
 | GET | `/api/v1/audit/facets` | session | `audit.read_finance` | finance_reviewer (all), super_admin (all) | - |
 | POST | `/api/v1/auth/login` | public | - | anyone | `loginSchema` |
 | POST | `/api/v1/auth/logout` | session | - | any signed-in role | - |
@@ -188,17 +248,23 @@ Generated from the route files by `node scripts/gen-api-doc.mjs`. Do not edit be
 | GET | `/api/v1/dashboard/summary` | session | `dashboard.read` | super_admin (all), finance_reviewer (all) | - |
 | GET | `/api/v1/dashboard/trend` | session | `dashboard.read` | super_admin (all), finance_reviewer (all) | - |
 | GET | `/api/v1/dashboard/unrouted` | session | `dashboard.read` | super_admin (all), finance_reviewer (all) | - |
+| POST | `/api/v1/exports/print` | session | `export.create` | super_admin (all), finance_reviewer (all) | `printBodySchema` |
+| GET | `/api/v1/exports/{kind}` | session | `export.create` | super_admin (all), finance_reviewer (all) | - |
 | GET | `/api/v1/members` | session | `member.read` | super_admin (all), hr_lead (own branch), branch_lead (own branch) | - |
 | GET | `/api/v1/members/{id}` | session | `member.read` | super_admin (all), hr_lead (own branch), branch_lead (own branch) | - |
 | PATCH | `/api/v1/members/{id}` | session | `member.update` | super_admin (all), hr_lead (own branch) | `memberPatchSchema` |
 | POST | `/api/v1/public/applications` | public | - | anyone | `applicationInputSchema` |
+| GET | `/api/v1/public/impact` | public | - | anyone | - |
+| GET | `/api/v1/public/verify/{code}` | public | - | anyone | - |
 | GET | `/api/v1/reports` | session | `report.read` | super_admin (all), finance_reviewer (all), branch_lead (own branch) | - |
 | GET | `/api/v1/reports/review-queue` | session | `report.approve` | finance_reviewer (all) | - |
 | GET | `/api/v1/reports/{id}` | session | `report.read` | super_admin (all), finance_reviewer (all), branch_lead (own branch) | - |
 | POST | `/api/v1/reports/{id}/approve` | session | `report.approve` | finance_reviewer (all) | - |
 | POST | `/api/v1/reports/{id}/return` | session | `report.return` | finance_reviewer (all) | `returnInputSchema` |
+| POST | `/api/v1/reports/{id}/share` | session | `report.share` | branch_lead (own branch) | `shareInputSchema` |
 | POST | `/api/v1/reports/{id}/submit` | session | `report.submit` | branch_lead (own branch) | `submitInputSchema` |
 | GET | `/api/v1/reports/{id}/timeline` | session | `audit.read_timeline` | super_admin (all), finance_reviewer (all), branch_lead (own branch) | - |
+| GET | `/api/v1/reports/{id}/verification` | session | `report.read` | super_admin (all), finance_reviewer (all), branch_lead (own branch) | - |
 | GET | `/api/v1/teams` | session | `team.read` | super_admin (all), hr_lead (own branch), branch_lead (own branch) | - |
 | POST | `/api/v1/teams` | session | `team.manage` | super_admin (all), hr_lead (own branch) | `teamInputSchema` |
 | PATCH | `/api/v1/teams/{id}` | session | `team.manage` | super_admin (all), hr_lead (own branch) | `renameInputSchema` |
@@ -213,6 +279,8 @@ Endpoints that need no session:
 - GET `/api/health/db`
 - POST `/api/v1/auth/login`
 - POST `/api/v1/public/applications`
+- GET `/api/v1/public/impact`
+- GET `/api/v1/public/verify/{code}`
 <!-- api-inventory:end -->
 
 ## Endpoint reference
@@ -376,6 +444,27 @@ HTTP/1.1 200
 Content-Type: application/json
 
 { "data": "<from listAuditEvents>" }
+```
+
+### GET /api/v1/audit/chain
+
+- Access: session, action `audit.read_finance`.
+- Roles (scope): finance_reviewer (all), super_admin (all).
+- Request body: none.
+- Success status: 200. Error statuses: 401, 403.
+- Access matrix: registry id `audit.chain`.
+- Source: `src/app/api/v1/audit/chain/route.ts`.
+
+```sh
+curl -X GET "http://localhost:3000/api/v1/audit/chain" \
+  -b "shiplens_session=<session token>"
+```
+
+```http
+HTTP/1.1 200
+Content-Type: application/json
+
+{ "data": "<value>" }
 ```
 
 ### GET /api/v1/audit/facets
@@ -1222,6 +1311,53 @@ Content-Type: application/json
 { "data": "<from listUnrouted>" }
 ```
 
+### POST /api/v1/exports/print
+
+- Access: session, action `export.create`.
+- Roles (scope): super_admin (all), finance_reviewer (all).
+- Request body: `printBodySchema`; fields `kind`, `reportId`, `rowCount`.
+- Calls: `recordPrint` (`@/modules/reporting`).
+- Success status: 200. Error statuses: 403 (Origin), 401, 403, 422.
+- Access matrix: registry id `exports.print`.
+- Source: `src/app/api/v1/exports/print/route.ts`.
+
+```sh
+curl -X POST "http://localhost:3000/api/v1/exports/print" \
+  -H "Origin: http://localhost:3000" \
+  -b "shiplens_session=<session token>" \
+  -H "Content-Type: application/json" \
+  -d '{"kind":"<kind>","reportId":"<reportId>","rowCount":"<rowCount>"}'
+```
+
+```http
+HTTP/1.1 200
+Content-Type: application/json
+
+{ "data": "<from recordPrint>" }
+```
+
+### GET /api/v1/exports/{kind}
+
+- Access: session, action `export.create`.
+- Roles (scope): super_admin (all), finance_reviewer (all).
+- Path parameters: `kind`.
+- Request body: none.
+- Calls: `exportCsv` (`@/modules/reporting`), `figureFromSlug` (`@/modules/reporting`), `isExportKind` (`@/modules/reporting`), `isMoneyFigure` (`@/modules/reporting`), `parseReportingFilters` (`@/modules/reporting`).
+- Success status: 200. Error statuses: 401, 403, 404.
+- Access matrix: registry id `exports.csv`.
+- Source: `src/app/api/v1/exports/[kind]/route.ts`.
+
+```sh
+curl -X GET "http://localhost:3000/api/v1/exports/example-kind" \
+  -b "shiplens_session=<session token>"
+```
+
+```http
+HTTP/1.1 200
+
+(JSON written directly by the handler in src/app/api/v1/exports/[kind]/route.ts)
+```
+
 ### GET /api/v1/members
 
 - Access: session, action `member.read`.
@@ -1314,6 +1450,47 @@ HTTP/1.1 201
 Content-Type: application/json
 
 { "ok": true }
+```
+
+### GET /api/v1/public/impact
+
+- Access: public, no session.
+- Request body: none.
+- Calls: `getPublicImpact` (`@/modules/reporting`).
+- Success status: 200.
+- Access matrix: registry id `public.impact`.
+- Source: `src/app/api/v1/public/impact/route.ts`.
+
+```sh
+curl -X GET "http://localhost:3000/api/v1/public/impact"
+```
+
+```http
+HTTP/1.1 200
+Content-Type: application/json
+
+{ "data": "<from getPublicImpact>" }
+```
+
+### GET /api/v1/public/verify/{code}
+
+- Access: public, no session.
+- Path parameters: `code`.
+- Request body: none.
+- Calls: `lookupVerification` (`@/modules/verification`), `verifyRateLimiter` (`@/modules/verification`).
+- Success status: 200. Error statuses: 404, 429.
+- Access matrix: registry id `public.verify`.
+- Source: `src/app/api/v1/public/verify/[code]/route.ts`.
+
+```sh
+curl -X GET "http://localhost:3000/api/v1/public/verify/example-code"
+```
+
+```http
+HTTP/1.1 200
+Content-Type: application/json
+
+{ "data": "<from lookupVerification>" }
 ```
 
 ### GET /api/v1/reports
@@ -1433,6 +1610,32 @@ Content-Type: application/json
 { "data": "<from returnReport>" }
 ```
 
+### POST /api/v1/reports/{id}/share
+
+- Access: session, action `report.share`.
+- Roles (scope): branch_lead (own branch).
+- Path parameters: `id`.
+- Request body: `shareInputSchema`; fields `locale`.
+- Calls: `shareReport` (`@/modules/reporting`).
+- Success status: 200. Error statuses: 403 (Origin), 401, 403, 404, 422.
+- Access matrix: registry id `reports.share`.
+- Source: `src/app/api/v1/reports/[id]/share/route.ts`.
+
+```sh
+curl -X POST "http://localhost:3000/api/v1/reports/00000000-0000-4000-8000-000000000001/share" \
+  -H "Origin: http://localhost:3000" \
+  -b "shiplens_session=<session token>" \
+  -H "Content-Type: application/json" \
+  -d '{"locale":"<locale>"}'
+```
+
+```http
+HTTP/1.1 200
+Content-Type: application/json
+
+{ "data": "<from shareReport>" }
+```
+
 ### POST /api/v1/reports/{id}/submit
 
 - Access: session, action `report.submit`.
@@ -1480,6 +1683,29 @@ HTTP/1.1 200
 Content-Type: application/json
 
 { "data": "<from getReportTimeline>" }
+```
+
+### GET /api/v1/reports/{id}/verification
+
+- Access: session, action `report.read`.
+- Roles (scope): super_admin (all), finance_reviewer (all), branch_lead (own branch).
+- Path parameters: `id`.
+- Request body: none.
+- Calls: `getReportVerification` (`@/modules/verification`).
+- Success status: 200. Error statuses: 401, 403, 404.
+- Access matrix: registry id `reports.verification`.
+- Source: `src/app/api/v1/reports/[id]/verification/route.ts`.
+
+```sh
+curl -X GET "http://localhost:3000/api/v1/reports/00000000-0000-4000-8000-000000000001/verification" \
+  -b "shiplens_session=<session token>"
+```
+
+```http
+HTTP/1.1 200
+Content-Type: application/json
+
+{ "data": "<from getReportVerification>" }
 ```
 
 ### GET /api/v1/teams
@@ -1561,9 +1787,9 @@ Content-Type: application/json
 - Roles (scope): super_admin (all), finance_reviewer (all).
 - Path parameters: `slug`.
 - Request body: none.
-- Calls: `figureFromSlug` (`@/modules/reporting`), `getFigureByBranch` (`@/modules/reporting/service-trace`), `parseReportingFilters` (`@/modules/reporting`).
+- Calls: `figureFromSlug` (`@/modules/reporting`), `getFigureByBranch` (`@/modules/reporting`), `parseReportingFilters` (`@/modules/reporting`).
 - Success status: 200. Error statuses: 401, 403, 404.
-- Access matrix: not in the endpoint registry.
+- Access matrix: registry id `trace.figure`.
 - Source: `src/app/api/v1/trace/[slug]/route.ts`.
 
 ```sh
@@ -1584,9 +1810,9 @@ Content-Type: application/json
 - Roles (scope): super_admin (all), finance_reviewer (all).
 - Path parameters: `slug`, `branchId`.
 - Request body: none.
-- Calls: `figureFromSlug` (`@/modules/reporting`), `getBranchReports` (`@/modules/reporting/service-trace`), `parseReportingFilters` (`@/modules/reporting`).
+- Calls: `figureFromSlug` (`@/modules/reporting`), `getBranchReports` (`@/modules/reporting`), `parseReportingFilters` (`@/modules/reporting`).
 - Success status: 200. Error statuses: 401, 403, 404.
-- Access matrix: not in the endpoint registry.
+- Access matrix: registry id `trace.branch`.
 - Source: `src/app/api/v1/trace/[slug]/branches/[branchId]/route.ts`.
 
 ```sh
@@ -1607,9 +1833,9 @@ Content-Type: application/json
 - Roles (scope): super_admin (all), finance_reviewer (all).
 - Path parameters: `slug`, `branchId`, `reportId`.
 - Request body: none.
-- Calls: `figureFromSlug` (`@/modules/reporting`), `getReportCollections` (`@/modules/reporting/service-trace`), `parseReportingFilters` (`@/modules/reporting`).
+- Calls: `figureFromSlug` (`@/modules/reporting`), `getReportCollections` (`@/modules/reporting`), `parseReportingFilters` (`@/modules/reporting`).
 - Success status: 200. Error statuses: 401, 403, 404.
-- Access matrix: not in the endpoint registry.
+- Access matrix: registry id `trace.report`.
 - Source: `src/app/api/v1/trace/[slug]/branches/[branchId]/reports/[reportId]/route.ts`.
 
 ```sh
@@ -1630,9 +1856,9 @@ Content-Type: application/json
 - Roles (scope): super_admin (all), finance_reviewer (all).
 - Path parameters: `slug`, `branchId`, `reportId`, `collectionId`.
 - Request body: none.
-- Calls: `figureFromSlug` (`@/modules/reporting`), `getCollectionEvidence` (`@/modules/reporting/service-trace`), `parseReportingFilters` (`@/modules/reporting`).
+- Calls: `figureFromSlug` (`@/modules/reporting`), `getCollectionEvidence` (`@/modules/reporting`), `parseReportingFilters` (`@/modules/reporting`).
 - Success status: 200. Error statuses: 401, 403, 404.
-- Access matrix: not in the endpoint registry.
+- Access matrix: registry id `trace.collection`.
 - Source: `src/app/api/v1/trace/[slug]/branches/[branchId]/reports/[reportId]/collections/[collectionId]/route.ts`.
 
 ```sh
