@@ -146,12 +146,17 @@ function responseShape(handler, status) {
   return { kind: 'key', key: m[1], literal: m[2] ?? null };
 }
 
+/** Escape every regular-expression metacharacter, backslash included. */
+function escapeRegExp(text) {
+  return text.replace(/[\\^$.*+?()[\]{}|]/g, '\\$&');
+}
+
 function servicesCalled(handler, imports) {
   const names = [];
   for (const [name, from] of Object.entries(imports)) {
     if (!from.startsWith('@/modules/')) continue;
     if (/Schema$/.test(name)) continue;
-    if (new RegExp(`\\b${name.replace(/\$/g, '\\$')}\\s*[.(]`).test(handler)) {
+    if (new RegExp(`\\b${escapeRegExp(name)}\\s*[.(]`).test(handler)) {
       names.push({ name, from });
     }
   }

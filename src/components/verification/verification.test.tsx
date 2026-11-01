@@ -210,9 +210,15 @@ function msg(locale: Loc, key: string, args: Record<string, string> = {}): strin
     .split('.')
     .reduce<unknown>((node, part) => (node as Messages | undefined)?.[part], messages(locale));
   if (typeof value !== 'string') throw new Error(`missing verify.${key} (${locale})`);
-  return value
-    .replace(/<\/?\w+>/g, '')
-    .replace(/\{(\w+)\}/g, (_, name: string) => args[name] ?? `{${name}}`);
+  // Remove rich-text tags until none remain, so a tag split around another tag cannot
+  // survive a single pass.
+  let text = value;
+  let previous: string;
+  do {
+    previous = text;
+    text = text.replace(/<\/?\w+>/g, '');
+  } while (text !== previous);
+  return text.replace(/\{(\w+)\}/g, (_, name: string) => args[name] ?? `{${name}}`);
 }
 
 function expectLogicalOnly(root: HTMLElement) {
