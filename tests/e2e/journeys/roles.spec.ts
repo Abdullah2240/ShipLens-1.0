@@ -92,13 +92,16 @@ const APP_NAV: readonly NavEntry[] = [
 
 // One forbidden page and one forbidden API call per role (Super Admin may do everything
 // these screens offer).
-const FORBIDDEN: Readonly<Record<Role, { page: string; api: string } | null>> = {
-  branch_lead: { page: '/dashboard', api: '/api/v1/dashboard/summary' },
-  hr_lead: { page: '/reports/review', api: '/api/v1/reports/review-queue' },
-  content_editor: { page: '/people/applications', api: '/api/v1/applications' },
-  finance_reviewer: { page: '/content', api: '/api/v1/content/entries' },
-  super_admin: null,
-};
+// The dashboard has a loading boundary (dashboard/loading.tsx), so its refusal streams the
+// not-found content with status 200.
+const FORBIDDEN: Readonly<Record<Role, { page: string; api: string; streamed?: boolean } | null>> =
+  {
+    branch_lead: { page: '/dashboard', api: '/api/v1/dashboard/summary', streamed: true },
+    hr_lead: { page: '/reports/review', api: '/api/v1/reports/review-queue' },
+    content_editor: { page: '/people/applications', api: '/api/v1/applications' },
+    finance_reviewer: { page: '/content', api: '/api/v1/content/entries' },
+    super_admin: null,
+  };
 
 // messages/<locale>/auth.json: account.logout.
 const SIGN_OUT: Readonly<Record<UiLocale, string>> = { en: 'Sign out', ur: 'سائن آؤٹ' };
@@ -145,7 +148,7 @@ test.describe('five-role access journey', { tag: '@smoke' }, () => {
       const forbidden = FORBIDDEN[role];
       if (forbidden) {
         const refused = await page.goto(localePath(forbidden.page));
-        await expectForbiddenPage(page, uiLocale, refused);
+        await expectForbiddenPage(page, uiLocale, refused, { streamed: forbidden.streamed });
 
         const api = await apiAs(page, baseURL).get(forbidden.api);
         expect(api.status(), `GET ${forbidden.api} as ${role}`).toBe(403);

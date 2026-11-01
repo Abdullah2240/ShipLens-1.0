@@ -86,15 +86,21 @@ export async function navLinkNames(
   }));
 }
 
-/** The localized not-found page, with no record data: no table and no report status. */
+/**
+ * The localized not-found page, with no record data: no table and no report status.
+ * `streamed`: the route has a loading boundary, so the response is already committed as
+ * 200 when the page refuses the actor; the not-found content is what proves the refusal.
+ */
 export async function expectForbiddenPage(
   page: Page,
   locale: UiLocale,
   response: { status(): number } | null,
+  { streamed = false }: { streamed?: boolean } = {},
 ): Promise<void> {
-  expect(response?.status(), 'forbidden page status').toBe(404);
+  expect(response?.status(), 'forbidden page status').toBe(streamed ? 200 : 404);
+  // The app shell renders the not-found message as an empty-state heading (level 3).
   await expect(
-    page.getByRole('heading', { level: 1, name: NOT_FOUND_TITLE[locale] }),
+    page.getByRole('heading', { name: NOT_FOUND_TITLE[locale], exact: true }),
   ).toBeVisible();
   await expect(page.locator('main table')).toHaveCount(0);
   await expect(page.getByTestId('report-status')).toHaveCount(0);

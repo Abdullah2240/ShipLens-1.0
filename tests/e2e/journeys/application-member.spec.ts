@@ -104,7 +104,7 @@ test.describe('application to member journey', () => {
     expect(memberCode).toMatch(MEMBER_CODE);
     await loginAs('hr_lead');
     await page.goto(localePath('/people/members'));
-    const search = page.getByLabel(EN.search);
+    const search = page.getByRole('searchbox', { name: EN.search });
     await search.fill(RUN);
     await search.press('Enter');
     await expect(page).toHaveURL(new RegExp(`[?&]q=${RUN}`));
