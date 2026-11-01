@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { ReportVerificationSection } from '@/components/verification/ReportVerificationSection';
 import { getReport, type ReportDetail } from '@/modules/reports';
 import { reportCapabilities, type ReportCapabilities } from '@/modules/reports/capabilities';
 import { Panel } from '@/modules/reports/components/Panel';
@@ -87,6 +88,9 @@ export default async function ReportPage({ params }: { params: Params }) {
             totalIsFrozen={frozen}
           />
           <ReportHistory events={report.events} />
+          {report.status === 'approved' ? (
+            <ReportVerificationSection reportId={report.id} actor={actor} locale={locale} />
+          ) : null}
           {timeline ? (
             <Panel title={t('timeline')} description={t('timelineBody')}>
               <AuditTimeline entries={timeline} headingLevel={3} />
