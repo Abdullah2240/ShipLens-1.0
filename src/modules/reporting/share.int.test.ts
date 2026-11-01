@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { approveReport, submitReport } from '@/modules/reports';
+import { formatCode } from '@/modules/verification';
 import type { CommandContext } from '@/platform/audit/types';
 import type { Actor } from '@/platform/authz';
 import { AppError, Forbidden, NotFound } from '@/platform/errors';
@@ -49,6 +51,14 @@ async function failure(promise: Promise<unknown>): Promise<AppError> {
   throw new Error('expected a rejection');
 }
 
+async function codeOf(reportId: string): Promise<string> {
+  const { rows } = await db.query<{ code: string }>(
+    'SELECT code FROM report_verifications WHERE report_id = $1',
+    [reportId],
+  );
+  return rows[0]!.code;
+}
+
 const share = (actor: Actor, reportId: string, locale: 'en' | 'ur' = 'en') =>
   shareReport(ctx(actor), reportId, { appOrigin: ORIGIN, locale });
 
@@ -74,6 +84,7 @@ describe('shareReport', () => {
       amount: '300.00',
       collectionCount: 1,
       amountIsFrozen: true,
+      verifyUrl: null,
     });
     expect(link).toBe(`${ORIGIN}/ur/share/reports/${s.reports.aSubmitted}`);
   });
@@ -107,6 +118,56 @@ describe('shareReport', () => {
       collectionCount: 1,
       amountIsFrozen: false,
     });
+  });
+
+  it('gives no verification link for draft, submitted and returned reports', async () => {
+    for (const id of [s.reports.aDraft, s.reports.aSubmitted, s.reports.aReturned]) {
+      const { summary } = await share(s.actors.leadA, id);
+      expect(summary.verifyUrl, summary.status).toBeNull();
+    }
+  });
+
+  it('gives the public verification link (code, no seal) of an approved report without an approval event', async () => {
+    const { summary } = await share(s.actors.leadA, s.reports.aApproved);
+    expect(summary.verifyUrl).toBe(
+      `${ORIGIN}/verify/${formatCode(await codeOf(s.reports.aApproved))}`,
+    );
+  });
+
+  it('gives the public verification link with the seal of a report approved through the services, and the same audit row', async () => {
+    const id = s.reports.aDraft;
+    await submitReport(ctx(s.actors.leadA), id, {});
+    await approveReport(ctx(s.actors.finance), id);
+    const { rows: anchor } = await db.query<{ hash: string }>(
+      `SELECT hash FROM audit_events
+        WHERE entity_type = 'report' AND entity_id = $1 AND action = 'report.approve'`,
+      [id],
+    );
+    const seal = anchor[0]!.hash.slice(0, 16);
+    const before = (await audits()).length;
+
+    for (const locale of ['en', 'ur'] as const) {
+      const { summary, link } = await share(s.actors.leadA, id, locale);
+      expect(summary.status).toBe('approved');
+      expect(summary.verifyUrl).toBe(`${ORIGIN}/verify/${formatCode(await codeOf(id))}?s=${seal}`);
+      expect(link).toBe(`${ORIGIN}/${locale}/share/reports/${id}`);
+    }
+
+    const rows = (await audits()).slice(before);
+    expect(rows).toHaveLength(2);
+    for (const row of rows) {
+      expect(row).toMatchObject({
+        action: 'report.share',
+        actor_role: 'branch_lead',
+        entity_type: 'share',
+        entity_id: id,
+        branch_id: s.branches.a.id,
+        report_id: id,
+        before: null,
+        after: { channel: 'whatsapp' },
+      });
+      expect(JSON.stringify(row)).not.toContain('verify');
+    }
   });
 
   it('writes exactly one minimal report.share audit row', async () => {
@@ -172,6 +233,7 @@ describe('shareReport', () => {
         'collectionCount',
         'reportId',
         'status',
+        'verifyUrl',
         'weekEnd',
         'weekStart',
       ].sort(),
