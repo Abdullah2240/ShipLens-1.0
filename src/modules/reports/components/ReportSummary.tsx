@@ -1,6 +1,7 @@
 import { useId, type ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { StatusBadge } from '@/components/ui';
+import { Bdi, Ltr, StatusBadge } from '@/components/ui';
+import { fillSlots, slot } from '@/components/ui/Bidi';
 import { Link } from '@/i18n/navigation';
 import { formatInt } from '@/platform/i18n/format';
 import type { ReportDetail, ReportEventItem, ReportStatus } from '../types';
@@ -222,14 +223,18 @@ export function ReportSummary({ report }: ReportSummaryProps) {
             {t('eyebrow')}
           </p>
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <h1 className="text-2xl font-semibold tracking-tight text-text">{report.branchName}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-text">
+              <Bdi>{report.branchName}</Bdi>
+            </h1>
             <BranchCode code={report.branchCode} />
             <span data-testid="report-status">
               <StatusBadge status={report.status} />
             </span>
           </div>
           <p className="text-sm text-text-muted">
-            <time dateTime={report.weekStart}>{weekLabel(report.weekStart, report.weekEnd)}</time>
+            <time dateTime={report.weekStart}>
+              <Bdi>{weekLabel(report.weekStart, report.weekEnd)}</Bdi>
+            </time>
           </p>
         </div>
         <div className="border-t border-border pt-5">
@@ -247,10 +252,10 @@ export function ReportSummary({ report }: ReportSummaryProps) {
           </blockquote>
           {report.reviewedAt ? (
             <p className="text-xs text-tone-warning-fg">
-              {t('returnReasonBy', {
-                name: report.reviewedByName ?? '—',
-                date: safeDateTime(report.reviewedAt, locale),
-              })}
+              {fillSlots(t('returnReasonBy', { name: slot(0), date: slot(1) }), [
+                <Bdi key="name">{report.reviewedByName ?? '—'}</Bdi>,
+                <Bdi key="date">{safeDateTime(report.reviewedAt, locale)}</Bdi>,
+              ])}
             </p>
           ) : null}
           {canResubmit ? (
@@ -264,10 +269,10 @@ export function ReportSummary({ report }: ReportSummaryProps) {
           <p className="text-sm text-text">{t('lockedBody')}</p>
           {report.reviewedAt ? (
             <p className="text-xs text-tone-success-fg">
-              {t('lockedBy', {
-                name: report.reviewedByName ?? '—',
-                date: safeDateTime(report.reviewedAt, locale),
-              })}
+              {fillSlots(t('lockedBy', { name: slot(0), date: slot(1) }), [
+                <Bdi key="name">{report.reviewedByName ?? '—'}</Bdi>,
+                <Bdi key="date">{safeDateTime(report.reviewedAt, locale)}</Bdi>,
+              ])}
             </p>
           ) : null}
         </Callout>
@@ -332,7 +337,7 @@ export function ReportTotals({ report, note }: ReportTotalsProps) {
           data-testid="report-total"
           className="text-3xl font-semibold tracking-tight text-text tabular"
         >
-          <span dir="ltr">{safeMoney(amount, locale)}</span>
+          <Ltr>{safeMoney(amount, locale)}</Ltr>
         </p>
         <p className="text-sm text-text-muted">
           {t('collectionCount', { count, total: formatInt(count, locale) })}
@@ -343,7 +348,11 @@ export function ReportTotals({ report, note }: ReportTotalsProps) {
       </p>
       {showLastSubmitted ? (
         <p className="rounded-lg bg-surface-sunken px-3 py-2 text-xs text-text-muted">
-          {t('lastSubmitted', { amount: safeMoney(report.frozenAmount ?? '0', locale) })}
+          {fillSlots(t('lastSubmitted', { amount: slot() }), [
+            <Ltr key="amount" className="tabular whitespace-nowrap">
+              {safeMoney(report.frozenAmount ?? '0', locale)}
+            </Ltr>,
+          ])}
         </p>
       ) : null}
       {note ? (

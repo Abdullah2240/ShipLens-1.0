@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { Bdi, Ltr } from '@/components/ui';
+import { fillSlots, slot } from '@/components/ui/Bidi';
 import { getProfile } from '@/modules/auth';
 import { LogoutButton } from '@/modules/auth/ui/LogoutButton';
 import { getPool } from '@/platform/db';
@@ -58,7 +60,7 @@ export default async function AccountPage({ params }: { params: Params }) {
       <header className="flex flex-col gap-2">
         <p className="text-sm font-semibold text-accent">{t('account.title')}</p>
         <h1 className="text-3xl font-semibold tracking-tight text-text">
-          {t('account.greeting', { name: firstName })}
+          {fillSlots(t('account.greeting', { name: slot() }), [<Bdi key="name">{firstName}</Bdi>])}
         </h1>
         <p className="max-w-2xl text-sm leading-relaxed text-text-muted">{t('account.intro')}</p>
       </header>
@@ -85,9 +87,11 @@ export default async function AccountPage({ params }: { params: Params }) {
           </div>
           <div className="relative min-w-0 flex-1">
             <p className="text-xs font-medium text-text-muted">{t('account.signedInAs')}</p>
-            <p className="truncate text-xl font-semibold text-text">{profile.name}</p>
+            <p className="truncate text-xl font-semibold text-text">
+              <Bdi>{profile.name}</Bdi>
+            </p>
             <p className="truncate text-sm text-text-muted">
-              <bdi dir="ltr">{profile.email}</bdi>
+              <Ltr>{profile.email}</Ltr>
             </p>
           </div>
         </div>

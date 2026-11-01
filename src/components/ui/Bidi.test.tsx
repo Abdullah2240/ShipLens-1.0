@@ -91,7 +91,8 @@ describe.each(LOCALES)('DateText (%s)', (locale) => {
   it('formats a business date with formatDate', () => {
     const { container } = renderWithIntl(<DateText value="2026-10-31" />, { locale });
     const bdi = container.querySelector('bdi');
-    expect(bdi).toHaveAttribute('dir', 'ltr');
+    expect(bdi).toHaveAttribute('dir', 'auto');
+    expect(bdi?.className).toContain('[unicode-bidi:isolate]');
     expect(bdi?.textContent).toBe(formatDate('2026-10-31', locale));
     expect(bdi?.textContent).toMatch(/2026/);
     expect(container.querySelector('time')).toHaveAttribute('datetime', '2026-10-31');
@@ -117,6 +118,35 @@ describe.each(LOCALES)('DateText (%s)', (locale) => {
     const iso = '2026-10-31T19:30:00.000Z';
     const { container } = renderWithIntl(<DateText value={iso} withTime />, { locale });
     expect(container.querySelector('bdi')?.textContent).toBe(formatDateTime(new Date(iso), locale));
+  });
+});
+
+describe('DateText in Urdu text', () => {
+  it('isolates an Urdu date-time with automatic direction so it reads right to left', () => {
+    const instant = new Date('2026-10-15T08:06:00Z');
+    const { container } = renderWithIntl(
+      <p>
+        جمع کرایا گیا: <DateText value={instant} withTime /> کو
+      </p>,
+      { locale: 'ur' },
+    );
+    const bdi = container.querySelector('bdi');
+    const text = formatDateTime(instant, 'ur');
+    expect(bdi).toHaveAttribute('dir', 'auto');
+    expect(bdi).not.toHaveAttribute('dir', 'ltr');
+    expect(bdi?.textContent).toBe(text);
+    // The Urdu month name is the first strong character, so the isolate resolves to RTL.
+    expect(text).toMatch(/^[\d\s]*\p{Script=Arabic}/u);
+    expect(text).toMatch(/13:06/);
+    expect(container.querySelector('time')).toHaveAttribute('datetime', '2026-10-15T08:06:00.000Z');
+  });
+
+  it('keeps an English date-time left to right through the same automatic direction', () => {
+    const instant = new Date('2026-10-15T08:06:00Z');
+    const { container } = renderWithIntl(<DateText value={instant} withTime />);
+    const text = container.querySelector('bdi')?.textContent ?? '';
+    expect(text).toBe(formatDateTime(instant, 'en'));
+    expect(text).toMatch(/^[\x20-\x7e]+$/);
   });
 });
 

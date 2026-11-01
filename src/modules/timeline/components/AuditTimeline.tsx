@@ -1,6 +1,7 @@
 import { useId, type ReactNode } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { EmptyState } from '@/components/ui';
+import { Bdi, EmptyState, Ltr } from '@/components/ui';
+import { fillSlots, slot } from '@/components/ui/Bidi';
 import type { Locale } from '@/i18n/routing';
 import { formatDate, formatDateTime, formatInt, formatMoney } from '@/platform/i18n/format';
 import { actionMessageKey } from '../actions';
@@ -119,10 +120,16 @@ function useValueFormatter(locale: Locale) {
     if (typeof value === 'object') return <bdi>{JSON.stringify(value)}</bdi>;
 
     const text = String(value);
-    if (MONEY_FIELDS.has(field)) return attempt(() => formatMoney(text, locale), text);
-    if (DATE_FIELDS.has(field)) return attempt(() => formatDate(text, locale), text);
+    if (MONEY_FIELDS.has(field)) {
+      return (
+        <Ltr className="tabular whitespace-nowrap">
+          {attempt(() => formatMoney(text, locale), text)}
+        </Ltr>
+      );
+    }
+    if (DATE_FIELDS.has(field)) return <Bdi>{attempt(() => formatDate(text, locale), text)}</Bdi>;
     if (INSTANT_FIELDS.has(field)) {
-      return attempt(() => formatDateTime(new Date(text), locale), text);
+      return <Bdi>{attempt(() => formatDateTime(new Date(text), locale), text)}</Bdi>;
     }
     if (COUNT_FIELDS.has(field)) return attempt(() => formatInt(text, locale), text);
     if (field === 'status' && MESSAGE_KEY.test(text) && tStatus.has(text)) return tStatus(text);
@@ -202,7 +209,8 @@ function TimelineItem({
   if (entry.actorName) {
     actor = (
       <span>
-        {t('timeline.by', { name: entry.actorName })} {t('timeline.as', { role: roleLabel })}
+        {fillSlots(t('timeline.by', { name: slot() }), [<Bdi key="name">{entry.actorName}</Bdi>])}{' '}
+        {t('timeline.as', { role: roleLabel })}
       </span>
     );
   } else if (entry.actorRole === 'system') {
@@ -226,9 +234,9 @@ function TimelineItem({
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
           <p className="text-sm font-medium leading-5 text-text">{actionLabel}</p>
-          <time dateTime={entry.occurredAt} className="text-xs tabular-nums text-text-muted">
-            {when}
-          </time>
+          <Bdi className="text-xs tabular-nums text-text-muted">
+            <time dateTime={entry.occurredAt}>{when}</time>
+          </Bdi>
         </div>
         <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
           {actor}

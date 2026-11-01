@@ -1,4 +1,6 @@
 import { useLocale, useTranslations } from 'next-intl';
+import { Bdi } from '@/components/ui';
+import { fillSlots, slot } from '@/components/ui/Bidi';
 import type { ReportEventItem, ReportEventType } from '../types';
 import { Panel } from './Panel';
 import { asLocale, safeDateTime } from './report-format';
@@ -72,16 +74,17 @@ export function ReportHistory({ events }: ReportHistoryProps) {
               <div className="flex min-w-0 flex-1 flex-col gap-1 pt-0.5">
                 <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5">
                   <p className="text-sm font-semibold text-text">{t(`events.${event.type}`)}</p>
-                  <time
-                    dateTime={event.occurredAt}
-                    className="text-xs whitespace-nowrap text-text-muted tabular"
-                  >
-                    {safeDateTime(event.occurredAt, locale)}
-                  </time>
+                  <Bdi className="text-xs whitespace-nowrap text-text-muted tabular">
+                    <time dateTime={event.occurredAt}>
+                      {safeDateTime(event.occurredAt, locale)}
+                    </time>
+                  </Bdi>
                 </div>
                 {event.actorName ? (
                   <p className="text-xs text-text-muted">
-                    {t('events.by', { name: event.actorName })}
+                    {fillSlots(t('events.by', { name: slot() }), [
+                      <Bdi key="name">{event.actorName}</Bdi>,
+                    ])}
                   </p>
                 ) : null}
                 {event.reason ? (

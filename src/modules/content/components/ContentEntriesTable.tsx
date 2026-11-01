@@ -1,5 +1,5 @@
 import { useLocale, useTranslations } from 'next-intl';
-import { DataTable, StatusBadge, type Column } from '@/components/ui';
+import { Bdi, DataTable, Ltr, StatusBadge, type Column } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { CONTENT_KEYS } from '@/modules/public-site/keys';
@@ -129,9 +129,7 @@ export function ContentEntriesTable({ entries }: { entries: ContentEntryView[] }
       render: (row) => (
         <span className="flex flex-col gap-0.5">
           <span className="font-semibold text-text">{t(`keys.${row.key}`)}</span>
-          <span dir="ltr" className="text-xs text-text-muted">
-            /{row.key}
-          </span>
+          <Ltr className="text-xs text-text-muted">/{row.key}</Ltr>
         </span>
       ),
     },
@@ -153,9 +151,9 @@ export function ContentEntriesTable({ entries }: { entries: ContentEntryView[] }
       render: (row) => {
         const stamp = latest(row);
         return stamp ? (
-          <time dateTime={stamp} className="whitespace-nowrap text-text-muted">
-            {formatDateTime(new Date(stamp), locale)}
-          </time>
+          <Bdi className="whitespace-nowrap text-text-muted">
+            <time dateTime={stamp}>{formatDateTime(new Date(stamp), locale)}</time>
+          </Bdi>
         ) : (
           <span className="text-text-muted">—</span>
         );

@@ -1,5 +1,5 @@
 import { useLocale, useTranslations } from 'next-intl';
-import { DataTable, EmptyState, StatusBadge, type Column } from '@/components/ui';
+import { Bdi, DataTable, EmptyState, Ltr, StatusBadge, type Column } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import type { BranchListItem } from '@/modules/branches/types';
@@ -11,16 +11,16 @@ export const branchHref = (id: string) => `${BRANCHES_PATH}/${id}`;
 /** Branch code, kept LTR and in Latin digits inside Urdu text. */
 export function BranchCode({ code }: { code: string }) {
   return (
-    <bdi
-      dir="ltr"
-      className="inline-block rounded-md bg-surface-sunken px-1.5 py-0.5 font-mono text-xs font-medium text-text-muted tabular"
-    >
+    <Ltr className="inline-block rounded-md bg-surface-sunken px-1.5 py-0.5 font-mono text-xs font-medium text-text-muted tabular">
       {formatId(code)}
-    </bdi>
+    </Ltr>
   );
 }
 
-/** An ISO instant as a PKT calendar date; falls back to the raw text if it cannot be read. */
+/**
+ * An ISO instant as a PKT calendar date, isolated with automatic direction; falls back to the
+ * raw text if it cannot be read.
+ */
 export function BranchDate({ value, locale }: { value: string; locale: Locale }) {
   let text = value;
   try {
@@ -29,9 +29,9 @@ export function BranchDate({ value, locale }: { value: string; locale: Locale })
     // keep the raw value
   }
   return (
-    <time dateTime={value} className="whitespace-nowrap tabular">
-      {text}
-    </time>
+    <Bdi className="whitespace-nowrap tabular">
+      <time dateTime={value}>{text}</time>
+    </Bdi>
   );
 }
 
@@ -58,7 +58,7 @@ export function BranchesTable({ branches }: BranchesTableProps) {
           href={branchHref(row.id)}
           className="font-semibold text-text underline-offset-4 hover:text-primary hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          {row.name}
+          <Bdi>{row.name}</Bdi>
         </Link>
       ),
       className: 'min-w-44',
@@ -68,7 +68,7 @@ export function BranchesTable({ branches }: BranchesTableProps) {
       header: t('columns.city'),
       render: (row) =>
         row.city ? (
-          <span className="whitespace-nowrap text-text">{row.city}</span>
+          <Bdi className="whitespace-nowrap text-text">{row.city}</Bdi>
         ) : (
           <span className="text-text-muted">
             <span aria-hidden="true">—</span>
