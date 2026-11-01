@@ -14,11 +14,13 @@
 // of any page scores under the floor.
 import { spawn } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
   buildTargets,
   CATEGORIES,
+  cpuBusyShare,
   DEFAULT_FLOOR,
   evaluate,
   medianRun,
@@ -28,6 +30,22 @@ import {
 
 export const LIGHTHOUSE_VERSION = '13.6.0';
 const OUT_DIR = path.join('test-results', 'lighthouse');
+// Wait (up to QUIET_WAIT_MS) until the host is at most this busy before each run.
+const QUIET_SHARE = 0.35;
+const QUIET_WAIT_MS = 180_000;
+
+const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** Resolves with the busy share once the CPU is quiet enough, or after the wait limit. */
+async function waitForQuietCpu() {
+  const deadline = Date.now() + QUIET_WAIT_MS;
+  for (;;) {
+    const before = os.cpus();
+    await pause(3000);
+    const share = cpuBusyShare(before, os.cpus());
+    if (share <= QUIET_SHARE || Date.now() > deadline) return share;
+  }
+}
 
 /** Quotes one argument for the platform shell that runs `npx`. */
 function shellQuote(arg) {
@@ -91,6 +109,8 @@ async function main(argv) {
     try {
       const lhrs = [];
       for (let run = 0; run < runs; run += 1) {
+        const busy = await waitForQuietCpu();
+        console.log(`  run ${run + 1}: host cpu ${Math.round(busy * 100)}% busy before the run`);
         lhrs.push(await runLighthouse(target.url, formFactor, chromePath));
       }
       const lhr = medianRun(lhrs);

@@ -134,3 +134,24 @@ export function parseLighthouseArgs(argv) {
   if (!/^[1-9]\d*$/.test(String(runs))) throw new Error('--runs must be a positive whole number');
   return { baseUrl: baseUrl.replace(/\/+$/, ''), only, formFactor, runs: Number(runs) };
 }
+
+/**
+ * Share of CPU time spent busy between two `os.cpus()` samples (0..1). Lighthouse
+ * simulates a slow phone by scaling the work it observes, so a host busy with other
+ * jobs inflates blocking time; the runner waits for a quiet moment before each run.
+ * @param {{ times: Record<string, number> }[]} before
+ * @param {{ times: Record<string, number> }[]} after
+ */
+export function cpuBusyShare(before, after) {
+  let busy = 0;
+  let total = 0;
+  after.forEach((cpu, index) => {
+    const prev = before[index]?.times ?? {};
+    for (const [kind, value] of Object.entries(cpu.times)) {
+      const delta = value - (prev[kind] ?? 0);
+      total += delta;
+      if (kind !== 'idle') busy += delta;
+    }
+  });
+  return total > 0 ? busy / total : 0;
+}

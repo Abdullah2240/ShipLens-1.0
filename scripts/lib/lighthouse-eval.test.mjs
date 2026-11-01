@@ -4,6 +4,7 @@ import {
   PAGES,
   LOCALES,
   medianRun,
+  cpuBusyShare,
   buildTargets,
   evaluate,
   parseLighthouseArgs,
@@ -214,5 +215,19 @@ describe('medianRun', () => {
     expect(parseLighthouseArgs(['--base-url', 'http://h', '--runs', '3']).runs).toBe(3);
     expect(parseLighthouseArgs(['--base-url', 'http://h']).runs).toBe(1);
     expect(() => parseLighthouseArgs(['--base-url', 'http://h', '--runs', '0'])).toThrow(/runs/);
+  });
+});
+
+describe('cpuBusyShare', () => {
+  const cpu = (user, idle) => ({ times: { user, nice: 0, sys: 0, idle, irq: 0 } });
+
+  it('is the busy share of the time between two samples, over every core', () => {
+    const before = [cpu(100, 900), cpu(100, 900)];
+    const after = [cpu(160, 940), cpu(120, 1020)];
+    expect(cpuBusyShare(before, after)).toBeCloseTo(80 / 240);
+  });
+
+  it('is zero when no time has passed', () => {
+    expect(cpuBusyShare([cpu(1, 1)], [cpu(1, 1)])).toBe(0);
   });
 });

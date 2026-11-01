@@ -59,6 +59,7 @@
   "branches": {
     "title": "Find a branch near you",
     "lead": "Every branch is run by volunteers who live in the neighbourhood it serves. Find the one closest to you and apply to join its team.",
+    "listTitle": "Branches by city",
     "jumpTo": "Jump to a city",
     "cityCount": "{count, plural, one {# branch} other {# branches}}",
     "otherCity": "Other areas",
