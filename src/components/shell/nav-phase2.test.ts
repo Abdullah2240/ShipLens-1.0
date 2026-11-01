@@ -15,6 +15,7 @@ describe('people and content navigation', () => {
       'super_admin',
       [
         'account',
+        'dashboard',
         'branches',
         'collections',
         'reports',
@@ -22,12 +23,13 @@ describe('people and content navigation', () => {
         'members',
         'teams',
         'content',
+        'audit',
       ],
     ],
     ['hr_lead', ['account', 'branches', 'applications', 'members', 'teams']],
     ['branch_lead', ['account', 'branches', 'collections', 'reports', 'members', 'teams']],
     ['content_editor', ['account', 'content']],
-    ['finance_reviewer', ['account', 'branches', 'collections', 'reports']],
+    ['finance_reviewer', ['account', 'dashboard', 'branches', 'collections', 'reports', 'audit']],
   ] as const)('shows %s exactly the entries its permissions allow', (role, expected) => {
     expect(ids(role)).toEqual(expected);
   });
