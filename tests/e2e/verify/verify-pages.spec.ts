@@ -109,30 +109,37 @@ test.describe('public verify pages', { tag: '@smoke' }, () => {
   });
 
   test('a locale-free QR link redirects to the visitor language and keeps the seal', async ({
-    request,
+    playwright,
     baseURL,
   }) => {
-    const target = (location: string | undefined) => {
-      const url = new URL(location ?? '', baseURL);
-      return `${url.pathname}${url.search}`;
-    };
     const qr = `/verify/${UNKNOWN_CODE}?s=${SEAL}`;
+    const urdu = 'ur-PK,ur;q=0.9,en;q=0.5';
 
-    const plain = await request.get(qr, { maxRedirects: 0 });
-    expect([302, 303, 307, 308]).toContain(plain.status());
-    expect(target(plain.headers().location)).toBe(`/en${qr}`);
+    // Each visitor is a fresh client. The redirect may set NEXT_LOCALE (a visitor with no
+    // Accept-Language gets NEXT_LOCALE=en), and a shared cookie jar would carry that cookie
+    // into the next case, where the cookie rightly wins over the header.
+    const redirectFor = async (headers: Record<string, string>) => {
+      const visitor = await playwright.request.newContext({ baseURL });
+      try {
+        const response = await visitor.get(qr, { maxRedirects: 0, headers });
+        expect([302, 303, 307, 308]).toContain(response.status());
+        const url = new URL(response.headers().location ?? '', baseURL);
+        return `${url.pathname}${url.search}`;
+      } finally {
+        await visitor.dispose();
+      }
+    };
 
-    const urdu = await request.get(qr, {
-      maxRedirects: 0,
-      headers: { 'Accept-Language': 'ur-PK,ur;q=0.9,en;q=0.5' },
-    });
-    expect(target(urdu.headers().location)).toBe(`/ur${qr}`);
-
-    const chosen = await request.get(qr, {
-      maxRedirects: 0,
-      headers: { 'Accept-Language': 'en', Cookie: 'NEXT_LOCALE=ur' },
-    });
-    expect(target(chosen.headers().location)).toBe(`/ur${qr}`);
+    expect(await redirectFor({}), 'no language preference').toBe(`/en${qr}`);
+    expect(await redirectFor({ 'Accept-Language': urdu }), 'Urdu browser').toBe(`/ur${qr}`);
+    expect(
+      await redirectFor({ 'Accept-Language': 'en', Cookie: 'NEXT_LOCALE=ur' }),
+      'Urdu chosen earlier, English browser',
+    ).toBe(`/ur${qr}`);
+    expect(
+      await redirectFor({ 'Accept-Language': urdu, Cookie: 'NEXT_LOCALE=en' }),
+      'English chosen earlier, Urdu browser',
+    ).toBe(`/en${qr}`);
   });
 });
 
