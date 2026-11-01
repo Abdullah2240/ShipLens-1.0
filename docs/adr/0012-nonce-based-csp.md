@@ -21,6 +21,7 @@ The other complication was composing a nonce with the next-intl locale middlewar
   `default-src 'self'; script-src 'self' 'nonce-{N}' 'strict-dynamic'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; manifest-src 'self'; worker-src 'self' blob:`
 
   plus `upgrade-insecure-requests` only when the request arrived over https, so local http runs of the Docker image still work. Development adds `'unsafe-eval'` and `ws:` for hot reload.
+- Production never needs `'unsafe-eval'`. The one eval in the client bundle was zod's JIT probe (`new Function('')` when an object schema is built, caught but still reported as a violation by the browser). `src/instrumentation-client.ts` sets `z.config({ jitless: true })` in the browser before hydration, so client-side validation runs without eval and with the same results.
 - API responses (`/api/*`, not matched by the proxy) get `default-src 'none'; frame-ancestors 'none'` from `next.config.ts`, since they never render HTML.
 - Every response also carries HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: DENY`, a restrictive `Permissions-Policy`, `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin`; `X-Powered-By` is off.
 - `scripts/check-headers.mjs` verifies this against the production build running in Docker: the policy is present on English, Urdu and verification pages, the nonce differs between two requests, every `<script>` tag carries that response's nonce, `script-src` has no `'unsafe-inline'`, and the API and other headers are correct. The same check runs locally, in CI and after deploy.
@@ -54,6 +55,7 @@ The other complication was composing a nonce with the next-intl locale middlewar
 
 - [`src/proxy.ts`](../../src/proxy.ts): proxy where the nonce and policy are applied.
 - [`next.config.ts`](../../next.config.ts): headers for every response, including API responses.
+- [`src/instrumentation-client.ts`](../../src/instrumentation-client.ts): turns off zod's eval-based JIT in the browser.
 
 ## Where it lives (planned)
 
