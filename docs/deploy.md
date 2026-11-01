@@ -29,21 +29,22 @@ What is different from the Render setup:
 
 ## Vercel: recorded facts
 
-| Fact                     | Value                                                                                                                                  |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Live URL                 | <https://shiplens-two.vercel.app>                                                                                                      |
-| Project                  | `shiplens`, Hobby plan, Next.js framework preset, function region `iad1`                                                               |
-| Database                 | Neon Postgres, Free plan, resource `shiplens-db`, added through the Vercel marketplace                                                 |
-| Database created on      | 2026-11-01                                                                                                                             |
-| Database expiry          | No fixed expiry on Neon's free plan (Render's free Postgres expires after 30 days). Usage limits apply: see <https://neon.com/pricing> |
-| Database connected to    | Production, Preview and Development environments of the project                                                                        |
-| Variables from Neon      | `DATABASE_URL` (pooled, used by the app), `DATABASE_URL_UNPOOLED` (direct, used for migrations)                                        |
-| Variables set by hand    | `APP_ORIGIN` = `https://shiplens-two.vercel.app` (Production). `NODE_ENV` is set by Vercel                                             |
-| Migrations and seed      | Run once from a developer machine against `DATABASE_URL_UNPOOLED`; the seed took about 460 s from Pakistan (round trips to US East)    |
-| Deploy method            | Git connected on 2026-11-01: a merge to `main` deploys to production; `vercel.json` turns off builds for every other branch            |
-| Post-deploy verification | `scripts/verify-deploy.mjs --markdown`: 102/102 PASS on 2026-11-01T07:37:03Z (health 2, smoke 41, headers 44, chain 2, verify 13)      |
-| Cold start               | 821 ms                                                                                                                                 |
-| Keep-warm                | Inactive (no `RENDER_EXTERNAL_URL` on Vercel)                                                                                          |
+| Fact                     | Value                                                                                                                                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Live URL                 | <https://shiplens-two.vercel.app>                                                                                                                                                          |
+| Project                  | `shiplens`, Hobby plan, Next.js framework preset, function region `iad1`                                                                                                                   |
+| Database                 | Neon Postgres, Free plan, resource `shiplens-db`, added through the Vercel marketplace                                                                                                     |
+| Database created on      | 2026-11-01                                                                                                                                                                                 |
+| Database expiry          | No fixed expiry on Neon's free plan (Render's free Postgres expires after 30 days). Usage limits apply: see <https://neon.com/pricing>                                                     |
+| Database connected to    | Production, Preview and Development environments of the project                                                                                                                            |
+| Variables from Neon      | `DATABASE_URL` (pooled, used by the app), `DATABASE_URL_UNPOOLED` (direct, used for migrations)                                                                                            |
+| Variables set by hand    | `APP_ORIGIN` = `https://shiplens-two.vercel.app` (Production). `NODE_ENV` is set by Vercel                                                                                                 |
+| Migrations and seed      | Run once from a developer machine against `DATABASE_URL_UNPOOLED`; the seed took about 460 s from Pakistan (round trips to US East)                                                        |
+| Deploy method            | Git connected on 2026-11-01: a merge to `main` deploys to production; `vercel.json` turns off builds for every other branch                                                                |
+| Post-deploy verification | `scripts/verify-deploy.mjs --markdown`: 102/102 PASS on 2026-11-01T07:37:03Z (health 2, smoke 41, headers 44, chain 2, verify 13)                                                          |
+| Cold start               | 821 ms                                                                                                                                                                                     |
+| Full live browser run    | 2026-11-01, against the Git-deployed `main` (a3d9a7a): every spec on English/Urdu, light/dark, desktop/mobile. Tests that write data run on one project only and were left out (see below) |
+| Keep-warm                | Inactive (no `RENDER_EXTERNAL_URL` on Vercel)                                                                                                                                              |
 
 ## Vercel step 1: Account and CLI login
 
@@ -138,6 +139,24 @@ the public report verification. It exits 0 only when every check passes. Copy it
 (never the password) into [Vercel: recorded facts](#vercel-recorded-facts). The first run
 recorded 102/102 PASS. The script makes one deliberately wrong login, so do not run it many
 times in a row (five failures for one email lock it for 15 minutes).
+
+## Vercel: full live browser run (2026-11-01)
+
+Run from a developer machine in Pakistan against `https://shiplens-two.vercel.app`, with the
+Playwright image and the five demo logins. Tests that create or change data are guarded to
+the `desktop-en-light` project, which was **not** run in full on the live site; in that
+project only the 25 spec files that never write were run.
+
+| Pass  | Projects                                                       | Result                                                                 |
+| ----- | -------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| 1     | desktop-ur-dark, mobile-en-dark, mobile-ur-light (all specs)   | 440 passed, 167 skipped by design, 16 failed on the default 30 s limit |
+| 2     | desktop-en-light (25 write-free spec files)                    | 129 passed, 21 skipped by design, 2 failed on the default 30 s limit   |
+| Retry | the 18 failures, one worker, 120 s limit, assertions unchanged | 17 passed on the first retry; the last passed 6 of 6 when run alone    |
+
+Every failure was a timeout, a dropped connection or a slow page transition (one URL
+assertion with a 7 s window). Vercel logs showed no 5xx in the window, and the page HTML
+answered in about 1 to 2 s; static files and audit pages from Pakistan to US East are
+slower. No test failed on what it checks.
 
 ## Vercel: connect Git (optional)
 
