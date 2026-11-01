@@ -70,6 +70,8 @@ committed; refer to them by name.
 | `E2E_DEMO_PASSWORD` | Demo password seeded into the throwaway end-to-end stack | You, CI (generated per run) | Keep out of git |
 | `E2E_DB_EXEC` | `1` allows journeys that `docker compose exec` into the database | You | No |
 | `PLAYWRIGHT_VERSION` | Playwright version of the end-to-end runner image | Docker build argument | No |
+| `E2E_EXPECTED_JSON` | Path of `db/seed/expected.json` for the exact-value end-to-end specs, when the runner cannot find it from its working directory | You, only for such runs | No |
+| `API_DOC_ROOT` | Repository root the API doc generator reads; its tests point it at a fixture tree | Tooling only | No |
 
 There is no session secret: sessions are random tokens stored only as SHA-256 hashes in
 the database.
@@ -133,11 +135,12 @@ The full click-by-click version is [deploy.md](deploy.md), steps 1 to 7. The sho
    unset DEMO_PW
    ```
 
-   `scripts/verify-deploy.mjs` is the post-deploy check (health, database health, both
-   locales, logins for every role, security headers, the public verification page). It
-   exits 0 only when every check passes. Until it is on your branch, run the smoke script
-   from [deploy.md step 6](deploy.md#step-6-verify-the-deployment-from-your-machine)
-   instead: `BASE_URL="$URL" SMOKE_DEMO_PASSWORD="$DEMO_PW" node scripts/smoke.mjs`.
+   `scripts/verify-deploy.mjs` is the post-deploy check: health with the cold-start time,
+   database health, the smoke checks (both locales, a login for every role, cookie flags),
+   the security headers and CSP nonce, the audit chain status, and the public verification
+   of an approved report through the API and both language pages. It exits 0 only when
+   every check passes; add `--markdown` to print a summary block for the deploy record.
+   The smoke script alone is step 6 of [deploy.md](deploy.md#step-6-verify-the-deployment-from-your-machine).
    The check makes one deliberately wrong login, so do not run it many times in a row
    (section 11, login lockout).
 8. **Record the result.** Copy the summary lines (never the password) into
@@ -296,7 +299,10 @@ its own SHA-256 hash, computed by the `audit_events_chain` database trigger
   failing event number and the reason (`sequence_gap`, `link_mismatch` or
   `hash_mismatch`), or `empty`. Results are cached for 60 seconds; `?fresh=1` walks the
   whole chain again. The audit viewer (`/en/audit`) shows the same result as a badge:
-  "Audit chain intact, N events, checked at T" or "Audit chain broken at event #N".
+  "Audit chain intact" with "N events checked at T", or "Audit chain broken at event #N"
+  with the reason in plain words (for example "This event was changed after it was
+  recorded." for `hash_mismatch`); its "Check again" link forces a fresh walk. What each
+  reason means: [verification.md, The audit chain](verification.md#the-audit-chain).
 - **What a broken chain means.** Someone or something changed, inserted or removed an
   audit row outside the normal write path. The append-only triggers block `UPDATE`,
   `DELETE` and `TRUNCATE` on `audit_events`, so a break needs database rights beyond the
@@ -331,9 +337,13 @@ its own SHA-256 hash, computed by the `audit_events_chain` database trigger
 - **Login throttling** is stored in the database (`login_attempts`): 5 failures per email
   or 20 per IP address in 15 minutes block further attempts with 429 and `Retry-After`
   (`src/modules/auth/throttle.ts`). It survives restarts and is shared by all instances.
-- **Public verification lookups** are limited to 30 per minute per client IP, in memory,
-  per server process. A restart resets them, and a second instance would have its own
-  counters. The service runs as one instance on the free plan, so this is acceptable.
+- **Public verification lookups** are limited to 30 per minute per client IP and public
+  membership applications to 5 per hour per client IP, in memory, per server process
+  (`src/platform/rate-limit/index.ts`). A restart resets them, and a second instance would
+  have its own counters. The service runs as one instance on the free plan, so this is
+  acceptable. The client IP is the first `X-Forwarded-For` entry; confirm once on the live
+  service that Render replaces, rather than appends to, a value the client sends
+  ([security.md, Residual risks](security.md#residual-risks)).
 - **Single instance.** Free web services run one instance. Do not scale out without
   first moving the in-memory limits to a shared store.
 
@@ -347,8 +357,8 @@ its own SHA-256 hash, computed by the `audit_events_chain` database trigger
 | `POST` requests (login, any change) return 403 from the browser | The browser's `Origin` differs from the origin the app derived. Set `APP_ORIGIN` to the exact live URL (scheme and host, no trailing slash) and redeploy. |
 | Login answers 429, or keeps failing after the smoke script ran | Login lockout: 5 failed logins for one email in 15 minutes. Wait 15 minutes from the last failure; the response's `Retry-After` header says how long. |
 | Browser console shows "Refused to execute inline script" or another Content Security Policy violation | A script without the per-request nonce, or from another origin. Do not add `'unsafe-inline'` to `script-src`; load the script through Next.js so it receives the nonce. The policy and its reasons: [ADR 0012](adr/0012-nonce-based-csp.md) and [security.md](security.md#security-headers). |
-| The public verification page shows "unanchored" | The report has no `report.approve` audit event, or no earlier submit event carrying its totals (for example it was approved by direct SQL). The figures cannot be proven; investigate how the report was approved. Do not insert audit rows by hand. |
-| The public verification page shows "chain broken" | See section 9, incident steps. |
+| The public verification page says "This report could not be traced" (`unanchored`) | The report has no `report.approve` audit event, or no earlier submit event carrying its totals (for example it was approved by direct SQL). The figures cannot be proven; investigate how the report was approved. Do not insert audit rows by hand. |
+| The public verification page says "The audit record cannot be trusted right now" (`chain_broken`) | See section 9, incident steps. |
 | Pages fail with a database error after about a month | The free database expired. See section 6. |
 
 More deploy-specific cases: [deploy.md, Troubleshooting](deploy.md#troubleshooting).

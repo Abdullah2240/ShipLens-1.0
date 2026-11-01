@@ -17,7 +17,9 @@ This file lists what is frozen after the scaffold. Changes to a frozen item go t
 Owner track:
 
 - `src/platform/{db,authz,audit,http,errors,time,money,config,log}`
+- `src/platform/csv` (CSV writer with formula neutralising), `src/platform/rate-limit` (the one in-memory rate limiter), `src/platform/keepwarm` (the Render self-ping, started from `src/instrumentation.ts`) and `src/platform/audit/chain` (canonical form, hash chain verifier and cached status)
 - `src/modules/{auth,branches,collections,reports,reporting}`
+- `src/modules/{timeline,audit-log,verification}` (audit timelines, the audit viewer, public report verification)
 - `db/`
 - `scripts/{migrate,seed,smoke}*`
 - Docker, CI and Render files
@@ -26,7 +28,7 @@ Saniya track:
 
 - `src/i18n`
 - `src/app/[locale]/**` layouts
-- `src/components`
+- `src/components` (including the verification kit in `src/components/verification`)
 - `src/platform/i18n`
 - `src/modules/{applications,members,content,public-site}`
 - `messages/` content
@@ -36,7 +38,7 @@ Saniya track:
 
 Route handler, then service, then repository, then Postgres. ESLint enforces this with `no-restricted-imports`:
 
-- Services, repositories and kernel code (`src/platform/{authz,audit,db,time,money,errors,config,log}`) must not import `next`, `next/*`, `next-intl`, `next-intl/*`, `react` or `react-dom`.
+- Services, repositories and kernel code (`src/platform/{authz,audit,db,time,money,errors,config,log,csv,rate-limit,keepwarm,i18n}`) must not import `next`, `next/*`, `next-intl`, `next-intl/*`, `react` or `react-dom`. In `src/platform/http`, `route.ts` is framework-free too; `server.ts` (the page actor helpers) is the one platform file that uses Next.
 - Pages, routes and components (`src/app`, `src/components`) must not import a repository.
 - Repositories must not import another module (use relative imports inside your own module) and must not import `@/platform/audit`; `command()` writes audit rows.
 
@@ -52,3 +54,6 @@ A test that touches Postgres lives under `tests/` or `db/`, or is named `*.int.t
 
 - `src/platform/http/route.ts` imports `@/modules/auth` to resolve the session. It is the one platform folder allowed to import a module.
 - `getEnv()` and `getPool()` are called only inside request handlers or script entry points, never at import time, because `next build` imports route modules with no environment.
+- Every `/api/v1` route is built with `route()` from `src/platform/http/route.ts`; the interim adapter of the first phases is retired, and `src/platform/http/route-usage.test.ts` keeps it that way.
+- Transactions that write (and so may insert audit events) run at READ COMMITTED, the database default: the audit chain trigger needs it. REPEATABLE READ is used only in `READ ONLY` reporting transactions; `src/platform/audit/isolation-guard.test.ts` enforces this.
+- New API routes are registered for the role-by-endpoint matrix in one registry file per phase under `tests/http/registry/` (`owner`, `saniya`, `phase3`, `phase4`); `tests/http/route-registry.test.ts` fails on an unregistered route.

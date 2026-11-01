@@ -7,10 +7,9 @@ the audit trail behind it has not been altered.
 This page explains it first in plain words, then technically, then how to check it
 yourself, and finally what it cannot do.
 
-Status: the audit chain (database trigger, canonical form) and the verification codes are
-built. The chain verifier, the public check page and API, the QR code and the admin badge
-are being built to the design below; anything marked **(planned)** describes that agreed
-design.
+Status: everything on this page is built and tested: the audit chain and its verifier, the
+chain badge in the audit viewer, the verification codes, the public check page and API, the
+QR code and the verification panel on approved reports.
 
 ## For donors
 
@@ -26,17 +25,21 @@ spaces and hyphens do not matter, and the letters O, I and L are read as 0, 1 an
 **What you see.** The branch and its city, the report week, the approved total, how many
 collections it covers, the date it was approved, and the result of the check.
 
-**What the results mean.**
+**What the results mean.** The page shows one headline, and a line about the seal when your
+link carried one. The wording below is the English page; the Urdu page says the same.
 
-| Result | Meaning |
+| What the page says | Meaning |
 | --- | --- |
-| Verified | The figures you see are the ones that were submitted and then approved, and the record of that approval is intact. |
-| Seal matches | The seal on your copy (from the QR code) matches the approval record held today. |
-| Seal does not match | The approval record has changed since your copy was made. Please tell us (see [SECURITY.md](../SECURITY.md)). |
-| Figures do not match | The report's figures differ from what was submitted and approved. It should not be trusted until explained. |
-| Not anchored | We cannot find the approval record for this report, so its figures cannot be proven. |
-| Audit chain broken | Our audit trail has been altered somewhere. No report can be proven until this is resolved. |
-| Not recognised | No approved report has this code. Check for typing mistakes; unknown and malformed codes give the same answer. |
+| "This report is verified" | The figures you see are the ones that were submitted and then approved, and the record of that approval is intact. |
+| "The seal in your link matches the audit chain." | The seal on your copy (from the QR code) matches the approval record held today. |
+| "Seal does not match" | The approval record has changed since your copy was made. Please tell us (see [SECURITY.md](../SECURITY.md)). |
+| "These figures do not match the record" | The report's figures differ from what was submitted and approved. It should not be trusted until explained. |
+| "This report could not be traced" | We cannot find the submission and approval records for this report, so its figures cannot be proven. |
+| "The audit record cannot be trusted right now" | Our audit trail has been altered somewhere. No report can be proven until this is resolved. |
+| "Code not recognised" | No approved report has this code. Check for typing mistakes; unknown and malformed codes give the same answer. |
+
+In the API and in the technical sections below these results are `verified`, `match`,
+`mismatch` (seal), `mismatch` (figures), `unanchored`, `chain_broken` and a 404.
 
 **No personal data.** The check never shows anyone's name, email, phone number or
 account, and never shows individual collections, notes or reasons a report was returned.
@@ -75,12 +78,20 @@ hash = hex(sha256(utf8(canonical)))
 The byte-length prefix makes the encoding unambiguous: no value can imitate a separator.
 JSON values are hashed as the text Postgres itself produces, never re-serialised.
 
-Changing any stored field of an event changes its recomputed hash (`hash_mismatch`).
-Removing or inserting an event leaves a gap in `chain_seq` or a `prev_hash` that no longer
-matches (`sequence_gap`, `link_mismatch`). The verifier **(planned)**,
-`verifyAuditChain()` in `src/platform/audit/chain/`, walks the chain in order in batches
-of 1000 and reports the first failure. Administrators see the result through
-`GET /api/v1/audit/chain` and as a badge in the audit viewer **(planned)**.
+The verifier, `verifyAuditChain()` in `src/platform/audit/chain/verify.ts`, walks the chain
+in order in batches of 1000, recomputes every hash independently of the database, and
+reports the first failure. Each event is checked in this order:
+
+| Reason | What it means | Audit viewer badge says |
+| --- | --- | --- |
+| `sequence_gap` | Its `chain_seq` is not one more than the previous event's: an event was deleted, or one was inserted out of order. | "An event is missing, or one was added out of order." |
+| `hash_mismatch` | Its stored fields (its `prev_hash` included) no longer hash to its stored `hash`: this event was edited after it was recorded. | "This event was changed after it was recorded." |
+| `link_mismatch` | The event is consistent with itself, but its `prev_hash` is not the previous event's hash: an earlier event was replaced by a forgery whose hash was recomputed, and the break shows at the first event after it. | "This event no longer links to the event before it." |
+
+Administrators see the result through `GET /api/v1/audit/chain` and as a badge in the audit
+viewer: "Audit chain intact" with the number of events and the time of the check, or "Audit
+chain broken at event #N" with the reason above. The result is cached for 60 seconds;
+"Check again" in the viewer (or `?fresh=1` on the API) walks the whole chain again.
 
 ### Verification codes
 
@@ -94,7 +105,7 @@ reveal nothing and cannot be guessed. Input cleaning and display formatting live
 
 ### Anchor and seal
 
-The check for a code **(planned)** reads:
+The check for a code reads:
 
 1. The report's **anchor**: its latest `report.approve` audit event.
 2. Its **totals evidence**: the latest `report.submit` or `report.resubmit` event before
@@ -128,11 +139,13 @@ flowchart LR
   V -- "reads anchor, totals,<br/>chain status" --> DB
 ```
 
-### Where people see it **(planned)**
+### Where people see it
 
-- Public: `/{locale}/verify` (code entry, a plain form that works without JavaScript),
+- Public: `/{locale}/verify` (code entry, a plain form that works without JavaScript,
+  linked from the footer of every public page as "Verify a report"),
   `/{locale}/verify/{code}?s={seal}` (result), and `GET /api/v1/public/verify/{code}?s=`
-  (the same result as JSON).
+  (the same result as JSON). The QR code holds a link without a language, `/verify/{code}?s={seal}`,
+  which opens in the visitor's language.
 - Signed in: `GET /api/v1/reports/{id}/verification` returns the code, path and seal for
   an approved report the user may read; the approved report page shows the code, QR code,
   seal and a link to the public check; the WhatsApp share text includes the public link.
@@ -143,7 +156,8 @@ flowchart LR
 ### As a donor or judge
 
 1. Open the link in the QR code, or go to `/en/verify` and type the code.
-2. Read the result. "Verified" with "Seal matches" is the strongest answer.
+2. Read the result. "This report is verified" together with "The seal in your link matches
+   the audit chain." is the strongest answer.
 3. Compare the seal printed on your copy with the seal shown on the page. They must be
    identical. If you only typed the code, the page cannot compare the seal for you; do it
    by eye.

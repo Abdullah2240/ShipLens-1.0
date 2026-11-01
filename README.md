@@ -23,8 +23,10 @@ Built for the ShipLens 1.0 challenge (EchoLens).
 - **Private platform**: branch register with generated codes and a status lifecycle,
   volunteer applications and members with teams, offline collections that lock after 7
   days, weekly reports that go draft, submit, return or approve, a head office dashboard
-  with drill-down, CSV and print exports, a content manager with draft and publish, and an
-  audit trail of every change written in the same transaction as the change.
+  with drill-down from every figure to its audit events, CSV and print exports, WhatsApp
+  sharing of weekly reports, a content manager with draft and publish, and an audit trail
+  of every change written in the same transaction as the change, with an audit viewer that
+  shows whether the trail is intact.
 
 | Role             | What they can do                                                                             |
 | ---------------- | -------------------------------------------------------------------------------------------- |
@@ -93,16 +95,25 @@ npm run test:coverage       # all tests with the coverage thresholds
 npm run e2e:docker          # Playwright against the production image, see docs/e2e.md
 BASE_URL=http://localhost:3100 node scripts/check-headers.mjs   # security headers of a running production build
 npm run lint && npm run typecheck
+npm run permissions:check && npm run i18n:check   # generated permission table, translation parity
+node scripts/gen-api-doc.mjs --check               # docs/api.md matches the route files
+node scripts/check-tool-mentions.mjs               # tool names only in AI-USAGE.md
 ```
 
-CI runs all of these on every push; the single required check is `ci-ok`.
+CI runs all of these on every push, plus a secret scan of the full git history and a
+production dependency audit; the single required check is `ci-ok`.
 
 ## Deploy
 
 Render only: one free web service and one free Postgres database from the blueprint in
 `render.yaml`. Migrations run on every start, and the app keeps itself warm with a
 self-ping. Step by step: [docs/deploy.md](docs/deploy.md) and
-[docs/handover.md](docs/handover.md).
+[docs/handover.md](docs/handover.md). After a deploy, one command checks health, logins,
+headers, the audit chain and a public verification end to end:
+
+```sh
+BASE_URL="$URL" SMOKE_DEMO_PASSWORD="$DEMO_PW" node scripts/verify-deploy.mjs --markdown
+```
 
 ## Docs
 
