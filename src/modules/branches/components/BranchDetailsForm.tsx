@@ -82,9 +82,17 @@ export function BranchDetailsForm({ branch, canEdit }: BranchDetailsFormProps) {
   const [previous, setPrevious] = useState(branch);
   const [values, setValues] = useState(() => valuesOf(branch));
   if (branch !== previous) {
+    // A refresh (for example after a status change) must not wipe what is being typed:
+    // only fields still equal to the old saved value take the new one.
+    const before = valuesOf(previous);
+    const after = valuesOf(branch);
     setPrevious(branch);
     setView(branch);
-    setValues(valuesOf(branch));
+    setValues((current) => ({
+      name: current.name === before.name ? after.name : current.name,
+      city: current.city === before.city ? after.city : current.city,
+      summary: current.summary === before.summary ? after.summary : current.summary,
+    }));
   }
 
   const [errors, setErrors] = useState<FieldErrors>({});
