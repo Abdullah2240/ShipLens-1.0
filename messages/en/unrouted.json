@@ -1,0 +1,73 @@
+{
+  "title": "Not yet routed to the main account",
+  "eyebrow": "Routing",
+  "lead": "Approved collections that have not yet been sent to the main account, oldest approval first. Mark each one as sent once the money has reached the main account.",
+  "tabs": {
+    "label": "Routing lists",
+    "open": "Not yet routed",
+    "recent": "Recently routed"
+  },
+  "tables": {
+    "open": "Approved collections not yet routed",
+    "recent": "Collections recently routed to the main account"
+  },
+  "columns": {
+    "branch": "Branch",
+    "week": "Report week",
+    "collectedOn": "Collected on",
+    "purpose": "Purpose",
+    "amount": "Amount",
+    "approvedOn": "Approved on",
+    "waiting": "Waiting",
+    "routedOn": "Routed on",
+    "routedBy": "Routed by",
+    "action": "Action"
+  },
+  "waitingDays": "{count, plural, one {{days} day} other {{days} days}}",
+  "routedByUnknown": "Unknown",
+  "summary": "{code}, {date}, {amount}",
+  "amountLink": "{amount}, {code}, collected {date}: view evidence",
+  "recordCount": "{count, plural, one {{records} collection} other {{records} collections}}",
+  "asOf": "As of {time}",
+  "export": "Export CSV",
+  "actions": {
+    "mark": "Mark as sent",
+    "markFor": "Mark as sent: {summary}",
+    "undo": "Undo",
+    "undoFor": "Undo routing: {summary}",
+    "confirmMarkTitle": "Mark as sent to the main account?",
+    "confirmMarkBody": "{summary} will leave the not yet routed list and count as routed. You can undo this from Recently routed.",
+    "confirmMark": "Mark as sent",
+    "confirmUndoTitle": "Undo routing?",
+    "confirmUndoBody": "{summary} will return to the not yet routed list.",
+    "confirmUndo": "Undo routing",
+    "marking": "Marking…",
+    "undoing": "Undoing…"
+  },
+  "toast": {
+    "marked": "Marked as sent: {summary}.",
+    "undone": "Routing undone: {summary}.",
+    "dismiss": "Dismiss"
+  },
+  "errors": {
+    "already_routed": "This collection was already marked as sent, possibly by someone else. The list has been refreshed.",
+    "not_routed": "This collection is no longer marked as sent. The list has been refreshed.",
+    "not_approved": "Only collections in an approved report can be marked as sent. The list has been refreshed.",
+    "forbidden": "You do not have permission to change routing.",
+    "not_found": "This collection could not be found. The list has been refreshed.",
+    "network": "The change could not be saved. Check your connection and try again."
+  },
+  "empty": {
+    "openTitle": "Everything approved has been routed",
+    "openBody": "Approved collections appear here until they are marked as sent to the main account.",
+    "recentTitle": "Nothing routed yet",
+    "recentBody": "Collections marked as sent to the main account appear here, most recent first."
+  },
+  "filter": {
+    "label": "Filter by branch",
+    "branch": "Branch",
+    "allBranches": "All branches",
+    "apply": "Apply",
+    "clear": "Clear"
+  }
+}

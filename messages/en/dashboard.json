@@ -1,1 +1,80 @@
-{}
+{
+  "chart": {
+    "viewTable": "View as table",
+    "hideTable": "Hide table",
+    "monthAxis": "Month",
+    "amountAxis": "Amount (PKR)",
+    "legend": "Legend",
+    "noData": "No figures for this period yet.",
+    "total": "Total",
+    "barTitle": "{month} · {series}: {amount}",
+    "cellContext": "{month}, {series}"
+  },
+  "card": {
+    "viewBreakdown": "View breakdown",
+    "of": "{share} of {whole}"
+  },
+  "identity": {
+    "caption": "Breakdown of {figure}",
+    "legend": "Breakdown by status"
+  },
+  "metaTitle": "Dashboard",
+  "section": "Head office",
+  "title": "Funds overview",
+  "subtitle": "Every rupee recorded by the branches, from the first entry to the main account. Each figure opens the records behind it.",
+  "asOf": "Figures as of <time></time> PKT",
+  "loading": "Loading the dashboard",
+  "tabs": {
+    "label": "Dashboard sections",
+    "overview": "Overview",
+    "unrouted": "Not yet routed"
+  },
+  "flow": {
+    "title": "Money flow",
+    "collectedOf": "Collected, by report status",
+    "approvedOf": "Approved, by where the money is",
+    "records": "{n, plural, one {{count} collection} other {{count} collections}}",
+    "figureLink": "{figure}, {value}: view by branch",
+    "identityHolds": "Totals agree",
+    "identityBroken": "Totals do not agree",
+    "identityNote": "Every collection sits in exactly one status, so the parts add up to the whole.",
+    "partsExplain": "How each part is calculated"
+  },
+  "counts": {
+    "title": "Branches and reviews",
+    "activeBranchesHint": "Branches open for collections today.",
+    "awaitingHint": "Submitted weekly reports waiting for a finance decision."
+  },
+  "trend": {
+    "title": "Monthly trend",
+    "caption": "Collected amounts by month and report status",
+    "summary": "{n, plural, one {One month} other {{months} months}} from {first} to {last}: {total} collected in total.",
+    "tableCaption": "Monthly amounts by report status. Each amount opens the branches behind it."
+  },
+  "actions": {
+    "export": "Export CSV",
+    "exportHint": "Same filters as on screen",
+    "exportSummary": "Summary of figures",
+    "exportReports": "Approved reports",
+    "exportCollections": "Approved collections",
+    "exportUnrouted": "Not yet routed",
+    "print": "Print or save as PDF",
+    "format": "CSV"
+  },
+  "filters": {
+    "title": "Filters",
+    "months": "Months",
+    "branch": "Branch",
+    "report": "Report",
+    "range": "{from} to {to}",
+    "fromOnly": "From {from}",
+    "toOnly": "Until {to}"
+  },
+  "empty": {
+    "title": "No collections recorded for this period",
+    "body": "Figures appear here as soon as branches record collections. Try a wider month range."
+  },
+  "trail": {
+    "weekOf": "Week of <date></date>"
+  }
+}

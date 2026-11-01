@@ -1,8 +1,7 @@
-import { useLocale, useTranslations } from 'next-intl';
-import { EmptyState, StatusBadge } from '@/components/ui';
+import { useTranslations } from 'next-intl';
+import { Bdi, DateText, EmptyState, Ltr, MoneyText, StatusBadge } from '@/components/ui';
+import { fillSlots, slot } from '@/components/ui/Bidi';
 import { Link } from '@/i18n/navigation';
-import type { Locale } from '@/i18n/routing';
-import { formatDate, formatMoney } from '@/platform/i18n/format';
 import { isEditable } from '../capabilities';
 import type { CollectionItem } from '../types';
 import { reportHref } from './CurrentWeekCard';
@@ -28,12 +27,9 @@ const actionClass =
 
 export function BranchCode({ code }: { code: string }) {
   return (
-    <bdi
-      dir="ltr"
-      className="inline-block rounded-md bg-surface-sunken px-1.5 py-0.5 font-mono text-xs font-medium text-text-muted tabular"
-    >
+    <Ltr className="inline-block rounded-md bg-surface-sunken px-1.5 py-0.5 font-mono text-xs font-medium text-text-muted tabular">
       {code}
-    </bdi>
+    </Ltr>
   );
 }
 
@@ -49,7 +45,6 @@ export function CollectionsTable({
   canVoid = false,
 }: CollectionsTableProps) {
   const t = useTranslations('collections');
-  const locale = useLocale() as Locale;
 
   if (items.length === 0) {
     return <EmptyState title={t('page.empty')} body={t('page.emptyHint')} />;
@@ -107,13 +102,13 @@ export function CollectionsTable({
                 }`}
               >
                 <td className={`${cell} whitespace-nowrap text-text-muted tabular`}>
-                  <time dateTime={row.collectedOn}>{formatDate(row.collectedOn, locale)}</time>
+                  <DateText value={row.collectedOn} />
                 </td>
                 {showBranch ? (
                   <td className={`${cell} max-sm:col-span-2 max-sm:row-start-2`}>
                     <span className="flex flex-wrap items-center gap-2">
                       <BranchCode code={row.branchCode} />
-                      <span className={voided ? '' : 'text-text'}>{row.branchName}</span>
+                      <Bdi className={voided ? '' : 'text-text'}>{row.branchName}</Bdi>
                     </span>
                   </td>
                 ) : null}
@@ -130,12 +125,14 @@ export function CollectionsTable({
                     {showBranch && row.createdByName ? (
                       <span className="text-xs text-text-muted">
                         <span className="sr-only">{t('columns.loggedBy')}: </span>
-                        {row.createdByName}
+                        <Bdi>{row.createdByName}</Bdi>
                       </span>
                     ) : null}
                     {voided && row.voidReason ? (
                       <span className="text-xs text-tone-danger-fg" data-testid="void-reason">
-                        {t('void.reasonLabel', { reason: row.voidReason })}
+                        {fillSlots(t('void.reasonLabel', { reason: slot() }), [
+                          <Bdi key="reason">{row.voidReason}</Bdi>,
+                        ])}
                       </span>
                     ) : null}
                   </span>
@@ -143,12 +140,10 @@ export function CollectionsTable({
                 <td
                   className={`${cell} whitespace-nowrap text-end tabular max-sm:col-start-2 max-sm:row-start-1`}
                 >
-                  <span
-                    dir="ltr"
+                  <MoneyText
+                    amount={row.amount}
                     className={voided ? 'text-text-muted line-through' : 'font-semibold text-text'}
-                  >
-                    {formatMoney(row.amount, locale)}
-                  </span>
+                  />
                 </td>
                 <td className={cell}>
                   <Link

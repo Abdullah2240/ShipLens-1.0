@@ -24,6 +24,8 @@ const EN = {
   lockedTitle: 'Approved and locked',
   timeline: 'Audit trail',
   thisWeek: 'This week',
+  // messages/en/share.json: button.
+  share: 'Share to WhatsApp',
   audit: [
     'Report submitted for review',
     'Report returned for changes',
@@ -164,12 +166,25 @@ test.describe('weekly report lifecycle', () => {
     );
   });
 
-  test('the approved report offers the lead nothing', async ({ page, baseURL, localePath }) => {
+  test('the approved report offers the lead no lifecycle action, only the WhatsApp share', async ({
+    page,
+    baseURL,
+    localePath,
+  }) => {
     await loginAsEmail(page, baseURL, LAHORE_LEAD);
     await page.goto(localePath(`/reports/${reportId}`));
     await expect(page.getByTestId('report-status')).toHaveText('Approved');
     await expect(page.getByRole('region', { name: EN.lockedTitle })).toBeVisible();
-    await expect(page.getByTestId('report-actions')).toHaveCount(0);
+
+    // The actions panel stays for the Branch Lead because sharing an approved report is
+    // allowed (WA-01); the share button is the only control in it.
+    const actions = page.getByTestId('report-actions');
+    await expect(actions).toBeVisible();
+    for (const name of [EN.submit, EN.resubmit, EN.approve, EN.return]) {
+      await expect(actions.getByRole('button', { name })).toHaveCount(0);
+    }
+    await expect(actions.getByRole('button')).toHaveCount(1);
+    await expect(actions.getByRole('button', { name: EN.share, exact: true })).toBeVisible();
 
     const submit = await page.request.post(`/api/v1/reports/${reportId}/submit`, {
       headers: { Origin: new URL(baseURL!).origin },

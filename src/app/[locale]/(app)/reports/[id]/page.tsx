@@ -7,6 +7,7 @@ import { ReportActions } from '@/modules/reports/components/ReportActions';
 import { ReportCollectionsTable } from '@/modules/reports/components/ReportCollectionsTable';
 import { ReportHistory } from '@/modules/reports/components/ReportHistory';
 import { ReportSummary, ReportTotals } from '@/modules/reports/components/ReportSummary';
+import { ShareReportButton } from '@/modules/reporting/components/share/ShareReportButton';
 import { getReportTimeline } from '@/modules/timeline';
 import { AuditTimeline } from '@/modules/timeline/components/AuditTimeline';
 import { getPool } from '@/platform/db';
@@ -53,10 +54,12 @@ export default async function ReportPage({ params }: { params: Params }) {
   const frozen = report.status === 'submitted' || report.status === 'approved';
   const displayedTotal = frozen ? (report.frozenAmount ?? report.liveAmount) : report.liveAmount;
   const note = noteKey(report, caps);
-  const hasActions = report.allowedActions.length > 0;
+  // On phones the actions panel is a fixed bottom bar; a Branch Lead always gets it (the share
+  // button shows even when no action is allowed), so leave room for it.
+  const showsActionBar = report.allowedActions.length > 0 || actor.role === 'branch_lead';
 
   return (
-    <div className={`flex flex-col gap-6 ${hasActions ? 'pb-32 lg:pb-0' : ''}`}>
+    <div className={`flex flex-col gap-6 ${showsActionBar ? 'pb-32 lg:pb-0' : ''}`}>
       <ReportSummary report={report} />
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start xl:grid-cols-[minmax(0,1fr)_22rem]">
@@ -71,6 +74,9 @@ export default async function ReportPage({ params }: { params: Params }) {
             liveAmount={report.liveAmount}
             branchName={report.branchName}
             frozenAmount={report.frozenAmount}
+            extra={
+              actor.role === 'branch_lead' ? <ShareReportButton reportId={report.id} /> : undefined
+            }
           />
         </aside>
 

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { StatusBadge } from '@/components/ui';
+import { Bdi, StatusBadge } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import { getBranch, listLeadCandidates } from '@/modules/branches';
 import { branchCapabilities, isBranchReadOnly } from '@/modules/branches/capabilities';
@@ -63,14 +63,20 @@ export default async function BranchPage({ params }: { params: Params }) {
             {t('detail.title')}
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight text-text">{branch.name}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-text">
+              <Bdi>{branch.name}</Bdi>
+            </h1>
             <BranchCode code={branch.code} />
             <StatusBadge status={branch.status} />
           </div>
           <p className="text-sm text-text-muted">
-            {[branch.city, t('detail.openReports', { count: branch.openReportCount })]
-              .filter(Boolean)
-              .join(' · ')}
+            {branch.city ? (
+              <>
+                <Bdi>{branch.city}</Bdi>
+                {' · '}
+              </>
+            ) : null}
+            {t('detail.openReports', { count: branch.openReportCount })}
           </p>
         </header>
       </div>

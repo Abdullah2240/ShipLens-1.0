@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { EventList } from '@/components/public/EventList';
 import { PublicHero } from '@/components/public/PublicHero';
+import { publicMetadata } from '@/components/public/seo';
 import { type ContentLocale, listUpcomingEvents } from '@/modules/public-site';
 import { getPool } from '@/platform/db';
 
@@ -16,7 +17,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     getTranslations({ locale, namespace: 'public.events' }),
     getTranslations({ locale, namespace: 'common' }),
   ]);
-  return { title: `${t('title')} | ${common('appName')}`, description: t('lead') };
+  return publicMetadata({
+    locale,
+    path: '/events',
+    title: t('title'),
+    description: t('lead'),
+    appName: common('appName'),
+  });
 }
 
 export default async function EventsPage({ params }: PageProps) {

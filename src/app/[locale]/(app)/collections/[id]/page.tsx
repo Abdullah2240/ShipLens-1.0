@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { StatusBadge } from '@/components/ui';
+import { Bdi, MoneyText, StatusBadge } from '@/components/ui';
+import { fillSlots, slot } from '@/components/ui/Bidi';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { getCollection } from '@/modules/collections';
@@ -16,7 +17,7 @@ import { AuditTimeline } from '@/modules/timeline/components/AuditTimeline';
 import { LOCK_DAYS } from '@/platform/config/constants';
 import { getPool } from '@/platform/db';
 import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
-import { formatDate, formatDateTime, formatMoney } from '@/platform/i18n/format';
+import { formatDate, formatDateTime } from '@/platform/i18n/format';
 import { addDays, pktDate, systemClock } from '@/platform/time';
 
 // Reads the session, the clock and the collection on every request.
@@ -111,7 +112,7 @@ export default async function CollectionPage({ params }: { params: Params }) {
                 voided ? 'text-text-muted line-through' : 'text-text'
               }`}
             >
-              {formatMoney(collection.amount, loc)}
+              <MoneyText amount={collection.amount} />
             </h1>
             <LockBadge
               editability={collection.editability}
@@ -122,18 +123,22 @@ export default async function CollectionPage({ params }: { params: Params }) {
           <p className="flex flex-wrap items-center gap-x-2 text-sm text-text-muted">
             <bdi className="font-medium text-text">{collection.purpose}</bdi>
             <span aria-hidden="true">·</span>
-            <time dateTime={collection.collectedOn} className="tabular">
-              {formatDate(collection.collectedOn, loc)}
-            </time>
+            <Bdi className="tabular">
+              <time dateTime={collection.collectedOn}>
+                {formatDate(collection.collectedOn, loc)}
+              </time>
+            </Bdi>
             <span aria-hidden="true">·</span>
-            <span>{collection.branchName}</span>
+            <Bdi>{collection.branchName}</Bdi>
           </p>
           {voided && collection.voidReason ? (
             <p
               data-testid="void-reason"
               className="w-fit rounded-lg border border-danger/30 bg-tone-danger-bg px-3 py-2 text-sm font-medium text-tone-danger-fg"
             >
-              {t('void.reasonLabel', { reason: collection.voidReason })}
+              {fillSlots(t('void.reasonLabel', { reason: slot() }), [
+                <Bdi key="reason">{collection.voidReason}</Bdi>,
+              ])}
             </p>
           ) : null}
         </header>
@@ -144,14 +149,14 @@ export default async function CollectionPage({ params }: { params: Params }) {
           <Card id="facts" title={t('detail.title')}>
             <dl className="grid gap-5 sm:grid-cols-2">
               <Fact label={t('detail.amount')}>
-                <span dir="ltr" className="font-semibold tabular">
-                  {formatMoney(collection.amount, loc)}
-                </span>
+                <MoneyText amount={collection.amount} className="font-semibold" />
               </Fact>
               <Fact label={t('detail.collectedOn')}>
-                <time dateTime={collection.collectedOn} className="tabular">
-                  {formatDate(collection.collectedOn, loc)}
-                </time>
+                <Bdi className="tabular">
+                  <time dateTime={collection.collectedOn}>
+                    {formatDate(collection.collectedOn, loc)}
+                  </time>
+                </Bdi>
               </Fact>
               <Fact label={t('detail.purpose')}>
                 <bdi>{collection.purpose}</bdi>
@@ -159,16 +164,18 @@ export default async function CollectionPage({ params }: { params: Params }) {
               <Fact label={t('detail.branch')}>
                 <span className="flex flex-wrap items-center gap-2">
                   <BranchCode code={collection.branchCode} />
-                  {collection.branchName}
+                  <Bdi>{collection.branchName}</Bdi>
                 </span>
               </Fact>
               <Fact label={t('detail.week')}>
-                <time dateTime={collection.weekStart} className="tabular">
-                  {t('week.range', {
-                    start: formatDate(collection.weekStart, loc),
-                    end: formatDate(addDays(collection.weekStart, 6), loc),
-                  })}
-                </time>
+                <Bdi className="tabular">
+                  <time dateTime={collection.weekStart}>
+                    {t('week.range', {
+                      start: formatDate(collection.weekStart, loc),
+                      end: formatDate(addDays(collection.weekStart, 6), loc),
+                    })}
+                  </time>
+                </Bdi>
               </Fact>
               <Fact label={t('detail.report')}>
                 <span className="flex flex-wrap items-center gap-2">
@@ -182,14 +189,18 @@ export default async function CollectionPage({ params }: { params: Params }) {
                 </span>
               </Fact>
               <Fact label={t('detail.loggedBy')}>
-                {collection.createdByName ?? (
+                {collection.createdByName != null ? (
+                  <Bdi>{collection.createdByName}</Bdi>
+                ) : (
                   <span className="text-text-muted">{t('detail.system')}</span>
                 )}
               </Fact>
               <Fact label={t('detail.loggedAt')}>
-                <time dateTime={collection.createdAt} className="tabular">
-                  {formatDateTime(new Date(collection.createdAt), loc)}
-                </time>
+                <Bdi className="tabular">
+                  <time dateTime={collection.createdAt}>
+                    {formatDateTime(new Date(collection.createdAt), loc)}
+                  </time>
+                </Bdi>
               </Fact>
               <div className="sm:col-span-2">
                 <Fact label={t('detail.note')}>

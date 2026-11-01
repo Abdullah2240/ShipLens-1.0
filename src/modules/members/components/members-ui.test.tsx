@@ -376,7 +376,9 @@ describe.each(LOCALES)('MemberEditForm (%s)', (locale) => {
     expect(screen.queryByRole('combobox')).toBeNull();
     expect(screen.queryByRole('button', { name: m('edit.save') })).toBeNull();
     expect(screen.getByText(m('detail.readOnlyNotice'))).toBeInTheDocument();
-    expect(screen.getByText('Food drive')).toBeInTheDocument();
+    // The header also names the team (in its own isolate), so look inside the team fact.
+    const teamFact = screen.getByText(m('edit.team')).closest('div')!;
+    expect(within(teamFact).getByText('Food drive')).toBeInTheDocument();
     expect(screen.getByText(m('roles.team_lead'))).toBeInTheDocument();
     expect(screen.getAllByText(status('active')).length).toBeGreaterThanOrEqual(1);
   });

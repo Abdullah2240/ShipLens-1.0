@@ -50,7 +50,13 @@ export function BranchesByCity({ branches }: BranchesByCityProps) {
   const t = useTranslations('public.branches');
 
   if (branches.length === 0) {
-    return <EmptyState title={t('empty.title')} body={t('empty.body')} />;
+    // The hidden heading keeps the heading order h1, h2, h3 (the empty state's title is an h3).
+    return (
+      <>
+        <h2 className="sr-only">{t('listTitle')}</h2>
+        <EmptyState title={t('empty.title')} body={t('empty.body')} />
+      </>
+    );
   }
 
   const groups = groupByCity(branches);
@@ -129,6 +135,7 @@ export function BranchesByCity({ branches }: BranchesByCityProps) {
                   </p>
                 ) : null}
                 <Link
+                  prefetch={false}
                   href={`/get-involved/apply?branch=${branch.id}`}
                   className="relative mt-auto inline-flex w-fit items-center gap-1.5 pt-2 font-semibold text-primary underline-offset-4 hover:text-primary-hover hover:underline"
                 >

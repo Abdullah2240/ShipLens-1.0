@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { cache } from 'react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PublicContentPage, resolvePublicContent } from '@/components/public/PublicContentPage';
+import { publicMetadata } from '@/components/public/seo';
 import { type ContentLocale, getPublishedContent } from '@/modules/public-site';
 import { getPool } from '@/platform/db';
 
@@ -25,11 +26,18 @@ const loadContent = cache(async (locale: string) => {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
-  const [{ title }, t] = await Promise.all([
+  const [{ title }, t, common] = await Promise.all([
     loadContent(locale),
+    getTranslations({ locale, namespace: 'public.pages.about' }),
     getTranslations({ locale, namespace: 'common' }),
   ]);
-  return { title: `${title} | ${t('appName')}` };
+  return publicMetadata({
+    locale,
+    path: '/about',
+    title,
+    description: t('lead'),
+    appName: common('appName'),
+  });
 }
 
 export default async function AboutPage({ params }: PageProps) {

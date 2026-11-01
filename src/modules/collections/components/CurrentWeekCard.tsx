@@ -1,8 +1,8 @@
 import { useLocale, useTranslations } from 'next-intl';
-import { StatusBadge } from '@/components/ui';
+import { Bdi, MoneyText, StatusBadge } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { formatDate, formatInt, formatMoney } from '@/platform/i18n/format';
+import { formatDate, formatInt } from '@/platform/i18n/format';
 import { addDays } from '@/platform/time';
 import { ACCEPTING_BRANCH_STATUSES, type CurrentWeek } from '../types';
 
@@ -36,10 +36,12 @@ export function CurrentWeekCard({ week }: CurrentWeekCardProps) {
             </h2>
             <p className="text-sm text-text-muted tabular">
               <time dateTime={week.weekStart}>
-                {t('range', {
-                  start: formatDate(week.weekStart, locale),
-                  end: formatDate(week.weekEnd, locale),
-                })}
+                <Bdi>
+                  {t('range', {
+                    start: formatDate(week.weekStart, locale),
+                    end: formatDate(week.weekEnd, locale),
+                  })}
+                </Bdi>
               </time>
             </p>
           </div>
@@ -78,11 +80,10 @@ export function CurrentWeekCard({ week }: CurrentWeekCardProps) {
             {t('total')}
           </span>
           <span
-            dir="ltr"
             data-testid="week-total"
             className="self-start text-3xl font-semibold tracking-tight text-text tabular sm:text-4xl"
           >
-            {formatMoney(week.activeTotal, locale)}
+            <MoneyText amount={week.activeTotal} />
           </span>
           <span className="text-sm text-text-muted">
             {t('count', { count: week.activeCount, total: formatInt(week.activeCount, locale) })}

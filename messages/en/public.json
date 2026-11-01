@@ -59,6 +59,7 @@
   "branches": {
     "title": "Find a branch near you",
     "lead": "Every branch is run by volunteers who live in the neighbourhood it serves. Find the one closest to you and apply to join its team.",
+    "listTitle": "Branches by city",
     "jumpTo": "Jump to a city",
     "cityCount": "{count, plural, one {# branch} other {# branches}}",
     "otherCity": "Other areas",
@@ -71,6 +72,7 @@
   "events": {
     "title": "Upcoming events",
     "lead": "Health camps, relief drives and community days organised by our branches. Everyone is welcome.",
+    "listTitle": "Event calendar",
     "timezone": "All times are Pakistan time (PKT).",
     "when": "When",
     "where": "Where",
@@ -80,6 +82,12 @@
     "empty": {
       "title": "No upcoming events right now",
       "body": "New events appear here as our branches plan them. Check back soon, or find your nearest branch to hear about them first."
+    }
+  },
+  "meta": {
+    "home": {
+      "title": "Community giving you can trace",
+      "description": "A volunteer-run charity whose neighbourhood branches collect locally and account for every rupee, from the branch that collects it to the report that approves it."
     }
   }
 }

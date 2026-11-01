@@ -168,8 +168,8 @@ describe('world fixture', () => {
     expect(await count('branches')).toBe(2);
     expect(await count('users')).toBe(8);
     expect(await count('sessions')).toBe(7);
-    expect(await count('weekly_reports')).toBe(4);
-    expect(await count('collections')).toBe(4);
+    expect(await count('weekly_reports')).toBe(6);
+    expect(await count('collections')).toBe(8);
     expect(await count('applications')).toBe(2);
     expect(await count('teams')).toBe(2);
     expect(await count('members')).toBe(2);

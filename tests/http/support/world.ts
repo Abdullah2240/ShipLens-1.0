@@ -48,8 +48,9 @@ async function audit(
  * Resets the database and builds two active branches (A and B), one user per role in A,
  * a Branch Lead and an HR Lead in B, a session per user, and in both branches: a draft
  * report for the current PKT week holding one active collection dated today, a submitted
- * report for the previous week, a pending application, a team, a member, and audit rows
- * for the report and collection timelines. Branchless: one published event and one
+ * report for the previous week, an approved report two weeks back holding one unrouted and
+ * one routed active collection (reviewed by the Finance Reviewer), a pending application, a
+ * team, a member, and audit rows for the report and collection timelines. Branchless: one published event and one
  * published content entry (about/en).
  */
 export async function buildWorld(pool: Pool = testPool()): Promise<World> {
@@ -91,6 +92,9 @@ export async function buildWorld(pool: Pool = testPool()): Promise<World> {
     application: { A: '', B: '' },
     team: { A: '', B: '' },
     member: { A: '', B: '' },
+    report_approved: { A: '', B: '' },
+    collection_approved: { A: '', B: '' },
+    collection_routed: { A: '', B: '' },
   };
 
   for (const side of ['A', 'B'] as const) {
@@ -114,6 +118,27 @@ export async function buildWorld(pool: Pool = testPool()): Promise<World> {
     records.report_draft![side] = draft.reportId;
     records.report_submitted![side] = submitted.reportId;
     records.collection![side] = draft.collectionIds[0]!;
+
+    // Routing targets: only an active collection of an approved report can be marked routed.
+    const approved = await seedReport(pool, {
+      branchId,
+      weekStart: addDays(weekStart, -14),
+      status: 'approved',
+      submittedBy: lead.id,
+      reviewedBy: users.finance_reviewer.id,
+      collections: [
+        { amount: '300.00', purpose: `Matrix ${side} approved`, createdBy: lead.id },
+        {
+          amount: '150.00',
+          purpose: `Matrix ${side} routed`,
+          createdBy: lead.id,
+          routedAt: new Date().toISOString(),
+        },
+      ],
+    });
+    records.report_approved![side] = approved.reportId;
+    records.collection_approved![side] = approved.collectionIds[0]!;
+    records.collection_routed![side] = approved.collectionIds[1]!;
 
     const base = { actorId: lead.id, actorRole: 'branch_lead', branchId };
     await audit(pool, {

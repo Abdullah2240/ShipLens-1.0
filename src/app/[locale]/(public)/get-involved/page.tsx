@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { cache } from 'react';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PublicContentPage, resolvePublicContent } from '@/components/public/PublicContentPage';
+import { publicMetadata } from '@/components/public/seo';
 import { type ContentLocale, getPublishedContent } from '@/modules/public-site';
 import { Link } from '@/i18n/navigation';
 import { getPool } from '@/platform/db';
@@ -26,11 +27,18 @@ const loadContent = cache(async (locale: string) => {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
-  const [{ title }, t] = await Promise.all([
+  const [{ title }, t, common] = await Promise.all([
     loadContent(locale),
+    getTranslations({ locale, namespace: 'public.pages.getInvolved' }),
     getTranslations({ locale, namespace: 'common' }),
   ]);
-  return { title: `${title} | ${t('appName')}` };
+  return publicMetadata({
+    locale,
+    path: '/get-involved',
+    title,
+    description: t('lead'),
+    appName: common('appName'),
+  });
 }
 
 export default async function GetInvolvedPage({ params }: PageProps) {
@@ -63,6 +71,7 @@ export default async function GetInvolvedPage({ params }: PageProps) {
           <div className="mt-3 flex flex-wrap gap-3">
             {/* This link precedes the application form route, which ships separately. */}
             <Link
+              prefetch={false}
               href="/get-involved/apply"
               className="inline-flex h-12 items-center gap-2 rounded-xl bg-primary px-6 text-base font-semibold text-primary-contrast shadow-card transition-colors hover:bg-primary-hover"
             >
@@ -72,6 +81,7 @@ export default async function GetInvolvedPage({ params }: PageProps) {
               </span>
             </Link>
             <Link
+              prefetch={false}
               href="/branches"
               className="inline-flex h-12 items-center rounded-xl border border-border-strong bg-surface-raised px-6 text-base font-semibold text-text transition-colors hover:bg-surface-sunken"
             >

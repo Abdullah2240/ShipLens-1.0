@@ -1,0 +1,82 @@
+{
+  "level3": {
+    "eyebrow": "Weekly report",
+    "title": "Week of <week></week>",
+    "lead": "The collections in this report that make up its figure. Open any amount to see who logged it, what changed and who approved it.",
+    "collectionsTitle": "Collections behind this figure",
+    "caption": "Collections in this weekly report",
+    "parentLabel": "the report figure, {amount}",
+    "columns": {
+      "collectedOn": "Collected on",
+      "purpose": "Purpose",
+      "routed": "Main account",
+      "amount": "Amount"
+    },
+    "routedBadge": "Sent to main account",
+    "notRoutedBadge": "Not yet sent",
+    "amountLink": "{amount} collected on {date}: view evidence",
+    "export": "Export collections",
+    "print": "Printable report",
+    "empty": {
+      "title": "No collections behind this figure",
+      "body": "This report has no collections that count towards the figure under the current filters."
+    }
+  },
+  "report": {
+    "title": "Report summary",
+    "status": "Status",
+    "week": "Week",
+    "weekRange": "<start></start> to <end></end>",
+    "frozenTotal": "Frozen total",
+    "frozenHint": "Fixed when the report was submitted",
+    "liveTotal": "Live total",
+    "liveHint": "Sum of its active collections now",
+    "notSubmitted": "Not yet submitted",
+    "totalsMatch": "Totals match",
+    "totalsDiffer": "Totals differ",
+    "collections": "{count, plural, one {{total} collection} other {{total} collections}}",
+    "submittedBy": "Submitted by",
+    "approvedBy": "Approved by",
+    "returnedBy": "Returned by",
+    "returnReason": "Reason for return",
+    "events": "Report events",
+    "nobody": "Not yet"
+  },
+  "events": {
+    "submitted": "Submitted",
+    "returned": "Returned",
+    "resubmitted": "Resubmitted",
+    "approved": "Approved",
+    "by": "by <name></name>",
+    "system": "by the system",
+    "reason": "Reason",
+    "empty": "No report events yet",
+    "emptyBody": "Every submission, return and approval of this report will be listed here."
+  },
+  "level4": {
+    "eyebrow": "Collection",
+    "title": "Collection evidence",
+    "lead": "One collection and every recorded step behind it: who logged it, what changed, and how its weekly report was approved.",
+    "factsTitle": "Collection facts",
+    "facts": {
+      "amount": "Amount",
+      "collectedOn": "Collected on",
+      "purpose": "Purpose",
+      "status": "Status",
+      "voidReason": "Reason for void",
+      "mainAccount": "Main account",
+      "routed": "Sent to main account",
+      "notRouted": "Not yet sent to main account",
+      "notApplicable": "Only approved collections are sent",
+      "routedBy": "Marked by",
+      "createdBy": "Logged by",
+      "report": "Weekly report",
+      "atTime": "on <time></time>"
+    },
+    "collectionAudit": "Collection audit trail",
+    "collectionAuditHint": "Every recorded change to this collection, oldest first.",
+    "reportAudit": "Report audit trail",
+    "reportAuditHint": "How the weekly report around it was submitted, returned and approved.",
+    "openInAuditLog": "Open in audit log"
+  }
+}

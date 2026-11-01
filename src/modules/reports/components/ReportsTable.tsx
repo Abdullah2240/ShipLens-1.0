@@ -1,5 +1,6 @@
 import { useLocale, useTranslations } from 'next-intl';
-import { DataTable, EmptyState, StatusBadge, type Column } from '@/components/ui';
+import { Bdi, DataTable, EmptyState, Ltr, StatusBadge, type Column } from '@/components/ui';
+import { fillSlots, slot } from '@/components/ui/Bidi';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
 import { daysBetween, pktDate } from '@/platform/time';
@@ -10,12 +11,9 @@ import { asLocale, reportHref, safeDate, safeDateTime, safeMoney } from './repor
 /** Branch code isolated in LTR direction, Latin digits. */
 export function BranchCode({ code }: { code: string }) {
   return (
-    <bdi
-      dir="ltr"
-      className="inline-block rounded-md bg-surface-sunken px-1.5 py-0.5 font-mono text-xs font-medium text-text-muted tabular"
-    >
+    <Ltr className="inline-block rounded-md bg-surface-sunken px-1.5 py-0.5 font-mono text-xs font-medium text-text-muted tabular">
       {formatId(code)}
-    </bdi>
+    </Ltr>
   );
 }
 
@@ -31,10 +29,10 @@ function WhoWhen({ name, at, locale }: { name: string | null; at: string | null;
   if (!at) return <span className="text-text-muted">—</span>;
   return (
     <span className="flex flex-col gap-0.5">
-      {name ? <span className="text-text">{name}</span> : null}
-      <time dateTime={at} className="text-xs whitespace-nowrap text-text-muted tabular">
-        {safeDateTime(at, locale)}
-      </time>
+      {name ? <Bdi className="text-text">{name}</Bdi> : null}
+      <Bdi className="text-xs whitespace-nowrap text-text-muted tabular">
+        <time dateTime={at}>{safeDateTime(at, locale)}</time>
+      </Bdi>
     </span>
   );
 }
@@ -84,7 +82,7 @@ export function ReportsTable({ reports, showBranch = false, currentWeek }: Repor
             href={reportHref(row.id)}
             className="font-semibold whitespace-nowrap text-text underline-offset-4 hover:text-primary hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
-            {weekLabel(row.weekStart, row.weekEnd)}
+            <Bdi>{weekLabel(row.weekStart, row.weekEnd)}</Bdi>
           </Link>
           {currentWeek && row.weekStart === currentWeek ? (
             <span className="rounded-full bg-accent-soft px-2 py-px text-[11px] font-semibold text-accent">
@@ -103,7 +101,7 @@ export function ReportsTable({ reports, showBranch = false, currentWeek }: Repor
       className: 'min-w-44',
       render: (row) => (
         <span className="flex flex-wrap items-center gap-2">
-          <span className="text-text">{row.branchName}</span>
+          <Bdi className="text-text">{row.branchName}</Bdi>
           <BranchCode code={row.branchCode} />
         </span>
       ),
@@ -122,9 +120,9 @@ export function ReportsTable({ reports, showBranch = false, currentWeek }: Repor
       align: 'end',
       render: (row) => (
         <span className="flex flex-col items-end gap-0.5">
-          <span dir="ltr" className="font-semibold whitespace-nowrap text-text tabular">
+          <Ltr className="font-semibold whitespace-nowrap text-text tabular">
             {safeMoney(row.amount, locale)}
-          </span>
+          </Ltr>
           <AmountHint frozen={row.amountIsFrozen} />
         </span>
       ),
@@ -206,23 +204,29 @@ export function ReviewQueueList({ reports, today }: ReviewQueueListProps) {
                     href={reportHref(report.id)}
                     className="rounded-sm after:absolute after:inset-0 after:rounded-card focus-visible:outline-none"
                   >
-                    {report.branchName}
+                    <Bdi>{report.branchName}</Bdi>
                   </Link>
                 </h2>
                 <BranchCode code={report.branchCode} />
               </div>
               <p className="text-sm text-text-muted">
-                {weekLabel(report.weekStart, report.weekEnd)}
+                <Bdi>{weekLabel(report.weekStart, report.weekEnd)}</Bdi>
               </p>
               <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-muted">
                 {report.submittedByName ? (
-                  <span>{t('review.submittedBy', { name: report.submittedByName })}</span>
+                  <span>
+                    {fillSlots(t('review.submittedBy', { name: slot() }), [
+                      <Bdi key="name">{report.submittedByName}</Bdi>,
+                    ])}
+                  </span>
                 ) : null}
                 {report.submittedAt ? (
                   <>
                     <span aria-hidden="true">·</span>
                     <time dateTime={report.submittedAt} className="tabular">
-                      {t('review.waitingSince', { date: safeDateTime(report.submittedAt, locale) })}
+                      {fillSlots(t('review.waitingSince', { date: slot() }), [
+                        <Bdi key="date">{safeDateTime(report.submittedAt, locale)}</Bdi>,
+                      ])}
                     </time>
                   </>
                 ) : null}
@@ -231,9 +235,9 @@ export function ReviewQueueList({ reports, today }: ReviewQueueListProps) {
 
             <div className="flex items-center justify-between gap-4 sm:flex-col sm:items-end sm:gap-1.5">
               <span className="flex flex-col items-start gap-0.5 sm:items-end">
-                <span dir="ltr" className="text-lg font-semibold text-text tabular">
+                <Ltr className="text-lg font-semibold text-text tabular">
                   {safeMoney(report.amount, locale)}
-                </span>
+                </Ltr>
                 <span className="text-xs text-text-muted">
                   {t('detail.collectionCount', {
                     count: report.count,
