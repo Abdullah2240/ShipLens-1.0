@@ -13,14 +13,6 @@ const repoRoot = path.resolve(scriptsDir, '..');
 const root = process.argv[2] ? path.resolve(process.argv[2]) : path.join(repoRoot, 'messages');
 const srcRoot = process.argv[3] ? path.resolve(process.argv[3]) : path.join(repoRoot, 'src');
 
-// The public side is translated in a parallel pass; the phase gate removes these.
-const SKIP_NAMESPACES = ['public', 'impact'];
-const SKIP_PATHS = [
-  '/app/[locale]/(public)/',
-  '/components/public/',
-  '/components/shell/PublicShell.tsx',
-];
-
 const { problems, keys, files } = inspectMessages(root);
 
 if (problems.length > 0) {
@@ -53,10 +45,10 @@ function listTsx(dir, out = []) {
 const relative = (file) => path.relative(repoRoot, file).replace(/\\/g, '/');
 const sources = listTsx(srcRoot)
   .map((file) => ({ file: relative(file), abs: file }))
-  .filter(({ file }) => shouldScanFile(file) && !SKIP_PATHS.some((p) => `/${file}`.includes(p)))
+  .filter(({ file }) => shouldScanFile(file))
   .map(({ file, abs }) => ({ file, text: fs.readFileSync(abs, 'utf8') }));
 
-const untranslated = findUntranslated(root, { allowlist, skipNamespaces: SKIP_NAMESPACES });
+const untranslated = findUntranslated(root, { allowlist });
 const hardCoded = scanJsxText(sources, { allowlist });
 
 function groupBy(items, keyOf) {

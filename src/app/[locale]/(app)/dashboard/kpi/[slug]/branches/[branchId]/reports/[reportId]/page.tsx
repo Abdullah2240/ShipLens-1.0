@@ -6,8 +6,13 @@ import { TraceHeader, type ExplainFilterChip } from '@/components/trace';
 import { Bdi, IdText, MoneyText } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
-import { FIGURES, figureFromSlug, isMoneyFigure, parseReportingFilters } from '@/modules/reporting';
-import { getReportCollections } from '@/modules/reporting/service-trace';
+import {
+  FIGURES,
+  figureFromSlug,
+  isMoneyFigure,
+  parseReportingFilters,
+  getReportCollections,
+} from '@/modules/reporting';
 import { filterChipTexts } from '@/modules/reporting/components/dashboard/dashboard-view-model';
 import { LevelExplain } from '@/modules/reporting/components/drill/LevelExplain';
 import { TraceTrail } from '@/modules/reporting/components/drill/TraceTrail';

@@ -1,4 +1,4 @@
-import { getPublicImpact } from '@/modules/reporting/service-impact';
+import { getPublicImpact } from '@/modules/reporting';
 import { route } from '@/platform/http/interim-route';
 
 // Reads the database on every request (through the short impact cache); never at build time.

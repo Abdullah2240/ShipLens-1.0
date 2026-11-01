@@ -1,5 +1,4 @@
-import { figureFromSlug, parseReportingFilters } from '@/modules/reporting';
-import { getBranchReports } from '@/modules/reporting/service-trace';
+import { figureFromSlug, parseReportingFilters, getBranchReports } from '@/modules/reporting';
 import { NotFound } from '@/platform/errors';
 import { route } from '@/platform/http/interim-route';
 
