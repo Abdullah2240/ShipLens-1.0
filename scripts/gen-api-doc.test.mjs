@@ -44,7 +44,7 @@ beforeAll(() => {
     `${API}/v1/things/[id]/route.ts`,
     [
       "import { getThing, updateThing, thingPatchSchema } from '@/modules/things';",
-      "import { route } from '@/platform/http/interim-route';",
+      "import { route } from '@/platform/http/route';",
       "export const dynamic = 'force-dynamic';",
       "export const GET = route({ auth: 'session', action: 'thing.read' }, async (c) => ({",
       '  data: { data: await getThing(c.command.pool, c.params.id ?? "") },',
@@ -78,7 +78,7 @@ beforeAll(() => {
     `${API}/v1/public/signups/route.ts`,
     [
       "import { z } from 'zod';",
-      "import { route } from '@/platform/http/interim-route';",
+      "import { route } from '@/platform/http/route';",
       'const signupSchema = z.object({ email: z.string(), website: z.string().optional() });',
       "export const POST = route({ auth: 'public', body: signupSchema }, async () => {",
       '  if (!allowed()) throw new RateLimited(60);',
