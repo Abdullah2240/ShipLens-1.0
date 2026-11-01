@@ -3,7 +3,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { parseEntryParams, previewEntry } from '@/modules/content';
 import { ContentPreview } from '@/modules/content/components/ContentPreview';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Drafts are private: read per request and never indexed.
 export const dynamic = 'force-dynamic';
@@ -17,7 +17,7 @@ type Params = Promise<{ locale: string; key: string; entryLocale: string }>;
 export default async function ContentPreviewPage({ params }: { params: Params }) {
   const { locale, key, entryLocale } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const entryParams = await orNotFound(
     Promise.resolve().then(() => parseEntryParams(key, entryLocale)),
   );

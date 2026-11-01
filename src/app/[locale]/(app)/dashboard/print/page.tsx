@@ -25,7 +25,7 @@ import {
   PrintToolbar,
 } from '@/modules/reporting/components/print/PrintSheet';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 import { formatInt } from '@/platform/i18n/format';
 
 // Reads the session and the database on every request.
@@ -53,7 +53,7 @@ export default async function PrintSummaryPage({
   const { locale: rawLocale } = await params;
   setRequestLocale(rawLocale);
   const locale = rawLocale as Locale;
-  const { actor, user } = await requirePageActor();
+  const { actor, user } = await requireActor();
   const filters = parseReportingFilters(await searchParams);
   const pool = getPool();
 

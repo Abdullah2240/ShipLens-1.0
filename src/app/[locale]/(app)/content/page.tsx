@@ -4,7 +4,7 @@ import { listEntries } from '@/modules/content';
 import { ContentEntriesTable } from '@/modules/content/components/ContentEntriesTable';
 import { ContentTabs } from '@/modules/content/components/ContentTabs';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function ContentListPage({ params }: { params: Params }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const [t, entries] = await Promise.all([
     getTranslations('content'),
     orNotFound(listEntries(getPool(), actor)),

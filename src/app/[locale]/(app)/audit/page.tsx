@@ -10,7 +10,7 @@ import {
 import { AuditFilters } from '@/modules/audit-log/components/AuditFilters';
 import { auditHref, olderHref } from '@/modules/audit-log/components/audit-entity-link';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -36,7 +36,7 @@ export default async function AuditPage({
   setRequestLocale(locale);
   const search = await searchParams;
   const query = parseAuditQuery(search);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const pool = getPool();
   // Roles without audit access get Forbidden from the service: the not-found page.
   const [[page, facets], t] = await Promise.all([

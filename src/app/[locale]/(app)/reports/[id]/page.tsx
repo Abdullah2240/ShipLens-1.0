@@ -12,7 +12,7 @@ import { ShareReportButton } from '@/modules/reporting/components/share/ShareRep
 import { getReportTimeline } from '@/modules/timeline';
 import { AuditTimeline } from '@/modules/timeline/components/AuditTimeline';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session, the report and its timeline on every request.
 export const dynamic = 'force-dynamic';
@@ -41,7 +41,7 @@ function noteKey(report: ReportDetail, caps: ReportCapabilities) {
 export default async function ReportPage({ params }: { params: Params }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const caps = reportCapabilities(actor.role);
   const pool = getPool();
   const [t, report, timeline] = await Promise.all([

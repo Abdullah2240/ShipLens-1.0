@@ -13,7 +13,7 @@ import {
   PrintToolbar,
 } from '@/modules/reporting/components/print/PrintSheet';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 import { formatDate, formatInt } from '@/platform/i18n/format';
 
 // Reads the session and the database on every request.
@@ -43,7 +43,7 @@ export default async function PrintReportPage({ params }: { params: Params }) {
   const { locale: rawLocale, reportId } = await params;
   setRequestLocale(rawLocale);
   const locale = rawLocale as Locale;
-  const { actor, user } = await requirePageActor();
+  const { actor, user } = await requireActor();
   const printable = await orNotFound(getPrintableReport(getPool(), actor, reportId));
   const { branch, report, events, collections } = printable;
 

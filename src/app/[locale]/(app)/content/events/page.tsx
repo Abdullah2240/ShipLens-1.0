@@ -4,7 +4,7 @@ import { listEvents } from '@/modules/content';
 import { ContentTabs } from '@/modules/content/components/ContentTabs';
 import { EventsTable } from '@/modules/content/components/EventsTable';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the drafts on every request.
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function ContentEventsPage({ params }: { params: Params }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const [t, events] = await Promise.all([
     getTranslations('content'),
     orNotFound(listEvents(getPool(), actor)),

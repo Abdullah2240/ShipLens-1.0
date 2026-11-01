@@ -21,7 +21,7 @@ import { UnroutedTable } from '@/modules/reporting/components/unrouted/UnroutedT
 import type { Actor } from '@/platform/authz';
 import { PERMISSIONS } from '@/platform/authz/permissions';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 import { formatDateTime, formatInt, formatMoney } from '@/platform/i18n/format';
 
 // Reads the session and the database on every request.
@@ -78,7 +78,7 @@ export default async function UnroutedPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const sp = await searchParams;
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
 
   const tab: Tab = sp.tab === 'recent' ? 'recent' : 'open';
   // The list is all time; only the branch narrows it, so the total matches the KPI.

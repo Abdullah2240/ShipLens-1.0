@@ -5,7 +5,7 @@ import { listMembers, listTeams, parseMemberQuery } from '@/modules/members';
 import { MembersFilters, membersHref } from '@/modules/members/components/MembersFilters';
 import { MembersTable } from '@/modules/members/components/MembersTable';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -30,7 +30,7 @@ export default async function MembersPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const sp = await searchParams;
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const query = parseMemberQuery(sp);
   const [t, result, teams] = await Promise.all([
     getTranslations('members'),

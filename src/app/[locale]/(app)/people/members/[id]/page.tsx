@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { getMember, listTeams, memberCapabilities } from '@/modules/members';
 import { MemberEditForm } from '@/modules/members/components/MemberEditForm';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the member on every request.
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function MemberPage({ params }: { params: Params }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const [member, teams] = await Promise.all([
     orNotFound(getMember(getPool(), actor, id)),
     orNotFound(listTeams(getPool(), actor)),

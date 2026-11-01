@@ -18,7 +18,7 @@ import {
   reportsHref,
 } from '@/modules/reports/components/report-format';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 import { formatInt } from '@/platform/i18n/format';
 import { pktDate, pktWeekStart, systemClock } from '@/platform/time';
 
@@ -45,7 +45,7 @@ export default async function ReportsPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const sp = await searchParams;
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const caps = reportCapabilities(actor.role);
   const pool = getPool();
 

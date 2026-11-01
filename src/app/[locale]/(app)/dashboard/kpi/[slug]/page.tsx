@@ -26,7 +26,7 @@ import {
 } from '@/modules/reporting/components/drill/drill-view-model';
 import { getPool } from '@/platform/db';
 import { formatDateTime, formatInt, formatMoney } from '@/platform/i18n/format';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -59,7 +59,7 @@ export default async function FigureByBranchPage({
   const { locale: rawLocale, slug } = await params;
   setRequestLocale(rawLocale);
   const locale = rawLocale as Locale;
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const figure = figureFromSlug(slug);
   if (!figure) notFound();
 

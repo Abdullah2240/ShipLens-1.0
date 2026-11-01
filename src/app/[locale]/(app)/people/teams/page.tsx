@@ -3,7 +3,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { listBranchOptions, listTeams, memberCapabilities } from '@/modules/members';
 import { TeamsPanel } from '@/modules/members/components/TeamsPanel';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function TeamsPage({ params }: { params: Params }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const [t, teams, branches] = await Promise.all([
     getTranslations('members'),
     orNotFound(listTeams(getPool(), actor)),

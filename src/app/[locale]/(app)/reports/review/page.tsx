@@ -5,7 +5,7 @@ import { listReviewQueue } from '@/modules/reports';
 import { ReviewQueueList } from '@/modules/reports/components/ReportsTable';
 import { REPORTS_PATH } from '@/modules/reports/components/report-format';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 import { pktDate, systemClock } from '@/platform/time';
 
 // Reads the session and the queue on every request.
@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 export default async function ReviewQueuePage({ params }: { params: Params }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const [t, queue] = await Promise.all([
     getTranslations('reports'),
     orNotFound(listReviewQueue(getPool(), actor)),

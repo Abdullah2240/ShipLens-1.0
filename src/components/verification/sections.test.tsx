@@ -37,8 +37,8 @@ vi.mock('@/platform/config/env', () => ({
 
 // Host pages: their data loaders and child components are replaced by stand-ins, so only
 // the placement of the verification sections is under test.
-vi.mock('@/platform/http/interim-server', () => ({
-  requirePageActor: vi.fn(async () => ({ actor: mocks.actor.current })),
+vi.mock('@/platform/http/server', () => ({
+  requireActor: vi.fn(async () => ({ actor: mocks.actor.current })),
   orNotFound: <T,>(promise: Promise<T>) => promise,
 }));
 vi.mock('next-intl/server', async () => {

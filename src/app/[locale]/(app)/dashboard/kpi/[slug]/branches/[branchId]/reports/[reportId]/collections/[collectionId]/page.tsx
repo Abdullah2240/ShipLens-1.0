@@ -16,7 +16,7 @@ import { EvidenceDate } from '@/modules/reporting/components/evidence/ReportSumm
 import type { TimelineEntry } from '@/modules/timeline';
 import { AuditTimeline } from '@/modules/timeline/components/AuditTimeline';
 import { getPool } from '@/platform/db';
-import { orNotFound, requirePageActor } from '@/platform/http/interim-server';
+import { orNotFound, requireActor } from '@/platform/http/server';
 
 // Reads the session and the database on every request.
 export const dynamic = 'force-dynamic';
@@ -106,7 +106,7 @@ export default async function CollectionLevelPage({
   const locale = rawLocale as Locale;
   const figure = figureFromSlug(slug);
   if (!figure) notFound();
-  const { actor } = await requirePageActor();
+  const { actor } = await requireActor();
   const filters = parseReportingFilters(await searchParams);
 
   const evidence = await orNotFound(
