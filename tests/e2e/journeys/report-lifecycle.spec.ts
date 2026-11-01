@@ -302,16 +302,14 @@ test.describe('report in Urdu', { tag: '@smoke' }, () => {
     await expect(html).toHaveAttribute('dir', 'rtl');
 
     for (const id of ['report-total', 'collections-total']) {
-      // collections-total is the LTR span itself; report-total wraps one.
-      const total =
-        id === 'collections-total'
-          ? page.getByTestId(id)
-          : page.getByTestId(id).locator('[dir="ltr"]');
-      await expect(total).toHaveAttribute('dir', 'ltr');
-      await expect(total.first()).toHaveText(/^PKR\s?[\d,]+\.\d{2}$/);
-      expect(await total.first().textContent()).not.toMatch(URDU_DIGITS);
+      // Both totals wrap exactly one LTR isolate (`Ltr`, a bdi with dir="ltr") holding the
+      // amount, so the amount keeps its order inside the Urdu row.
+      const total = page.getByTestId(id).locator('bdi[dir="ltr"]');
+      await expect(total, `${id} LTR isolate`).toHaveCount(1);
+      await expect(total).toHaveText(/^PKR\s?[\d,]+\.\d{2}$/);
+      expect(await total.textContent()).not.toMatch(URDU_DIGITS);
       expect(
-        await total.first().evaluate((node) => getComputedStyle(node).direction),
+        await total.evaluate((node) => getComputedStyle(node).direction),
         `${id} direction`,
       ).toBe('ltr');
     }
