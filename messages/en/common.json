@@ -30,10 +30,17 @@
     "declined": "Declined",
     "active": "Active",
     "inactive": "Inactive",
+    "left": "Left",
     "forming": "Forming",
     "paused": "Paused",
     "closed": "Closed",
     "published": "Published",
     "voided": "Voided"
+  },
+  "pager": {
+    "label": "Pagination",
+    "previous": "Previous",
+    "next": "Next",
+    "pageOf": "Page {page} of {pages}"
   }
 }

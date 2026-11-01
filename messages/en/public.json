@@ -28,5 +28,58 @@
         }
       }
     }
+  },
+  "pages": {
+    "fallbackNotice": "This page is shown in English while the Urdu version is being prepared.",
+    "about": {
+      "title": "Neighbours, looking after neighbours",
+      "lead": "A volunteer-run charity, built branch by branch by people who live in the neighbourhoods they serve.",
+      "body": "We started with a simple idea: help is trusted most when it comes from people you already know. Each of our branches is run by volunteers from its own neighbourhood, who know which families need support and how best to reach them.\n\n## How we work\n\nEvery donation is recorded at the branch that collects it and reviewed before it is reported. Branch leads, finance volunteers and our central team work from the same records, so every figure we publish can be traced back to where it came from.\n\n## What we believe\n\nGiving should be simple, dignified and accountable. We treat the people we serve as neighbours, not cases, and we keep our books open so that donors never have to wonder where their help went."
+    },
+    "programs": {
+      "title": "Our programs",
+      "lead": "Practical help, organised locally and shaped by what each neighbourhood actually needs.",
+      "body": "Our branches run three kinds of programs. Local volunteers plan each one, and the help goes where the branch sees the greatest need.\n\n- **Education support:** school fees, books and tutoring for children whose families cannot cover them.\n- **Health camps:** free check-ups and basic medicines, organised with local doctors and volunteers.\n- **Relief drives:** food and essentials for families in need, especially in hard seasons and emergencies.\n\nNot every branch runs every program. To see what is happening near you, find your nearest branch or look at the upcoming events."
+    },
+    "getInvolved": {
+      "title": "Lend a hand, close to home",
+      "lead": "Volunteer with a branch near you. Give a few hours a month or take on a regular role: every pair of hands counts.",
+      "body": "Our work runs on volunteers: people who pack relief bags, tutor children, help at health camps, keep branch records straight and welcome new members.\n\n## How joining works\n\n1. Fill in a short application and choose the branch closest to you.\n2. The branch team reviews your application and gets in touch.\n3. Once you are accepted, you receive a member code and join the team on the ground.\n\nYou do not need special skills. Reliability, kindness and a little time go a long way.",
+      "ctaTitle": "Ready to help?",
+      "ctaBody": "Applying takes a few minutes. Not sure which branch to choose? Have a look at the list of branches first.",
+      "applyCta": "Apply to volunteer",
+      "branchesCta": "Browse branches"
+    },
+    "contact": {
+      "title": "Get in touch",
+      "lead": "Questions about volunteering, donations or a branch near you? Here is how to reach us.",
+      "body": "Our contact details will be published on this page soon.\n\nUntil then, the easiest way to reach us is through your nearest branch. Its volunteers can answer most questions about local programs, events and donations.\n\nIf you would like to volunteer, apply from the Get involved page and a branch team will contact you."
+    }
+  },
+  "branches": {
+    "title": "Find a branch near you",
+    "lead": "Every branch is run by volunteers who live in the neighbourhood it serves. Find the one closest to you and apply to join its team.",
+    "jumpTo": "Jump to a city",
+    "cityCount": "{count, plural, one {# branch} other {# branches}}",
+    "otherCity": "Other areas",
+    "applyHere": "Volunteer with this branch",
+    "empty": {
+      "title": "No branches are open yet",
+      "body": "We are still setting up our first branches. Please check back soon."
+    }
+  },
+  "events": {
+    "title": "Upcoming events",
+    "lead": "Health camps, relief drives and community days organised by our branches. Everyone is welcome.",
+    "timezone": "All times are Pakistan time (PKT).",
+    "when": "When",
+    "where": "Where",
+    "hostedBy": "Hosted by",
+    "untilTime": "until <ltr>{time}</ltr>",
+    "fallbackNote": "This event's details are not yet available in English.",
+    "empty": {
+      "title": "No upcoming events right now",
+      "body": "New events appear here as our branches plan them. Check back soon, or find your nearest branch to hear about them first."
+    }
   }
 }

@@ -1,0 +1,62 @@
+# Render Blueprint: one free Docker web service and one free managed Postgres 16, both in
+# Singapore. Create it from the Render Dashboard with New > Blueprint; the step-by-step
+# runbook is docs/deploy.md. This file holds variable names only, never secret values.
+#
+# Free plan notes:
+# - The free web service has no pre-deploy command, so the container start command
+#   (Dockerfile CMD) applies migrations and runs the idempotent seed before the server
+#   starts. On a paid plan, add `preDeployCommand: node scripts/migrate.mjs` to the web
+#   service; the start command can stay as it is because both steps are idempotent.
+# - The free web service sleeps after 15 minutes without inbound traffic; the next request
+#   waits about a minute while it starts again. Keep-warm is handled inside the app in a
+#   later phase; no external monitor is configured.
+# - Free Postgres expires 30 days after it is created (14 days' grace to upgrade, then it
+#   is deleted), has 1 GB of storage and no backups. Record the creation date in
+#   docs/deploy.md. Only one free Postgres can be active per workspace.
+# - The Dockerfile's last stage is the production runner, so no build target is set.
+
+databases:
+  - name: shiplens-db
+    plan: free
+    region: singapore
+    postgresMajorVersion: '16'
+    databaseName: shiplens
+    user: shiplens
+    # Empty list: no connections from outside Render; the web service uses the private
+    # network connection string below.
+    ipAllowList: []
+
+services:
+  - type: web
+    name: shiplens
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    # Liveness only (no database call), so a slow database never fails a deploy.
+    healthCheckPath: /api/health
+    # Deploy a new commit only after the branch's CI checks pass.
+    autoDeployTrigger: checksPass
+    envVars:
+      # Private network connection string of shiplens-db.
+      - key: DATABASE_URL
+        fromDatabase:
+          name: shiplens-db
+          property: connectionString
+      - key: NODE_ENV
+        value: production
+      # The image defaults to port 3000; Render routes to 10000 by default. Setting it
+      # here makes the server and the image healthcheck use Render's port explicitly.
+      - key: PORT
+        value: '10000'
+      # Applies migrations and then the idempotent demo seed on every start.
+      - key: SEED_ON_BOOT
+        value: 'true'
+      # Secret: entered in the dashboard when the Blueprint is created (12+ characters).
+      - key: SEED_DEMO_PASSWORD
+        sync: false
+      - key: LOG_LEVEL
+        value: info
+      # APP_ORIGIN is deliberately not set: the app falls back to RENDER_EXTERNAL_URL,
+      # which Render sets to the service's https://<name>.onrender.com address.

@@ -30,10 +30,17 @@
     "declined": "مسترد",
     "active": "فعال",
     "inactive": "غیر فعال",
+    "left": "\u0686\u06be\u0648\u0691 \u0686\u06a9\u0627",
     "forming": "زیرِ تشکیل",
     "paused": "موقوف",
     "closed": "بند",
     "published": "شائع شدہ",
     "voided": "کالعدم"
+  },
+  "pager": {
+    "label": "صفحہ بندی",
+    "previous": "پچھلا",
+    "next": "اگلا",
+    "pageOf": "صفحہ {page} از {pages}"
   }
 }

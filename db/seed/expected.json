@@ -1,0 +1,584 @@
+{
+  "asOf": "2026-10-31",
+  "seed": 20261031,
+  "dataDigest": "afac80073fa1332f42cb04d530441ccf6f61f1c108368519a6440497d9b38acb",
+  "kpis": {
+    "collected": {
+      "amount": "5439002.59",
+      "count": 207
+    },
+    "approved": {
+      "amount": "4692717.65",
+      "count": 180
+    },
+    "pending_approval": {
+      "amount": "211500.00",
+      "count": 7
+    },
+    "in_progress": {
+      "amount": "534784.94",
+      "count": 20
+    },
+    "not_yet_routed": {
+      "amount": "2216537.04",
+      "count": 84
+    },
+    "routed": {
+      "amount": "2476180.61",
+      "count": 96
+    },
+    "active_branches": 3,
+    "reports_awaiting_review": 4
+  },
+  "voided": {
+    "amount": "678728.62",
+    "count": 27
+  },
+  "reportsByStatus": {
+    "draft": 3,
+    "submitted": 4,
+    "returned": 2,
+    "approved": 43
+  },
+  "byBranch": {
+    "Islamabad North (Demo)": {
+      "collected": {
+        "amount": "1195942.74",
+        "count": 47
+      },
+      "approved": {
+        "amount": "917734.38",
+        "count": 37
+      },
+      "pending_approval": {
+        "amount": "54500.00",
+        "count": 2
+      },
+      "in_progress": {
+        "amount": "223708.36",
+        "count": 8
+      },
+      "not_yet_routed": {
+        "amount": "454234.82",
+        "count": 17
+      },
+      "routed": {
+        "amount": "463499.56",
+        "count": 20
+      }
+    },
+    "Lahore Central (Demo)": {
+      "collected": {
+        "amount": "1166157.05",
+        "count": 44
+      },
+      "approved": {
+        "amount": "1025580.47",
+        "count": 39
+      },
+      "pending_approval": {
+        "amount": "47000.00",
+        "count": 2
+      },
+      "in_progress": {
+        "amount": "93576.58",
+        "count": 3
+      },
+      "not_yet_routed": {
+        "amount": "448806.80",
+        "count": 17
+      },
+      "routed": {
+        "amount": "576773.67",
+        "count": 22
+      }
+    },
+    "Multan (Demo)": {
+      "collected": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "approved": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "pending_approval": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "in_progress": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "not_yet_routed": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "routed": {
+        "amount": "0.00",
+        "count": 0
+      }
+    },
+    "Peshawar (Demo)": {
+      "collected": {
+        "amount": "1101356.74",
+        "count": 38
+      },
+      "approved": {
+        "amount": "1033356.74",
+        "count": 36
+      },
+      "pending_approval": {
+        "amount": "68000.00",
+        "count": 2
+      },
+      "in_progress": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "not_yet_routed": {
+        "amount": "556032.94",
+        "count": 19
+      },
+      "routed": {
+        "amount": "477323.80",
+        "count": 17
+      }
+    },
+    "Quetta (Demo)": {
+      "collected": {
+        "amount": "769705.74",
+        "count": 31
+      },
+      "approved": {
+        "amount": "769705.74",
+        "count": 31
+      },
+      "pending_approval": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "in_progress": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "not_yet_routed": {
+        "amount": "245982.71",
+        "count": 11
+      },
+      "routed": {
+        "amount": "523723.03",
+        "count": 20
+      }
+    },
+    "Sample Branch (Demo)": {
+      "collected": {
+        "amount": "1205840.32",
+        "count": 47
+      },
+      "approved": {
+        "amount": "946340.32",
+        "count": 37
+      },
+      "pending_approval": {
+        "amount": "42000.00",
+        "count": 1
+      },
+      "in_progress": {
+        "amount": "217500.00",
+        "count": 9
+      },
+      "not_yet_routed": {
+        "amount": "511479.77",
+        "count": 20
+      },
+      "routed": {
+        "amount": "434860.55",
+        "count": 17
+      }
+    }
+  },
+  "byMonth": {
+    "2026-08": {
+      "collected": {
+        "amount": "1610713.62",
+        "count": 64
+      },
+      "approved": {
+        "amount": "1610713.62",
+        "count": 64
+      },
+      "pending_approval": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "in_progress": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "not_yet_routed": {
+        "amount": "800879.97",
+        "count": 31
+      },
+      "routed": {
+        "amount": "809833.65",
+        "count": 33
+      }
+    },
+    "2026-09": {
+      "collected": {
+        "amount": "2223981.90",
+        "count": 85
+      },
+      "approved": {
+        "amount": "2223981.90",
+        "count": 85
+      },
+      "pending_approval": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "in_progress": {
+        "amount": "0.00",
+        "count": 0
+      },
+      "not_yet_routed": {
+        "amount": "971942.59",
+        "count": 38
+      },
+      "routed": {
+        "amount": "1252039.31",
+        "count": 47
+      }
+    },
+    "2026-10": {
+      "collected": {
+        "amount": "1604307.07",
+        "count": 58
+      },
+      "approved": {
+        "amount": "858022.13",
+        "count": 31
+      },
+      "pending_approval": {
+        "amount": "211500.00",
+        "count": 7
+      },
+      "in_progress": {
+        "amount": "534784.94",
+        "count": 20
+      },
+      "not_yet_routed": {
+        "amount": "443714.48",
+        "count": 15
+      },
+      "routed": {
+        "amount": "414307.65",
+        "count": 16
+      }
+    }
+  },
+  "approvedReports": [
+    {
+      "reportId": "ea381dbe-e6fc-4120-8cd1-ceb5e1a8a883",
+      "branch": "Islamabad North (Demo)",
+      "weekStart": "2026-08-10",
+      "amount": "65500.00",
+      "count": 3
+    },
+    {
+      "reportId": "ad225dd2-d417-4d5e-98e1-8e20b4e29f16",
+      "branch": "Islamabad North (Demo)",
+      "weekStart": "2026-08-17",
+      "amount": "86000.00",
+      "count": 4
+    },
+    {
+      "reportId": "74d6c7bc-81c1-46ce-9d5b-bd0b0f08d968",
+      "branch": "Islamabad North (Demo)",
+      "weekStart": "2026-08-24",
+      "amount": "120500.00",
+      "count": 3
+    },
+    {
+      "reportId": "101a672c-e183-41b9-beca-d66a8e4f7122",
+      "branch": "Islamabad North (Demo)",
+      "weekStart": "2026-08-31",
+      "amount": "123500.00",
+      "count": 5
+    },
+    {
+      "reportId": "2cc650de-fc83-4c48-be7b-2835e078abc7",
+      "branch": "Islamabad North (Demo)",
+      "weekStart": "2026-09-07",
+      "amount": "202000.00",
+      "count": 6
+    },
+    {
+      "reportId": "e0bffe40-95aa-4759-859b-514d312b0440",
+      "branch": "Islamabad North (Demo)",
+      "weekStart": "2026-09-14",
+      "amount": "40234.82",
+      "count": 5
+    },
+    {
+      "reportId": "753688c4-3456-4751-8cbc-d83fde1f2a72",
+      "branch": "Islamabad North (Demo)",
+      "weekStart": "2026-09-21",
+      "amount": "61500.00",
+      "count": 4
+    },
+    {
+      "reportId": "ac157168-f4f8-4d46-8282-58cffb2d745a",
+      "branch": "Islamabad North (Demo)",
+      "weekStart": "2026-09-28",
+      "amount": "164217.01",
+      "count": 4
+    },
+    {
+      "reportId": "253a7847-c9ca-47e7-9571-e3c0b4177f3c",
+      "branch": "Islamabad North (Demo)",
+      "weekStart": "2026-10-05",
+      "amount": "54282.55",
+      "count": 3
+    },
+    {
+      "reportId": "201e344e-5737-4e4c-a9e3-3b941e5667b1",
+      "branch": "Lahore Central (Demo)",
+      "weekStart": "2026-08-10",
+      "amount": "122000.00",
+      "count": 4
+    },
+    {
+      "reportId": "989688ea-25db-41e2-8f03-8279d67cfd62",
+      "branch": "Lahore Central (Demo)",
+      "weekStart": "2026-08-17",
+      "amount": "202000.00",
+      "count": 7
+    },
+    {
+      "reportId": "3d34119e-bccd-4391-ab1e-9ea8381997a5",
+      "branch": "Lahore Central (Demo)",
+      "weekStart": "2026-08-24",
+      "amount": "20000.00",
+      "count": 2
+    },
+    {
+      "reportId": "ac9fbbbe-dcb8-412a-8ab1-bb224f0522af",
+      "branch": "Lahore Central (Demo)",
+      "weekStart": "2026-08-31",
+      "amount": "0.00",
+      "count": 0
+    },
+    {
+      "reportId": "64969fa2-47eb-47b6-aeba-76a78d4e9aca",
+      "branch": "Lahore Central (Demo)",
+      "weekStart": "2026-09-07",
+      "amount": "16000.00",
+      "count": 1
+    },
+    {
+      "reportId": "3132914f-d920-461e-b71c-b6f136a997cf",
+      "branch": "Lahore Central (Demo)",
+      "weekStart": "2026-09-14",
+      "amount": "98500.00",
+      "count": 4
+    },
+    {
+      "reportId": "7ec6dbb5-679f-4639-b3ac-c9141ea06916",
+      "branch": "Lahore Central (Demo)",
+      "weekStart": "2026-09-21",
+      "amount": "158772.38",
+      "count": 7
+    },
+    {
+      "reportId": "b79f63e5-97ce-4fb2-94b9-0f5eec257747",
+      "branch": "Lahore Central (Demo)",
+      "weekStart": "2026-09-28",
+      "amount": "212500.00",
+      "count": 5
+    },
+    {
+      "reportId": "4d8258e8-0421-4c00-aea7-921f309cdc95",
+      "branch": "Lahore Central (Demo)",
+      "weekStart": "2026-10-05",
+      "amount": "139500.00",
+      "count": 4
+    },
+    {
+      "reportId": "712acaf1-6ed9-4eb6-bf15-3f9c57c4e258",
+      "branch": "Lahore Central (Demo)",
+      "weekStart": "2026-10-12",
+      "amount": "56308.09",
+      "count": 5
+    },
+    {
+      "reportId": "b84ad155-837d-4e91-bd47-56b9435cf484",
+      "branch": "Peshawar (Demo)",
+      "weekStart": "2026-08-10",
+      "amount": "45000.00",
+      "count": 3
+    },
+    {
+      "reportId": "415781a1-def7-4149-803c-795f30185d51",
+      "branch": "Peshawar (Demo)",
+      "weekStart": "2026-08-17",
+      "amount": "84188.63",
+      "count": 4
+    },
+    {
+      "reportId": "e76cf13d-dade-43ba-87dd-6a2ef1d3fa73",
+      "branch": "Peshawar (Demo)",
+      "weekStart": "2026-08-24",
+      "amount": "130000.00",
+      "count": 4
+    },
+    {
+      "reportId": "38965410-cb0d-4759-8d71-3d9e87549838",
+      "branch": "Peshawar (Demo)",
+      "weekStart": "2026-08-31",
+      "amount": "195500.00",
+      "count": 5
+    },
+    {
+      "reportId": "d4571967-9b44-4793-a561-8fdea6f9cda6",
+      "branch": "Peshawar (Demo)",
+      "weekStart": "2026-09-07",
+      "amount": "57823.80",
+      "count": 3
+    },
+    {
+      "reportId": "345fb603-f8cb-411b-b2aa-ad11b47074db",
+      "branch": "Peshawar (Demo)",
+      "weekStart": "2026-09-14",
+      "amount": "193344.31",
+      "count": 6
+    },
+    {
+      "reportId": "0d8fcc92-23cd-41c6-af3b-9ddb4ade5a7f",
+      "branch": "Peshawar (Demo)",
+      "weekStart": "2026-09-21",
+      "amount": "163000.00",
+      "count": 5
+    },
+    {
+      "reportId": "93229099-8bc7-40d5-a312-b8d3fc2734f7",
+      "branch": "Peshawar (Demo)",
+      "weekStart": "2026-09-28",
+      "amount": "77500.00",
+      "count": 4
+    },
+    {
+      "reportId": "fd011156-ffb8-4e49-a36c-58e11a6e9a29",
+      "branch": "Peshawar (Demo)",
+      "weekStart": "2026-10-05",
+      "amount": "87000.00",
+      "count": 2
+    },
+    {
+      "reportId": "cfc84add-2488-43be-89e8-7b6836225ac9",
+      "branch": "Quetta (Demo)",
+      "weekStart": "2026-08-10",
+      "amount": "92000.00",
+      "count": 3
+    },
+    {
+      "reportId": "9e665a6e-f97e-4698-8cd9-52a16ac5aa9a",
+      "branch": "Quetta (Demo)",
+      "weekStart": "2026-08-17",
+      "amount": "141500.00",
+      "count": 7
+    },
+    {
+      "reportId": "fced83a7-1089-4e76-af4a-39481e134a33",
+      "branch": "Quetta (Demo)",
+      "weekStart": "2026-08-24",
+      "amount": "188899.15",
+      "count": 7
+    },
+    {
+      "reportId": "92dc1cc6-aaaa-45fd-b3c7-7b2d3943cc77",
+      "branch": "Quetta (Demo)",
+      "weekStart": "2026-08-31",
+      "amount": "116500.00",
+      "count": 5
+    },
+    {
+      "reportId": "81e6a66e-fbb9-432b-91eb-a34e02c6e30a",
+      "branch": "Quetta (Demo)",
+      "weekStart": "2026-09-07",
+      "amount": "140499.98",
+      "count": 5
+    },
+    {
+      "reportId": "36a5b51a-bc6e-4f84-9746-e62df99c17bf",
+      "branch": "Quetta (Demo)",
+      "weekStart": "2026-09-14",
+      "amount": "90306.61",
+      "count": 4
+    },
+    {
+      "reportId": "72d847f7-686c-4106-b22b-f450dc726a8c",
+      "branch": "Sample Branch (Demo)",
+      "weekStart": "2026-08-10",
+      "amount": "95265.29",
+      "count": 3
+    },
+    {
+      "reportId": "89b90c1e-b3ee-46b7-b77f-79d1d2c6319c",
+      "branch": "Sample Branch (Demo)",
+      "weekStart": "2026-08-17",
+      "amount": "89860.55",
+      "count": 5
+    },
+    {
+      "reportId": "2099288b-ebce-4ca3-b21f-660bcf97476d",
+      "branch": "Sample Branch (Demo)",
+      "weekStart": "2026-08-24",
+      "amount": "66000.00",
+      "count": 2
+    },
+    {
+      "reportId": "5b32d449-c541-467f-857e-39b8c5d2c3c4",
+      "branch": "Sample Branch (Demo)",
+      "weekStart": "2026-08-31",
+      "amount": "60000.00",
+      "count": 2
+    },
+    {
+      "reportId": "5c40d4c2-c888-4cd9-8745-dfe9656347e3",
+      "branch": "Sample Branch (Demo)",
+      "weekStart": "2026-09-07",
+      "amount": "48000.00",
+      "count": 2
+    },
+    {
+      "reportId": "04e0b6e8-bdd1-4ce1-86e0-2be0fea93022",
+      "branch": "Sample Branch (Demo)",
+      "weekStart": "2026-09-14",
+      "amount": "176000.00",
+      "count": 6
+    },
+    {
+      "reportId": "569d783a-cd66-4b12-a33d-beddaa0c936f",
+      "branch": "Sample Branch (Demo)",
+      "weekStart": "2026-09-21",
+      "amount": "93500.00",
+      "count": 5
+    },
+    {
+      "reportId": "f65c84a4-1e09-4794-bb4c-73aa28e45274",
+      "branch": "Sample Branch (Demo)",
+      "weekStart": "2026-09-28",
+      "amount": "140953.34",
+      "count": 6
+    },
+    {
+      "reportId": "5f23369e-b643-4a9b-8483-6b0978c1181d",
+      "branch": "Sample Branch (Demo)",
+      "weekStart": "2026-10-05",
+      "amount": "176761.14",
+      "count": 6
+    }
+  ]
+}

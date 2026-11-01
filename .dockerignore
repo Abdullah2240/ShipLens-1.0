@@ -4,3 +4,6 @@ node_modules
 coverage
 .env*
 !.env.example
+test-results
+playwright-report
+blob-report

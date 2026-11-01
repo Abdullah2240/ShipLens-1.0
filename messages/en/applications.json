@@ -1,1 +1,125 @@
-{}
+{
+  "form": {
+    "eyebrow": "Volunteer with us",
+    "title": "Join a branch near you",
+    "intro": "Tell us a little about yourself and which branch you would like to help. A branch coordinator reads every application personally and will get in touch.",
+    "privacy": "We use your contact details only to reply about this application. They are never shown publicly or shared outside the branch team.",
+    "optional": "Optional",
+    "honeypot": "Leave this field empty",
+    "fields": {
+      "fullName": {
+        "label": "Full name",
+        "hint": "The name you would like the branch to call you."
+      },
+      "email": {
+        "label": "Email address",
+        "hint": "We will send our reply here."
+      },
+      "phone": {
+        "label": "Mobile number",
+        "hint": "A Pakistani mobile number, for example <ltr>0300 1234567</ltr>."
+      },
+      "message": {
+        "label": "Anything you would like us to know",
+        "hint": "Your skills, the time you can give, or why you want to join. Up to 1,000 characters."
+      },
+      "branch": {
+        "label": "Branch",
+        "hint": "Only branches currently welcoming volunteers are listed."
+      }
+    },
+    "branchPlaceholder": "Choose a branch",
+    "branchOption": "{name}, {city}",
+    "submit": "Send my application",
+    "submitting": "Sending your application…",
+    "errors": {
+      "required": "Please fill in this field.",
+      "too_short": "This looks too short. Please enter at least 2 characters.",
+      "too_long": "This is longer than we can accept. Please shorten it.",
+      "invalid_email": "Enter an email address like <ltr>name@example.com</ltr>.",
+      "invalid_phone": "Enter a Pakistani mobile number, like <ltr>0300 1234567</ltr> or <ltr>+92 300 1234567</ltr>.",
+      "invalid_branch": "Please choose a branch from the list.",
+      "summary": "{count, plural, one {Please check one answer before sending} other {Please check # answers before sending}}",
+      "duplicate": "You have already applied to this branch and your application is still being reviewed. We will be in touch soon.",
+      "rateLimited": "We have received several applications from this connection. Please wait a few minutes and try again.",
+      "generic": "Something went wrong on our side and your application was not sent. Your answers are still here, so please try again.",
+      "noBranchesTitle": "No branches are open right now",
+      "noBranches": "No branch is taking new volunteers at the moment. Please check back soon.",
+      "noBranchesLink": "See other ways to help"
+    }
+  },
+  "thanks": {
+    "eyebrow": "Application received",
+    "title": "Thank you, your application is with us",
+    "body": "A coordinator from the branch will read it and contact you by email or phone. There is nothing else you need to do for now.",
+    "nextTitle": "What happens next",
+    "steps": {
+      "read": "A branch coordinator reads your application.",
+      "contact": "They contact you to talk about where you can help.",
+      "welcome": "Once you are accepted, the branch welcomes you as a member."
+    },
+    "home": "Back to home",
+    "another": "Apply to another branch"
+  },
+  "admin": {
+    "list": {
+      "title": "Applications",
+      "intro": "People who asked to join a branch through the public form. Review each one, then accept or decline it.",
+      "caption": "Membership applications",
+      "tabsLabel": "Filter applications by status",
+      "tabPending": "Pending",
+      "tabAccepted": "Accepted",
+      "tabDeclined": "Declined",
+      "tabAll": "All",
+      "empty": {
+        "title": "No applications here",
+        "body": "Applications that match this view will appear here."
+      }
+    },
+    "columns": {
+      "applicant": "Applicant",
+      "branch": "Branch",
+      "contact": "Contact",
+      "received": "Received",
+      "status": "Status"
+    },
+    "detail": {
+      "title": "Application",
+      "back": "All applications",
+      "applicant": "Applicant",
+      "email": "Email",
+      "phone": "Phone",
+      "branch": "Branch",
+      "notProvided": "Not provided",
+      "message": "Message",
+      "noMessage": "The applicant did not include a message.",
+      "decision": "Decision",
+      "awaiting": "This application is waiting for a decision.",
+      "decidedBy": "Decided by",
+      "decidedOn": "Decided on",
+      "note": "Note",
+      "member": "Member ID",
+      "viewMember": "Open member record",
+      "received": "Received"
+    },
+    "decision": {
+      "prompt": "Review the applicant's details and message, then record a decision. A decision is final.",
+      "accept": "Accept",
+      "decline": "Decline",
+      "acceptTitle": "Accept this application?",
+      "acceptBody": "{name} will become a member of this branch and receive a member ID. A decision cannot be changed later.",
+      "declineTitle": "Decline this application?",
+      "declineBody": "{name}'s application will be closed as declined. A decision cannot be changed later.",
+      "noteLabel": "Note for the record (optional)",
+      "notePlaceholder": "For example, the branch is not taking volunteers for this role",
+      "noteHint": "Kept with the application for staff. Up to 500 characters.",
+      "confirmAccept": "Accept and add member",
+      "confirmDecline": "Decline application",
+      "working": "Saving decision…",
+      "accepted": "Application accepted. {name} is now a member.",
+      "declined": "Application declined.",
+      "alreadyDecided": "This application was already decided, possibly by someone else just now. The page now shows the final decision.",
+      "error": "We could not save the decision. Please try again."
+    }
+  }
+}

@@ -1,0 +1,972 @@
+[
+  {
+    "id": "ea381dbe-e6fc-4120-8cd1-ceb5e1a8a883",
+    "branchKey": "islamabad",
+    "weekStart": "2026-08-10",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-17T06:01:00.000Z",
+        "actorKey": "lead.islamabad"
+      },
+      {
+        "event": "approved",
+        "at": "2026-08-20T06:51:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "ad225dd2-d417-4d5e-98e1-8e20b4e29f16",
+    "branchKey": "islamabad",
+    "weekStart": "2026-08-17",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-24T05:12:00.000Z",
+        "actorKey": "lead.islamabad"
+      },
+      {
+        "event": "approved",
+        "at": "2026-08-26T06:06:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "74d6c7bc-81c1-46ce-9d5b-bd0b0f08d968",
+    "branchKey": "islamabad",
+    "weekStart": "2026-08-24",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-31T05:33:00.000Z",
+        "actorKey": "lead.islamabad"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-01T06:49:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "101a672c-e183-41b9-beca-d66a8e4f7122",
+    "branchKey": "islamabad",
+    "weekStart": "2026-08-31",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-07T06:27:00.000Z",
+        "actorKey": "lead.islamabad"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-10T08:48:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "2cc650de-fc83-4c48-be7b-2835e078abc7",
+    "branchKey": "islamabad",
+    "weekStart": "2026-09-07",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-14T06:17:00.000Z",
+        "actorKey": "lead.islamabad"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-16T06:16:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "e0bffe40-95aa-4759-859b-514d312b0440",
+    "branchKey": "islamabad",
+    "weekStart": "2026-09-14",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-21T05:35:00.000Z",
+        "actorKey": "lead.islamabad"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-24T11:38:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "753688c4-3456-4751-8cbc-d83fde1f2a72",
+    "branchKey": "islamabad",
+    "weekStart": "2026-09-21",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-28T05:16:00.000Z",
+        "actorKey": "lead.islamabad"
+      },
+      {
+        "event": "returned",
+        "at": "2026-09-30T06:40:00.000Z",
+        "actorKey": "finance",
+        "reason": "Purpose missing on one entry; please check."
+      },
+      {
+        "event": "resubmitted",
+        "at": "2026-10-01T05:41:00.000Z",
+        "actorKey": "lead.islamabad"
+      },
+      {
+        "event": "approved",
+        "at": "2026-10-03T09:14:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "ac157168-f4f8-4d46-8282-58cffb2d745a",
+    "branchKey": "islamabad",
+    "weekStart": "2026-09-28",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-05T06:14:00.000Z",
+        "actorKey": "lead.islamabad"
+      },
+      {
+        "event": "approved",
+        "at": "2026-10-06T06:03:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "253a7847-c9ca-47e7-9571-e3c0b4177f3c",
+    "branchKey": "islamabad",
+    "weekStart": "2026-10-05",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-12T06:08:00.000Z",
+        "actorKey": "lead.islamabad"
+      },
+      {
+        "event": "approved",
+        "at": "2026-10-13T11:37:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "e64c6b8b-727e-44ae-97ef-c6898e774b09",
+    "branchKey": "islamabad",
+    "weekStart": "2026-10-12",
+    "status": "submitted",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-19T06:10:00.000Z",
+        "actorKey": "lead.islamabad"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "41f63d73-a0ce-413e-a0d9-05fb22c3974f",
+    "branchKey": "islamabad",
+    "weekStart": "2026-10-19",
+    "status": "returned",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-26T05:36:00.000Z",
+        "actorKey": "lead.islamabad"
+      },
+      {
+        "event": "returned",
+        "at": "2026-10-29T10:15:00.000Z",
+        "actorKey": "finance",
+        "reason": "Receipt numbers missing for two entries."
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "226648dd-0539-46ce-9d03-ee50d6d431cc",
+    "branchKey": "islamabad",
+    "weekStart": "2026-10-26",
+    "status": "draft",
+    "history": [],
+    "confirmNil": false
+  },
+  {
+    "id": "201e344e-5737-4e4c-a9e3-3b941e5667b1",
+    "branchKey": "lahore",
+    "weekStart": "2026-08-10",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-17T05:42:00.000Z",
+        "actorKey": "lead.lahore"
+      },
+      {
+        "event": "approved",
+        "at": "2026-08-19T07:48:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "989688ea-25db-41e2-8f03-8279d67cfd62",
+    "branchKey": "lahore",
+    "weekStart": "2026-08-17",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-24T05:22:00.000Z",
+        "actorKey": "lead.lahore"
+      },
+      {
+        "event": "approved",
+        "at": "2026-08-26T12:00:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "3d34119e-bccd-4391-ab1e-9ea8381997a5",
+    "branchKey": "lahore",
+    "weekStart": "2026-08-24",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-31T05:34:00.000Z",
+        "actorKey": "lead.lahore"
+      },
+      {
+        "event": "returned",
+        "at": "2026-09-01T06:09:00.000Z",
+        "actorKey": "finance",
+        "reason": "Receipt numbers missing for two entries."
+      },
+      {
+        "event": "resubmitted",
+        "at": "2026-09-02T05:40:00.000Z",
+        "actorKey": "lead.lahore"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-03T08:37:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "ac9fbbbe-dcb8-412a-8ab1-bb224f0522af",
+    "branchKey": "lahore",
+    "weekStart": "2026-08-31",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-07T05:10:00.000Z",
+        "actorKey": "lead.lahore"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-08T08:46:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": true
+  },
+  {
+    "id": "64969fa2-47eb-47b6-aeba-76a78d4e9aca",
+    "branchKey": "lahore",
+    "weekStart": "2026-09-07",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-14T06:22:00.000Z",
+        "actorKey": "lead.lahore"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-16T06:50:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "3132914f-d920-461e-b71c-b6f136a997cf",
+    "branchKey": "lahore",
+    "weekStart": "2026-09-14",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-21T05:31:00.000Z",
+        "actorKey": "lead.lahore"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-22T06:52:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "7ec6dbb5-679f-4639-b3ac-c9141ea06916",
+    "branchKey": "lahore",
+    "weekStart": "2026-09-21",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-28T05:37:00.000Z",
+        "actorKey": "lead.lahore"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-30T10:25:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "b79f63e5-97ce-4fb2-94b9-0f5eec257747",
+    "branchKey": "lahore",
+    "weekStart": "2026-09-28",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-05T05:47:00.000Z",
+        "actorKey": "lead.lahore"
+      },
+      {
+        "event": "approved",
+        "at": "2026-10-08T06:25:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "4d8258e8-0421-4c00-aea7-921f309cdc95",
+    "branchKey": "lahore",
+    "weekStart": "2026-10-05",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-12T05:09:00.000Z",
+        "actorKey": "lead.lahore"
+      },
+      {
+        "event": "approved",
+        "at": "2026-10-14T06:49:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "712acaf1-6ed9-4eb6-bf15-3f9c57c4e258",
+    "branchKey": "lahore",
+    "weekStart": "2026-10-12",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-19T05:54:00.000Z",
+        "actorKey": "lead.lahore"
+      },
+      {
+        "event": "approved",
+        "at": "2026-10-20T10:01:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "a671a171-0b6c-4d0c-9aa3-f2d801515f19",
+    "branchKey": "lahore",
+    "weekStart": "2026-10-19",
+    "status": "submitted",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-26T05:38:00.000Z",
+        "actorKey": "lead.lahore"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "d93e7c5a-75ec-4ea7-9909-43d1890233e1",
+    "branchKey": "lahore",
+    "weekStart": "2026-10-26",
+    "status": "draft",
+    "history": [],
+    "confirmNil": false
+  },
+  {
+    "id": "b84ad155-837d-4e91-bd47-56b9435cf484",
+    "branchKey": "peshawar",
+    "weekStart": "2026-08-10",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-17T06:09:00.000Z",
+        "actorKey": "lead.peshawar"
+      },
+      {
+        "event": "approved",
+        "at": "2026-08-20T08:50:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "415781a1-def7-4149-803c-795f30185d51",
+    "branchKey": "peshawar",
+    "weekStart": "2026-08-17",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-24T05:48:00.000Z",
+        "actorKey": "lead.peshawar"
+      },
+      {
+        "event": "approved",
+        "at": "2026-08-27T07:45:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "e76cf13d-dade-43ba-87dd-6a2ef1d3fa73",
+    "branchKey": "peshawar",
+    "weekStart": "2026-08-24",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-31T05:04:00.000Z",
+        "actorKey": "lead.peshawar"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-02T08:25:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "38965410-cb0d-4759-8d71-3d9e87549838",
+    "branchKey": "peshawar",
+    "weekStart": "2026-08-31",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-07T05:23:00.000Z",
+        "actorKey": "lead.peshawar"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-10T11:15:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "d4571967-9b44-4793-a561-8fdea6f9cda6",
+    "branchKey": "peshawar",
+    "weekStart": "2026-09-07",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-14T05:09:00.000Z",
+        "actorKey": "lead.peshawar"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-16T10:00:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "345fb603-f8cb-411b-b2aa-ad11b47074db",
+    "branchKey": "peshawar",
+    "weekStart": "2026-09-14",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-21T05:32:00.000Z",
+        "actorKey": "lead.peshawar"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-23T11:48:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "0d8fcc92-23cd-41c6-af3b-9ddb4ade5a7f",
+    "branchKey": "peshawar",
+    "weekStart": "2026-09-21",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-28T05:11:00.000Z",
+        "actorKey": "lead.peshawar"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-30T08:20:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "93229099-8bc7-40d5-a312-b8d3fc2734f7",
+    "branchKey": "peshawar",
+    "weekStart": "2026-09-28",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-05T05:14:00.000Z",
+        "actorKey": "lead.peshawar"
+      },
+      {
+        "event": "approved",
+        "at": "2026-10-07T09:57:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "fd011156-ffb8-4e49-a36c-58e11a6e9a29",
+    "branchKey": "peshawar",
+    "weekStart": "2026-10-05",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-12T05:35:00.000Z",
+        "actorKey": "lead.peshawar"
+      },
+      {
+        "event": "approved",
+        "at": "2026-10-13T07:01:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "3288b84c-23e0-49a3-93e1-17e1e069da34",
+    "branchKey": "peshawar",
+    "weekStart": "2026-10-12",
+    "status": "submitted",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-19T06:27:00.000Z",
+        "actorKey": "lead.peshawar"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "cfc84add-2488-43be-89e8-7b6836225ac9",
+    "branchKey": "quetta",
+    "weekStart": "2026-08-10",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-17T05:22:00.000Z",
+        "actorKey": "lead.quetta"
+      },
+      {
+        "event": "approved",
+        "at": "2026-08-18T06:00:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "9e665a6e-f97e-4698-8cd9-52a16ac5aa9a",
+    "branchKey": "quetta",
+    "weekStart": "2026-08-17",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-24T06:26:00.000Z",
+        "actorKey": "lead.quetta"
+      },
+      {
+        "event": "approved",
+        "at": "2026-08-26T10:01:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "fced83a7-1089-4e76-af4a-39481e134a33",
+    "branchKey": "quetta",
+    "weekStart": "2026-08-24",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-31T05:30:00.000Z",
+        "actorKey": "lead.quetta"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-03T06:07:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "92dc1cc6-aaaa-45fd-b3c7-7b2d3943cc77",
+    "branchKey": "quetta",
+    "weekStart": "2026-08-31",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-07T05:19:00.000Z",
+        "actorKey": "lead.quetta"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-08T11:15:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "81e6a66e-fbb9-432b-91eb-a34e02c6e30a",
+    "branchKey": "quetta",
+    "weekStart": "2026-09-07",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-14T05:28:00.000Z",
+        "actorKey": "lead.quetta"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-16T06:40:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "36a5b51a-bc6e-4f84-9746-e62df99c17bf",
+    "branchKey": "quetta",
+    "weekStart": "2026-09-14",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-21T05:40:00.000Z",
+        "actorKey": "lead.quetta"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-22T11:15:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "72d847f7-686c-4106-b22b-f450dc726a8c",
+    "branchKey": "sample",
+    "weekStart": "2026-08-10",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-17T06:01:00.000Z",
+        "actorKey": "lead"
+      },
+      {
+        "event": "approved",
+        "at": "2026-08-18T10:51:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "89b90c1e-b3ee-46b7-b77f-79d1d2c6319c",
+    "branchKey": "sample",
+    "weekStart": "2026-08-17",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-24T05:00:00.000Z",
+        "actorKey": "lead"
+      },
+      {
+        "event": "approved",
+        "at": "2026-08-25T10:25:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "2099288b-ebce-4ca3-b21f-660bcf97476d",
+    "branchKey": "sample",
+    "weekStart": "2026-08-24",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-08-31T06:22:00.000Z",
+        "actorKey": "lead"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-01T07:22:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "5b32d449-c541-467f-857e-39b8c5d2c3c4",
+    "branchKey": "sample",
+    "weekStart": "2026-08-31",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-07T05:05:00.000Z",
+        "actorKey": "lead"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-08T10:11:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "5c40d4c2-c888-4cd9-8745-dfe9656347e3",
+    "branchKey": "sample",
+    "weekStart": "2026-09-07",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-14T06:06:00.000Z",
+        "actorKey": "lead"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-15T06:02:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "04e0b6e8-bdd1-4ce1-86e0-2be0fea93022",
+    "branchKey": "sample",
+    "weekStart": "2026-09-14",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-21T05:59:00.000Z",
+        "actorKey": "lead"
+      },
+      {
+        "event": "returned",
+        "at": "2026-09-22T12:00:00.000Z",
+        "actorKey": "finance",
+        "reason": "Total does not match the deposit slip."
+      },
+      {
+        "event": "resubmitted",
+        "at": "2026-09-23T05:13:00.000Z",
+        "actorKey": "lead"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-26T10:34:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "569d783a-cd66-4b12-a33d-beddaa0c936f",
+    "branchKey": "sample",
+    "weekStart": "2026-09-21",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-09-28T05:33:00.000Z",
+        "actorKey": "lead"
+      },
+      {
+        "event": "approved",
+        "at": "2026-09-30T08:23:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "f65c84a4-1e09-4794-bb4c-73aa28e45274",
+    "branchKey": "sample",
+    "weekStart": "2026-09-28",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-05T06:04:00.000Z",
+        "actorKey": "lead"
+      },
+      {
+        "event": "approved",
+        "at": "2026-10-08T10:58:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "5f23369e-b643-4a9b-8483-6b0978c1181d",
+    "branchKey": "sample",
+    "weekStart": "2026-10-05",
+    "status": "approved",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-12T05:27:00.000Z",
+        "actorKey": "lead"
+      },
+      {
+        "event": "approved",
+        "at": "2026-10-15T08:06:00.000Z",
+        "actorKey": "finance"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "ed0c3960-08bb-43f2-8b52-48cb8724b3ca",
+    "branchKey": "sample",
+    "weekStart": "2026-10-12",
+    "status": "returned",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-19T05:22:00.000Z",
+        "actorKey": "lead"
+      },
+      {
+        "event": "returned",
+        "at": "2026-10-20T11:23:00.000Z",
+        "actorKey": "finance",
+        "reason": "Total does not match the deposit slip."
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "a17b20bf-164b-416c-b208-835ff1a30699",
+    "branchKey": "sample",
+    "weekStart": "2026-10-19",
+    "status": "submitted",
+    "history": [
+      {
+        "event": "submitted",
+        "at": "2026-10-26T05:52:00.000Z",
+        "actorKey": "lead"
+      }
+    ],
+    "confirmNil": false
+  },
+  {
+    "id": "da940ad4-1d7b-4391-b57a-efdd10d7c7db",
+    "branchKey": "sample",
+    "weekStart": "2026-10-26",
+    "status": "draft",
+    "history": [],
+    "confirmNil": false
+  }
+]

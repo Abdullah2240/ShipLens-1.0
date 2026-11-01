@@ -62,6 +62,12 @@ describe('StatusBadge', () => {
     expect(badge).toHaveAttribute('data-tone', 'neutral');
   });
 
+  it('renders left with the translated label and neutral tone', () => {
+    renderWithIntl(<StatusBadge status="left" />);
+    const badge = screen.getByText('Left');
+    expect(badge).toHaveAttribute('data-tone', 'neutral');
+  });
+
   it('prefers an explicit label', () => {
     renderWithIntl(<StatusBadge status="draft" label="Custom" />);
     expect(screen.getByText('Custom')).toBeInTheDocument();
