@@ -4,6 +4,7 @@ import { TrendChart, TrendTable, formatMonth, type TrendPoint } from '@/componen
 import { ImpactBranches } from '@/components/public/ImpactBranches';
 import { ImpactFigures } from '@/components/public/ImpactFigures';
 import { PublicHero } from '@/components/public/PublicHero';
+import { publicMetadata } from '@/components/public/seo';
 import { DateText } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/i18n/routing';
@@ -26,7 +27,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     getTranslations({ locale, namespace: 'impact.meta' }),
     getTranslations({ locale, namespace: 'common' }),
   ]);
-  return { title: `${t('title')} | ${common('appName')}`, description: t('description') };
+  return publicMetadata({
+    locale,
+    path: '/impact',
+    title: t('title'),
+    description: t('description'),
+    appName: common('appName'),
+  });
 }
 
 function peakMonth(monthly: PublicImpact['monthly']) {

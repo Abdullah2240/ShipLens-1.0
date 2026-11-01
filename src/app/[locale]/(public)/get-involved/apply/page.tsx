@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { publicMetadata } from '@/components/public/seo';
 import { EmptyState } from '@/components/ui';
 import { Link } from '@/i18n/navigation';
 import { ApplicationForm } from '@/modules/applications/components/ApplicationForm';
@@ -18,7 +19,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'applications.form' });
   const common = await getTranslations({ locale, namespace: 'common' });
-  return { title: `${t('title')} | ${common('appName')}`, description: t('intro') };
+  return publicMetadata({
+    locale,
+    path: '/get-involved/apply',
+    title: t('title'),
+    description: t('intro'),
+    appName: common('appName'),
+  });
 }
 
 export default async function ApplyPage({

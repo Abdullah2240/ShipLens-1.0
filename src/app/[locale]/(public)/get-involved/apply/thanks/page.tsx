@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { publicMetadata } from '@/components/public/seo';
 import { Link } from '@/i18n/navigation';
 
 const STEPS = ['read', 'contact', 'welcome'] as const;
@@ -12,7 +13,13 @@ export async function generateMetadata({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'applications.thanks' });
   const common = await getTranslations({ locale, namespace: 'common' });
-  return { title: `${t('title')} | ${common('appName')}`, robots: { index: false } };
+  return publicMetadata({
+    locale,
+    path: '/get-involved/apply/thanks',
+    title: t('title'),
+    appName: common('appName'),
+    index: false,
+  });
 }
 
 export default async function ApplicationThanksPage({

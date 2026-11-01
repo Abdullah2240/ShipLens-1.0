@@ -81,5 +81,11 @@
       "title": "No upcoming events right now",
       "body": "New events appear here as our branches plan them. Check back soon, or find your nearest branch to hear about them first."
     }
+  },
+  "meta": {
+    "home": {
+      "title": "Community giving you can trace",
+      "description": "A volunteer-run charity whose neighbourhood branches collect locally and account for every rupee, from the branch that collects it to the report that approves it."
+    }
   }
 }

@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { publicMetadata } from '@/components/public/seo';
 import { Link } from '@/i18n/navigation';
 
 const PROGRAMS = [
@@ -16,7 +18,24 @@ const PROGRAMS = [
   },
 ] as const;
 
-export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+type PageProps = { params: Promise<{ locale: string }> };
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const [t, common] = await Promise.all([
+    getTranslations({ locale, namespace: 'public.meta.home' }),
+    getTranslations({ locale, namespace: 'common' }),
+  ]);
+  return publicMetadata({
+    locale,
+    path: '',
+    title: t('title'),
+    description: t('description'),
+    appName: common('appName'),
+  });
+}
+
+export default async function HomePage({ params }: PageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations('public.home');
