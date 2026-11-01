@@ -83,13 +83,14 @@ describe('nav data', () => {
     for (const href of hrefs) expect(publicHrefs.has(href)).toBe(false);
   });
 
-  it('declares the seven public pages with translated labels', () => {
+  it('declares the eight public pages with translated labels', () => {
     expect(publicNav.map((i) => i.href)).toEqual([
       '/',
       '/about',
       '/programs',
       '/branches',
       '/events',
+      '/impact',
       '/get-involved',
       '/contact',
     ]);
@@ -110,6 +111,7 @@ describe('navForRole', () => {
   it('drops items that are not live', () => {
     expect(navForRole(appNav, 'super_admin').map((i) => i.id)).toEqual([
       'account',
+      'dashboard',
       'branches',
       'collections',
       'reports',
@@ -117,6 +119,7 @@ describe('navForRole', () => {
       'members',
       'teams',
       'content',
+      'audit',
     ]);
   });
 
@@ -202,7 +205,7 @@ describe.each(LOCALES)('shells in %s', (locale) => {
     expectChrome();
   });
 
-  it('PublicShell renders the seven public links, switcher, theme toggle and footer', () => {
+  it('PublicShell renders the eight public links, switcher, theme toggle and footer', () => {
     renderWithIntl(
       <PublicShell>
         <h1>page</h1>

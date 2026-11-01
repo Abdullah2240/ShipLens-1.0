@@ -21,6 +21,7 @@ export const publicNav: NavItem[] = [
   { id: 'programs', href: '/programs', labelKey: 'nav.programs', live: true },
   { id: 'branches', href: '/branches', labelKey: 'nav.branches', live: true },
   { id: 'events', href: '/events', labelKey: 'nav.events', live: true },
+  { id: 'impact', href: '/impact', labelKey: 'nav.impact', live: true },
   { id: 'get-involved', href: '/get-involved', labelKey: 'nav.getInvolved', live: true },
   { id: 'contact', href: '/contact', labelKey: 'nav.contact', live: true },
 ];
@@ -33,7 +34,7 @@ export const appNav: NavItem[] = [
     href: '/dashboard',
     labelKey: 'appNav.dashboard',
     requiredAction: 'dashboard.read',
-    live: false,
+    live: true,
   },
   {
     id: 'branches',
@@ -89,7 +90,7 @@ export const appNav: NavItem[] = [
     href: '/audit',
     labelKey: 'appNav.audit',
     requiredAction: 'audit.read_finance',
-    live: false,
+    live: true,
   },
 ];
 
