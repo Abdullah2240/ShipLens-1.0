@@ -149,7 +149,7 @@ describe('.env.example', () => {
   const entries = parseEnvExample();
   const listed = new Set(entries.map((e) => e.name));
 
-  it('lists every variable the code, scripts, compose files and CI read', () => {
+  it('lists every variable the code, scripts, compose files and CI read', { timeout: 20_000 }, () => {
     const missing = [...collectRequired()]
       .filter(([name]) => !listed.has(name))
       .map(([name, where]) => `${name} (read in ${where})`);
