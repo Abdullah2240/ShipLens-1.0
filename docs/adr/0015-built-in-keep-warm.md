@@ -1,6 +1,6 @@
 # 0015 Built-in keep-warm on the Render free tier
 
-- Status: Accepted
+- Status: Accepted; inactive in production since [0017](0017-production-on-vercel-and-neon.md) (it only starts when `RENDER_EXTERNAL_URL` is set)
 - Date: 2026-10-31
 
 ## Context

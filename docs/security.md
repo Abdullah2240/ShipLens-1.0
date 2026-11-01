@@ -165,11 +165,11 @@ static fallback policy is not used. Why a nonce-based policy: [ADR 0012](adr/001
 | Risk | Why accepted | What would remove it |
 | --- | --- | --- |
 | `style-src 'unsafe-inline'` in the CSP | React `style` attributes and font CSS need it; injected styles can deface a page but cannot run code | Moving all inline styles to classes and hashing the remaining ones |
-| Public verification and application rate limits are in memory, per process | One instance on the free plan; a restart resets the counters | A shared store (for example Postgres or Redis) for the limiter |
-| Rate limits key on the first `X-Forwarded-For` entry | It is the address Render's proxy reports; whether Render replaces or appends a value the client sent has not been confirmed on the live service | Log one request's header on Render; if Render appends, key on the entry it adds |
-| Single instance, single region | Free plan | A paid plan with more instances; the in-memory limit must move first |
+| Public verification and application rate limits are in memory, per process | On Vercel each serverless instance keeps its own counters and a cold start resets them; login throttling is stored in the database and is shared | A shared store (for example Postgres or Redis) for the limiter |
+| Rate limits key on the first `X-Forwarded-For` entry | It is the address the hosting proxy reports (Vercel in production); whether the proxy replaces or appends a value the client sent has not been confirmed on the live service | Log one request's header in production; if the proxy appends, key on the entry it adds |
+| Single region (Vercel `iad1`, Neon US East) | Free plans | Move the in-memory limiter to a shared store before relying on more regions |
 | A database superuser can rewrite the whole audit chain; deleting the newest rows leaves no gap | Seals held by donors detect a rewrite of any approval they hold | A signed daily digest of the chain head published outside the database |
-| Free database has no backups and expires after 30 days | Demo deployment; manual `pg_dump` documented | A paid database plan with backups ([handover.md](handover.md#6-database)) |
+| Free Neon database: free-plan limits, no paid backup tier | Demo deployment; manual `pg_dump` documented | A paid database plan with backups ([handover.md](handover.md#6-database)) |
 | Dependabot does not track the secret-scan image digest in the workflow | One image from the official publisher | Bump the tag and digest by hand with each gitleaks release |
 
 ## Review log

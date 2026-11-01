@@ -22,12 +22,13 @@ Every record below is built: its "Where it lives" section links only to files th
 | [0014](./0014-public-report-verification.md) | Public verification of approved weekly reports | Accepted | 2026-10-31 |
 | [0015](./0015-built-in-keep-warm.md) | Built-in keep-warm on the Render free tier | Accepted | 2026-10-31 |
 | [0016](./0016-testing-strategy.md) | Testing strategy: real Postgres, generated matrices and full journeys | Accepted | 2026-10-28 |
+| [0017](./0017-production-on-vercel-and-neon.md) | Production on Vercel with Neon Postgres; Render stays the container alternative | Accepted | 2026-11-01 |
 
 ## How the records fit together
 
-- **Platform shape:** 0001 (one app, one image), 0002 (one way into the API), 0003 (SQL and migrations).
+- **Platform shape:** 0001 (one app, one image), 0002 (one way into the API), 0003 (SQL and migrations), 0017 (where production runs).
 - **Trust and traceability (the Core Value):** 0004 (audit in the same transaction), 0005 (permissions and scopes), 0010 (report lifecycle), 0011 (one definition per number), 0013 and 0014 (proof that approved numbers were not altered).
 - **Security:** 0005, 0006 (sessions and passwords), 0012 (CSP), with defence in depth from 0002 and 0004.
 - **Correctness of data:** 0007 (money), 0008 (time).
 - **People and languages:** 0009 (English and Urdu, right to left).
-- **Operations and quality:** 0015 (keep-warm), 0016 (testing).
+- **Operations and quality:** 0015 (keep-warm, Render only), 0016 (testing), 0017 (Vercel and Neon in production).

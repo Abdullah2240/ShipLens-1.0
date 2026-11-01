@@ -11,7 +11,7 @@ Built for the ShipLens 1.0 challenge (EchoLens).
 
 ## Live demo
 
-- **URL:** OWNER-CONFIRM: live Render URL
+- **URL:** <https://shiplens-two.vercel.app> (Vercel, with a Neon Postgres database)
 - **Test logins:** one per role, listed in [docs/test-logins.md](docs/test-logins.md). The
   password is shared with judges through the submission form and is never in the repository.
 
@@ -51,8 +51,9 @@ whether the record still matches its seal. The limits are written down plainly i
 
 ## Architecture
 
-One Next.js app (pages and the `/api/v1` route handlers) with PostgreSQL, shipped as one
-Docker image.
+One Next.js app (pages and the `/api/v1` route handlers) with PostgreSQL. Production runs on
+Vercel with Neon Postgres; the same app also ships as one Docker image for the Render
+alternative.
 
 ```mermaid
 flowchart LR
@@ -105,11 +106,16 @@ production dependency audit; the single required check is `ci-ok`.
 
 ## Deploy
 
-Render only: one free web service and one free Postgres database from the blueprint in
-`render.yaml`. Migrations run on every start, and the app keeps itself warm with a
-self-ping. Step by step: [docs/deploy.md](docs/deploy.md) and
-[docs/handover.md](docs/handover.md). After a deploy, one command checks health, logins,
-headers, the audit chain and a public verification end to end:
+Production runs on Vercel (Hobby plan) with a free Neon Postgres database added through the
+Vercel marketplace. Migrations and the demo seed run once from a developer machine against
+the direct database URL, then `vercel deploy --prod` ships a clean checkout of `main`.
+Render stays documented as the container-based alternative: one free web service and one
+free Postgres database from the blueprint in `render.yaml`, with migrations on every start
+and a built-in keep-warm self-ping. Why production moved:
+[ADR 0017](docs/adr/0017-production-on-vercel-and-neon.md). Step by step:
+[docs/deploy.md](docs/deploy.md) and [docs/handover.md](docs/handover.md). After a deploy,
+one command checks health, logins, headers, the audit chain and a public verification end to
+end (102 of 102 checks passed on the live site on 1 November 2026):
 
 ```sh
 BASE_URL="$URL" SMOKE_DEMO_PASSWORD="$DEMO_PW" node scripts/verify-deploy.mjs --markdown
@@ -125,7 +131,7 @@ BASE_URL="$URL" SMOKE_DEMO_PASSWORD="$DEMO_PW" node scripts/verify-deploy.mjs --
 | [docs/security.md](docs/security.md)         | OWASP Top 10 mapping with file references                 |
 | [docs/verification.md](docs/verification.md) | The audit chain and public report check, and their limits |
 | [docs/handover.md](docs/handover.md)         | Running and handing over the live service                 |
-| [docs/deploy.md](docs/deploy.md)             | Render deploy runbook                                     |
+| [docs/deploy.md](docs/deploy.md)             | Deploy runbook: Vercel + Neon, Render alternative         |
 | [docs/test-logins.md](docs/test-logins.md)   | Demo users, one per role                                  |
 | [docs/e2e.md](docs/e2e.md)                   | End-to-end test stack                                     |
 | [AI-USAGE.md](AI-USAGE.md)                   | How we used AI tools                                      |
