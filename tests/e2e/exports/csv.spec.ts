@@ -42,7 +42,7 @@ const LABELS = {
     value: 'قدر',
     records: 'ریکارڈز',
     collectionId: 'وصولی آئی ڈی',
-    branchCode: 'شاخ کوڈ',
+    branchCode: 'شاخ کا کوڈ',
     branchName: 'شاخ کا نام',
     weekStart: 'ہفتے کا آغاز',
     weekEnd: 'ہفتے کا اختتام',

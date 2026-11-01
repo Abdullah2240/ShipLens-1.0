@@ -119,7 +119,7 @@
     "resubmitted": "دوبارہ جمع کی گئی",
     "returned": "واپس کی گئی",
     "approved": "منظور کی گئی",
-    "by": "از {name}",
+    "by": "{name} کی جانب سے",
     "reason": "وجہ"
   },
   "errors": {

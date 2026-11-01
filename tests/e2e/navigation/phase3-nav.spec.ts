@@ -27,8 +27,8 @@ const ITEMS: Record<
   },
   audit: {
     href: '/audit',
-    label: { en: 'Audit log', ur: 'آڈٹ لاگ' },
-    heading: { en: 'Audit trail', ur: 'آڈٹ کا ریکارڈ' },
+    label: { en: 'Audit log', ur: 'آڈٹ ریکارڈ' },
+    heading: { en: 'Audit trail', ur: 'آڈٹ ریکارڈ' },
   },
 };
 const ORDER: HeadOfficeItem[] = ['dashboard', 'audit'];
