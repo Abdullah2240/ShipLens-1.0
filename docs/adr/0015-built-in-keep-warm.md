@@ -49,9 +49,6 @@ Common fixes are an external uptime monitor or a scheduled GitHub Actions job th
 
 - [`src/app/api/health/route.ts`](../../src/app/api/health/route.ts): the liveness endpoint the loop calls.
 - [`src/platform/log/logger.ts`](../../src/platform/log/logger.ts): redacting logger used for ping results.
-
-## Where it lives (planned)
-
 - [`src/platform/keepwarm/index.ts`](../../src/platform/keepwarm/index.ts): `startKeepWarm` with schedule, guards and logging.
 - [`src/instrumentation.ts`](../../src/instrumentation.ts): starts the loop once per server process.
 - [`docs/handover.md`](../handover.md): database creation and expiry dates, optional external monitor.

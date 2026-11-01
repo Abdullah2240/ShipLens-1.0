@@ -53,9 +53,6 @@ Much of the important logic lives in Postgres: triggers, conditional updates, vi
 - [`tests/db/scope-404.test.ts`](../../tests/db/scope-404.test.ts): 403 versus identical 404.
 - [`src/platform/audit/command.int.test.ts`](../../src/platform/audit/command.int.test.ts): audit rollback and refusal.
 - [`scripts/lint-layers.test.mjs`](../../scripts/lint-layers.test.mjs): layer rules.
-
-## Where it lives (planned)
-
 - [`tests/http/role-matrix.test.ts`](../../tests/http/role-matrix.test.ts) and [`tests/http/cross-branch.test.ts`](../../tests/http/cross-branch.test.ts): HTTP matrix and isolation.
 - [`tests/lifecycle/`](../../tests/lifecycle/): lifecycle, lock boundary, concurrency and rollback suites.
 - [`db/seed/expected.json`](../../db/seed/expected.json): expected values for the demo dataset.

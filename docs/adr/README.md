@@ -2,7 +2,7 @@
 
 Each record explains one decision that shapes ShipLens: the problem, what we chose, what it costs, what we rejected, and where to find it in the code. Read them in order for the full picture; each one stands alone. New records start from the [template](./0000-template.md).
 
-A record whose implementation is still landing lists those files under a final "Where it lives (planned)" section. Records are never deleted; a replaced decision is marked "Superseded by" its successor.
+Every record below is built: its "Where it lives" section links only to files that exist, checked against the code on 2026-11-01. A future record whose implementation is still landing lists those files under a final "Where it lives (planned)" section until they exist. Records are never deleted; a replaced decision is marked "Superseded by" its successor.
 
 | No. | Decision | Status | Date |
 | --- | --- | --- | --- |

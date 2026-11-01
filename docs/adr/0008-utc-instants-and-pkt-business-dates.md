@@ -56,8 +56,5 @@ If a business date is stored as a timestamp, a collection logged at 01:00 PKT on
 - [`db/migrations/202610281000_foundation_identity_audit.sql`](../../db/migrations/202610281000_foundation_identity_audit.sql): `pkt_week_start`.
 - [`tests/db/pkt-week-parity.test.ts`](../../tests/db/pkt-week-parity.test.ts): SQL and TypeScript parity.
 - [`src/platform/db/pool.ts`](../../src/platform/db/pool.ts): `date` returned as a string.
-
-## Where it lives (planned)
-
 - [`src/modules/collections/lock.ts`](../../src/modules/collections/lock.ts): the pure lock rule.
 - [`tests/lifecycle/lock-boundary.test.ts`](../../tests/lifecycle/lock-boundary.test.ts): day 7 and day 8 and PKT midnight over HTTP.

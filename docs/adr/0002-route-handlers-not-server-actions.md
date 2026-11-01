@@ -22,7 +22,7 @@ Every mutation must also pass the same checks in the same order: who is calling,
   7. builds the `CommandContext` (actor, request id, clock, pool) for `command()`;
   8. maps every error to one shape, `{ error: { code, message, details?, requestId } }`, logs denials and 500s through the redacting logger, and sets `Cache-Control: no-store` and `X-Request-Id`.
 - Layering is route handler, then service (framework-free), then repository, then Postgres. ESLint `no-restricted-imports` stops services and repositories from importing `next`, `next-intl` or `react`, and stops pages and routes from importing repositories.
-- `route()` lives in `src/platform/http/route.ts`. Routes written before it existed import an interim adapter with the identical call shape; switching is one import line per route, and the adapter is then deleted.
+- `route()` lives in `src/platform/http/route.ts`; pages read the signed-in actor through the helpers in `src/platform/http/server.ts`. While the wrapper was being built, the first routes and pages used an interim adapter with the identical call shape. That adapter is retired: on 2026-11-01 every route and page was switched (one import line each) and the adapter was deleted. A guard test fails if the adapter comes back or if any mutating handler under `/api/v1` is not built with `route()`.
 
 ## Consequences
 
@@ -51,17 +51,15 @@ Every mutation must also pass the same checks in the same order: who is calling,
 
 ## Where it lives
 
-- [`src/platform/http/interim-route.ts`](../../src/platform/http/interim-route.ts): adapter with the same call shape as `route()`, used by the first routes.
+- [`src/platform/http/route.ts`](../../src/platform/http/route.ts): the `route()` wrapper.
+- [`src/platform/http/origin.ts`](../../src/platform/http/origin.ts): Origin check.
+- [`src/platform/http/server.ts`](../../src/platform/http/server.ts): the signed-in actor for pages.
+- [`src/platform/http/route-usage.test.ts`](../../src/platform/http/route-usage.test.ts): every mutating handler is built with `route()`; the retired interim adapter stays gone.
 - [`src/app/api/v1/members/route.ts`](../../src/app/api/v1/members/route.ts): an example handler.
 - [`src/app/api/v1/public/applications/route.ts`](../../src/app/api/v1/public/applications/route.ts): a public, rate-limited mutation.
 - [`src/platform/errors/index.ts`](../../src/platform/errors/index.ts): error classes and `mapError`.
 - [`eslint.config.mjs`](../../eslint.config.mjs): layer rules.
-- [`docs/foundation-contract.md`](../foundation-contract.md): layer rules and the one allowed exception.
-
-## Where it lives (planned)
-
-- [`src/platform/http/route.ts`](../../src/platform/http/route.ts): the `route()` wrapper.
-- [`src/platform/http/origin.ts`](../../src/platform/http/origin.ts): Origin check.
 - [`tests/http/role-matrix.test.ts`](../../tests/http/role-matrix.test.ts): generated role by endpoint matrix over HTTP.
 - [`tests/http/cross-branch.test.ts`](../../tests/http/cross-branch.test.ts): cross-branch isolation over HTTP.
-- [`docs/api.md`](../api.md): API reference.
+- [`docs/api.md`](../api.md): API reference, generated from the route files.
+- [`docs/foundation-contract.md`](../foundation-contract.md): layer rules and the one allowed exception.

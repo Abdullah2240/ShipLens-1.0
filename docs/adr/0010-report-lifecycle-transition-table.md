@@ -58,9 +58,6 @@ The risks are classic workflow bugs: a status changed from a place nobody review
 - [`src/platform/config/constants.ts`](../../src/platform/config/constants.ts): `REPORT_STATUSES`.
 - [`db/migrations/202610281010_domain_schema.sql`](../../db/migrations/202610281010_domain_schema.sql): `weekly_reports` and `report_events`.
 - [`src/platform/audit/command.ts`](../../src/platform/audit/command.ts): the transaction each step runs in.
-
-## Where it lives (planned)
-
 - [`src/modules/reports/transitions.ts`](../../src/modules/reports/transitions.ts): the transition table.
 - [`src/modules/reports/service.ts`](../../src/modules/reports/service.ts) and [`src/modules/reports/repo.ts`](../../src/modules/reports/repo.ts): submit, return, approve, lazy drafts.
 - [`db/migrations/202610311200_finance_guards.sql`](../../db/migrations/202610311200_finance_guards.sql): report and collection guards.

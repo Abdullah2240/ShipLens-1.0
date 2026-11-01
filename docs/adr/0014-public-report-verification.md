@@ -44,14 +44,14 @@ The second part of our twist, "Proof, not promises", lets anyone outside the org
 
 - [`src/platform/money/index.ts`](../../src/platform/money/index.ts): exact comparison of totals.
 - [`src/platform/audit/command.ts`](../../src/platform/audit/command.ts): writes the approval event the code is anchored to.
-
-## Where it lives (planned)
-
 - [`db/migrations/202610311410_report_verification.sql`](../../db/migrations/202610311410_report_verification.sql): table, issuing triggers and backfill.
 - [`src/modules/verification/code.ts`](../../src/modules/verification/code.ts): normalising and formatting codes.
 - [`src/modules/verification/service.ts`](../../src/modules/verification/service.ts) and [`src/modules/verification/repo.ts`](../../src/modules/verification/repo.ts): lookup, integrity and seal check.
-- [`src/platform/rate-limit/index.ts`](../../src/platform/rate-limit/index.ts): in-memory limiter.
+- [`src/platform/rate-limit/index.ts`](../../src/platform/rate-limit/index.ts): in-memory limiter, also used by the public application form.
 - [`src/app/api/v1/public/verify/[code]/route.ts`](../../src/app/api/v1/public/verify/[code]/route.ts): public API.
 - [`src/app/api/v1/reports/[id]/verification/route.ts`](../../src/app/api/v1/reports/[id]/verification/route.ts): authorised code, path and seal.
 - [`src/components/verification/Qr.tsx`](../../src/components/verification/Qr.tsx) and [`src/components/verification/VerificationPanel.tsx`](../../src/components/verification/VerificationPanel.tsx): QR as an SVG path and the report page panel.
+- [`src/components/verification/ReportVerificationSection.tsx`](../../src/components/verification/ReportVerificationSection.tsx): the panel on the approved report page; [`src/components/verification/VerificationCertificate.tsx`](../../src/components/verification/VerificationCertificate.tsx): the result a visitor sees.
 - Public pages: `src/app/[locale]/(public)/verify/`.
+- [`src/modules/verification/service.int.test.ts`](../../src/modules/verification/service.int.test.ts) and [`tests/http/verify.test.ts`](../../tests/http/verify.test.ts): integrity, seal, rate limit and privacy; [`tests/e2e/journeys/verify.spec.ts`](../../tests/e2e/journeys/verify.spec.ts): from the report page to a cookie-less certificate in both languages.
+- [`docs/verification.md`](../verification.md): the explainer for donors and maintainers.

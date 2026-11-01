@@ -61,7 +61,4 @@ With two builders adding screens in parallel, these rules had to be enforced by 
 - [`src/platform/i18n/format.ts`](../../src/platform/i18n/format.ts): the shared formatter.
 - [`src/app/fonts.ts`](../../src/app/fonts.ts): Latin, Naskh and Nastaliq fonts.
 - [`src/components/LanguageSwitcher.tsx`](../../src/components/LanguageSwitcher.tsx): language switch.
-
-## Where it lives (planned)
-
 - [`src/components/ui/Bidi.tsx`](../../src/components/ui/Bidi.tsx): `<bdi>` wrappers for left-to-right values and user-entered names.

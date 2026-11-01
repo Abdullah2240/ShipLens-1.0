@@ -15,7 +15,7 @@ The Core Value says a head office figure must drill down to branch, report, coll
 - **One SQL view encodes the definitions once.** `v_kpi_collections` joins non-voided collections to their report and exposes boolean columns: `is_approved`, `is_pending_approval` (report submitted), `is_in_progress` (draft or returned), `is_not_yet_routed` and `is_routed` (approved, split by `routed_at`). Each money figure is `SUM(amount)` over the view with one of those predicates and the active filters; count figures are active branches and reports awaiting review.
 - **Identities hold by construction**, because report statuses partition the collections and `routed_at` partitions the approved ones: collected = approved + pending + in progress, and approved = routed + not yet routed. The service still checks both with the money module and exposes the result.
 - **Draft, submitted and returned amounts can never reach an approved figure**, because only `is_approved` rows feed approved, routed and not-yet-routed.
-- **One snapshot per read.** Multi-query reads run in one `READ ONLY`, `REPEATABLE READ` transaction, so rows, totals and the "as of" time agree.
+- **One snapshot per read.** Multi-query reads run in one `READ ONLY`, `REPEATABLE READ` transaction, so rows, totals and the "as of" time agree. A CSV export reads its rows in such a snapshot and then records its `export.create` audit event in a separate command at `READ COMMITTED`, as the audit chain requires (ADR [0013](./0013-tamper-evident-audit-chain.md)); the file is returned only after that event commits.
 - **The drill-down is a proof chain.** Each level re-checks its path (the branch exists, the report belongs to it and satisfies the figure, the collection belongs to the report). Each level's footer total is the SQL sum of the rows shown and must equal the parent figure (`matchesParent`). A broken path is the identical 404.
 - Filters (month range, branch) are parsed once, never widen the actor's scope, and serialise to one canonical URL.
 - The repositories read other modules' tables with their own SQL, a deliberate read-model exception; audit evidence comes from the timeline service.
@@ -47,9 +47,6 @@ The Core Value says a head office figure must drill down to branch, report, coll
 
 - [`src/platform/config/constants.ts`](../../src/platform/config/constants.ts): `KPI_NAMES`.
 - [`src/platform/money/index.ts`](../../src/platform/money/index.ts): identity checks in exact arithmetic.
-
-## Where it lives (planned)
-
 - [`db/migrations/202610311300_reporting_views.sql`](../../db/migrations/202610311300_reporting_views.sql): the `v_kpi_collections` view.
 - [`src/modules/reporting/figures.ts`](../../src/modules/reporting/figures.ts) and [`src/modules/reporting/filters.ts`](../../src/modules/reporting/filters.ts): figure map and filters.
 - [`src/modules/reporting/service-dashboard.ts`](../../src/modules/reporting/service-dashboard.ts): dashboard, trend and unrouted lists.

@@ -51,8 +51,5 @@ Security also pushes towards one origin. Session cookies that must travel betwee
 - [`src/app/api/health/route.ts`](../../src/app/api/health/route.ts): liveness without the database.
 - [`src/app/api/health/db/route.ts`](../../src/app/api/health/db/route.ts): database check.
 - [`scripts/migrate.mjs`](../../scripts/migrate.mjs): migration runner and optional seed, run at container start.
-
-## Where it lives (planned)
-
 - [`render.yaml`](../../render.yaml): Render blueprint (Docker runtime, health check path, deploy on passing checks, one region for web and database).
 - [`docs/deploy.md`](../deploy.md): deploy steps and the upgrade path to a pre-deploy command.

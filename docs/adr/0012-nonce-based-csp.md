@@ -25,7 +25,8 @@ The other complication was composing a nonce with the next-intl locale middlewar
 - API responses (`/api/*`, not matched by the proxy) get `default-src 'none'; frame-ancestors 'none'` from `next.config.ts`, since they never render HTML.
 - Every response also carries HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: DENY`, a restrictive `Permissions-Policy`, `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Resource-Policy: same-origin`; `X-Powered-By` is off.
 - `scripts/check-headers.mjs` verifies this against the production build running in Docker: the policy is present on English, Urdu and verification pages, the nonce differs between two requests, every `<script>` tag carries that response's nonce, `script-src` has no `'unsafe-inline'`, and the API and other headers are correct. The same check runs locally, in CI and after deploy.
-- Fallback, used only if the nonce cannot be made to reach Next's scripts: a static policy identical except `script-src 'self' 'unsafe-inline'`, with the evidence recorded. The record is updated if that happens.
+- **Shipped mode: nonce.** The nonce reaches every script tag Next.js emits, so the static fallback was never needed. Evidence: on 2026-11-01 `scripts/check-headers.mjs` passed all 44 of its checks in nonce mode against the production Docker image (run inside `scripts/verify-deploy.mjs`, which passed 102 of 102), and `tests/e2e/security/csp.spec.ts` fails on any `securitypolicyviolation` across public and signed-in pages. The same header check is a step of the CI end-to-end job.
+- Fallback, kept but not used: `buildCsp({ nonce: null })` gives a static policy identical except `script-src 'self' 'unsafe-inline'`, and the header check has a matching `--mode static`. It is switched on only with recorded evidence that the nonce no longer reaches the scripts, and this record is then updated.
 
 ## Consequences
 
@@ -53,11 +54,10 @@ The other complication was composing a nonce with the next-intl locale middlewar
 
 ## Where it lives
 
+- [`src/platform/http/csp.ts`](../../src/platform/http/csp.ts): policy builder (nonce and static fallback), tested in [`src/platform/http/csp.test.ts`](../../src/platform/http/csp.test.ts).
+- [`scripts/check-headers.mjs`](../../scripts/check-headers.mjs): header and nonce check against a running build, run in CI and by [`scripts/verify-deploy.mjs`](../../scripts/verify-deploy.mjs) after a deploy.
+- [`tests/e2e/security/csp.spec.ts`](../../tests/e2e/security/csp.spec.ts): browser check that no page reports a policy violation.
 - [`src/proxy.ts`](../../src/proxy.ts): proxy where the nonce and policy are applied.
 - [`next.config.ts`](../../next.config.ts): headers for every response, including API responses.
 - [`src/instrumentation-client.ts`](../../src/instrumentation-client.ts): turns off zod's eval-based JIT in the browser.
 
-## Where it lives (planned)
-
-- [`src/platform/http/csp.ts`](../../src/platform/http/csp.ts): policy builder.
-- [`scripts/check-headers.mjs`](../../scripts/check-headers.mjs): header and nonce check against a running build.
