@@ -1,6 +1,6 @@
 # 0001 One Next.js full-stack app plus Postgres, one Docker image on Render
 
-- Status: Accepted; hosting superseded by [0017](0017-production-on-vercel-and-neon.md) (production runs on Vercel + Neon; this single-container design remains the Render alternative)
+- Status: Accepted; hosting superseded by [0017](0017-production-on-vercel-and-neon.md) (production runs on Vercel + Neon; the Render blueprint was removed on 2 November 2026; the single-container design and the `Dockerfile` remain)
 - Date: 2026-10-28
 
 ## Context
@@ -51,5 +51,4 @@ Security also pushes towards one origin. Session cookies that must travel betwee
 - [`src/app/api/health/route.ts`](../../src/app/api/health/route.ts): liveness without the database.
 - [`src/app/api/health/db/route.ts`](../../src/app/api/health/db/route.ts): database check.
 - [`scripts/migrate.mjs`](../../scripts/migrate.mjs): migration runner and optional seed, run at container start.
-- [`render.yaml`](../../render.yaml): Render blueprint (Docker runtime, health check path, deploy on passing checks, one region for web and database).
 - [`docs/deploy.md`](../deploy.md): deploy steps and the upgrade path to a pre-deploy command.

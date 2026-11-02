@@ -16,7 +16,7 @@ The app itself does not depend on Render. It is one Next.js application with rou
 - `APP_ORIGIN` is set by hand for Production. No code changed: the configuration already accepted `APP_ORIGIN` ahead of `RENDER_EXTERNAL_URL`.
 - Migrations and the idempotent seed run from a developer machine with `node scripts/migrate.mjs`, before the first deploy and before any release that adds a migration.
 - Releases go out with `vercel deploy --prod` from a clean checkout of `main` until the project is connected to Git.
-- Render stays documented as the container-based alternative, and `render.yaml` and the `Dockerfile` stay in the repository.
+- The Render blueprint (`render.yaml`) was removed on 2 November 2026 because only Vercel is deployed; the `Dockerfile` stays in the repository and the image is still built and tested in CI.
 
 ## Consequences
 
@@ -46,9 +46,8 @@ The app itself does not depend on Render. It is one Next.js application with rou
 
 ## Where it lives
 
-- [`docs/deploy.md`](../deploy.md): the Vercel and Neon runbook and its recorded facts, followed by the Render alternative.
+- [`docs/deploy.md`](../deploy.md): the Vercel and Neon runbook and its recorded facts.
 - [`src/platform/config/env.ts`](../../src/platform/config/env.ts): reads `APP_ORIGIN` first, then `RENDER_EXTERNAL_URL`, and requires an origin in production.
 - [`scripts/migrate.mjs`](../../scripts/migrate.mjs): migrations under an advisory lock, then the seed when `SEED_ON_BOOT=true`.
 - [`scripts/verify-deploy.mjs`](../../scripts/verify-deploy.mjs): the post-deploy check that recorded 102 of 102.
 - [`src/platform/rate-limit/index.ts`](../../src/platform/rate-limit/index.ts): the in-memory limiter that counts per instance.
-- [`render.yaml`](../../render.yaml): the Render alternative.

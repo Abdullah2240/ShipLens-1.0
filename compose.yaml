@@ -34,7 +34,7 @@ services:
       DATABASE_URL: postgres://shiplens:shiplens@db:5432/shiplens
       APP_ORIGIN: http://localhost:3000
       SEED_ON_BOOT: 'true'
-      # Throwaway local value; override from the shell. Render uses a dashboard secret.
+      # Throwaway local value; override from the shell. Production sets its own secret.
       SEED_DEMO_PASSWORD: ${SEED_DEMO_PASSWORD:-local-demo-only-pass}
       LOG_LEVEL: info
 

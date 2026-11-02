@@ -246,8 +246,8 @@ We state these plainly because a proof is only as useful as its known boundaries
 - **What "verified" covers.** It proves that the approved figures match what was
   submitted and approved, and that the audit record is intact. It does not prove that the
   money collected in the field was counted correctly before it was entered.
-- **Single region, single instance.** The service and database run in one Render region
-  on the free plan. If they are down, the check is unavailable; nothing is lost, but
+- **Single region, single instance.** The service and database run in one region
+  on free plans. If they are down, the check is unavailable; nothing is lost, but
   nothing can be checked until it returns.
 - **Codes are bearer references.** Anyone holding a code sees that report's public
   summary. The summary is limited to what the organisation would publish anyway.

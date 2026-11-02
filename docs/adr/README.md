@@ -22,7 +22,7 @@ Every record below is built: its "Where it lives" section links only to files th
 | [0014](./0014-public-report-verification.md) | Public verification of approved weekly reports | Accepted | 2026-10-31 |
 | [0015](./0015-built-in-keep-warm.md) | Built-in keep-warm on the Render free tier | Accepted | 2026-10-31 |
 | [0016](./0016-testing-strategy.md) | Testing strategy: real Postgres, generated matrices and full journeys | Accepted | 2026-10-28 |
-| [0017](./0017-production-on-vercel-and-neon.md) | Production on Vercel with Neon Postgres; Render stays the container alternative | Accepted | 2026-11-01 |
+| [0017](./0017-production-on-vercel-and-neon.md) | Production on Vercel with Neon Postgres | Accepted | 2026-11-01 |
 
 ## How the records fit together
 

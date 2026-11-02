@@ -28,7 +28,7 @@ To report a vulnerability, see [SECURITY.md](../SECURITY.md).
 | --- | --- | --- |
 | Passwords hashed with argon2id at the OWASP minimum (19 MiB, 2 iterations, parallelism 1); parameters may only be raised | `scripts/lib/password.mjs` | `scripts/lib/password.test.mjs` |
 | Session tokens are 256 random bits; only their SHA-256 hash is stored; the raw token is never logged | `src/modules/auth/session.ts`, `sessions.token_hash` in `db/migrations/202610281000_foundation_identity_audit.sql` | `src/modules/auth/auth.int.test.ts` |
-| HTTPS only on Render; `Strict-Transport-Security: max-age=63072000; includeSubDomains`; session cookie uses the `__Host-` prefix and `Secure` over https | `next.config.ts`, `src/modules/auth/cookie.ts` | `src/modules/auth/cookie.test.ts`, `scripts/smoke.mjs` (cookie flags against a running build) |
+| HTTPS only on Vercel; `Strict-Transport-Security: max-age=63072000; includeSubDomains`; session cookie uses the `__Host-` prefix and `Secure` over https | `next.config.ts`, `src/modules/auth/cookie.ts` | `src/modules/auth/cookie.test.ts`, `scripts/smoke.mjs` (cookie flags against a running build) |
 | No secrets in logs: the logger redacts any key matching pass, token, secret, cookie, authorization or hash; the seed never prints the demo password | `src/platform/log/logger.ts` | `src/platform/log/logger.test.ts` |
 | Audit chain uses SHA-256 over a length-prefixed canonical form | `db/migrations/202610311400_audit_chain.sql`, `src/platform/audit/chain/canonical.ts` | `src/platform/audit/chain/canonical.test.ts`, `tests/db/audit-chain.test.ts` |
 
@@ -62,7 +62,6 @@ To report a vulnerability, see [SECURITY.md](../SECURITY.md).
 | Production image runs as uid 10001, not root; only explicitly listed files are copied; no runtime configuration baked into the image | `Dockerfile` | `scripts/docker-config.test.mjs`; CI step "App container runs as a non-root user" in `.github/workflows/ci.yml` |
 | Environment validated at start with Zod; the app refuses to start without a database URL or a usable origin | `src/platform/config/env.ts` | `src/platform/config/env.test.ts`, `scripts/env-example.test.mjs` |
 | Unexpected errors become a generic 500 with a code and request id, never a stack trace; the database health check returns no error detail | `src/platform/errors/index.ts`, `src/platform/http/route.ts`, `src/app/api/health/handlers.ts` | `src/platform/errors/errors.test.ts`, `src/app/api/health/health.test.ts` |
-| Database not reachable from the internet (`ipAllowList: []`) | `render.yaml` | Reviewed in [deploy.md](deploy.md) |
 
 ### A06 Vulnerable and Outdated Components
 
@@ -139,10 +138,10 @@ static fallback policy is not used. Why a nonce-based policy: [ADR 0012](adr/001
 
 ## Secret handling
 
-- The only application secret is the demo password (`SEED_DEMO_PASSWORD`). It is typed
-  into the Render dashboard (`sync: false` in `render.yaml`), kept in the owner's
+- The only application secret is the demo password (`SEED_DEMO_PASSWORD`). It is supplied
+  when the seed runs from a developer machine, kept in the owner's
   password manager and shared with judges only through the submission form.
-- `DATABASE_URL` is injected by Render from the managed database. There is no session
+- `DATABASE_URL` is injected by the Neon integration on Vercel. There is no session
   signing secret: sessions are opaque random tokens stored as hashes.
 - `.env.example` holds placeholders only; `.env*` files with values are git-ignored and
   never committed. CI generates throwaway passwords per run.
@@ -190,5 +189,5 @@ this checklist. Each fix came with a test that failed before it.
 | Layering | Services and kernel code import no framework code | Fixed: the lint rule did not cover the rate limiter, CSV, keep-warm and formatter folders; it does now (`scripts/lint-layers.test.mjs`) |
 | Duplication | One implementation of each platform concern | Fixed: the application form carried its own copy of the rate limiter; it now uses `src/platform/rate-limit/index.ts` (`src/modules/applications/rate-limit-shared.test.ts`) |
 
-Open item for the owner: confirm how Render sets `X-Forwarded-For` (see the residual risk
+Open item for the owner: confirm how Vercel sets `X-Forwarded-For` (see the residual risk
 above).
