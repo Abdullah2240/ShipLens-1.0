@@ -17,12 +17,12 @@ This file lists what is frozen after the scaffold. Changes to a frozen item go t
 Owner track:
 
 - `src/platform/{db,authz,audit,http,errors,time,money,config,log}`
-- `src/platform/csv` (CSV writer with formula neutralising), `src/platform/rate-limit` (the one in-memory rate limiter), `src/platform/keepwarm` (the Render self-ping, started from `src/instrumentation.ts`) and `src/platform/audit/chain` (canonical form, hash chain verifier and cached status)
+- `src/platform/csv` (CSV writer with formula neutralising), `src/platform/rate-limit` (the one in-memory rate limiter), `src/platform/keepwarm` (the keep-warm self-ping for container hosts, started from `src/instrumentation.ts`) and `src/platform/audit/chain` (canonical form, hash chain verifier and cached status)
 - `src/modules/{auth,branches,collections,reports,reporting}`
 - `src/modules/{timeline,audit-log,verification}` (audit timelines, the audit viewer, public report verification)
 - `db/`
 - `scripts/{migrate,seed,smoke}*`
-- Docker, CI and Render files
+- Docker and CI files
 
 Saniya track:
 

@@ -2,8 +2,7 @@
 
 This is the one file in the repository that names the AI tools we used. Everywhere else
 (code, comments, docs, commit messages) we keep tool names out, and
-`scripts/check-tool-mentions.mjs` enforces that. Lines starting with `OWNER-CONFIRM:` are
-open questions for us to answer before submission; they are not claims.
+`scripts/check-tool-mentions.mjs` enforces that.
 
 ## 1. Summary
 
@@ -20,22 +19,25 @@ Playwright browser tests running against the production Docker image).
 
 | Tool                                                            | Vendor            | Models                                                     | Used for                                                                                                                                                  |
 | --------------------------------------------------------------- | ----------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Claude Code (command-line coding agent)                         | Anthropic         | Claude models (see below)                                  | Research, requirements, roadmap, phase plans, plan checking, most of the code and tests, review passes, documentation drafts, running the overnight lanes |
+| Claude Code (command-line coding agent)                         | Anthropic         | Claude Opus 5.5                                            | Research, requirements, roadmap, phase plans, plan checking, most of the code and tests, review passes, documentation drafts, running the overnight lanes |
 | GSD planning workflow (open-source command set for Claude Code) | Community project | Uses the Claude Code session's models ("balanced" profile) | The structure of the work: research, roadmap, one plan per unit of work, plan checking, execution and per-plan summaries                                  |
 | OpenAI Codex CLI                                                | OpenAI            | gpt-6-luna, gpt-6-sol                                      | Code and tests for Phase 2 plans 02-01 to 02-05                                                                                                           |
 
-- **Claude Code.** The overnight lane that drafted this file ran on Claude Opus 5.5.
-  OWNER-CONFIRM: which Claude models, and which Claude Code version, ran the sessions of
-  28-31 Oct?
+- **Claude Code.** Every Claude Code session, from 28 Oct to 2 Nov 2026, ran on Claude
+  Opus 5.5.
 - **OpenAI Codex CLI.** gpt-6-luna at medium reasoning was the configured default (also
   set aside for translation and message files); gpt-6-sol was used for the
   security-sensitive plans (the request adapter, the public application endpoint, the
   members and teams backend). It was launched from a Claude Code session, which wrote its
-  prompts and checked its output. OWNER-CONFIRM: Codex CLI version?
-- Every session in our record ran on one development machine (see section 4).
+  prompts and checked its output. The Codex CLI installed on our development machine is
+  version 0.155.1; we did not record the version used for each run.
 
-OWNER-CONFIRM: did either of us use any other AI tool for this project (a chat app, editor
-completions, translation, images, or editing the walkthrough video)? If yes, add a row.
+We used no other AI tool for the code, the tests or the documentation: no chat app, no
+editor completions, no translation tool and no image generation. For the walkthrough
+video, Claude Code wrote the Playwright script that records the screen, and a local
+open-source speech-to-text model (Whisper, run through faster-whisper) was used only to
+find where each part of the voice-over starts and ends in the audio files. The voices in
+the video are ours.
 
 ## 3. How we used them, by activity
 
@@ -46,8 +48,8 @@ phase. An automatic plan checker reviewed the plans; on the first pass it found 
 and 7 warnings, which were fixed before any code was written. The remaining Phase 2, Phase 3
 and Phase 4 plans were written the same way on 31 Oct, after we made the decisions listed in
 section 4. Every plan names its files, its tests and its checks. The planning documents stay
-on our machine and are not committed. OWNER-CONFIRM: was the earlier build plan (the team's
-own plan from before 28 Oct) written by you without AI tools?
+on our machine and are not committed. The earlier build plan we gave it was written before
+20 Oct, brainstormed by the two of us without AI tools.
 
 **Code generation.**
 
@@ -70,15 +72,14 @@ own plan from before 28 Oct) written by you without AI tools?
 
 **Tests.** Tests were written from the plans, test-first where a plan said so, by the same
 agents that wrote the code. Integration tests run against a real Postgres 16 database, never
-a mock. OWNER-CONFIRM: which test suites did each of us read and check by hand?
+a mock. We did not review the test suites by hand line by line. We checked the behaviour
+visually in the browser instead: Sheikh Abdullah Bin Zahid checked all the logins, roles and
+permissions, and Saniya Hassan checked all the Urdu.
 
 **Review.** Plans were checked by an automatic plan checker before execution. Lane output
-was checked by the orchestrating session against the plan and by the merge gates. A final
-review and documentation reconciliation pass and a coverage top-up are scheduled as the last
-overnight steps. We review each phase branch as a pull request before it is merged into
-`main` (we merged the first two that way on 31 Oct). OWNER-CONFIRM: did the final review
-pass and coverage top-up run, and did you review every remaining pull request before
-submission?
+was checked by the orchestrating session against the plan and by the merge gates. We review
+each pull request before it is merged into `main`; Sheikh Abdullah Bin Zahid opened and
+merged every one of them (#1 to #15 at the time of writing).
 
 **Documentation.** The README, the architecture decision records, the handover, security
 and verification guides, the API docs and this file were drafted by Claude Code agents from
@@ -90,21 +91,22 @@ promises" (a tamper-evident audit chain plus a public verification code and QR f
 weekly reports), and asked for it to be designed. Claude Code drafted the design and the
 plans; we accepted it, and agents implemented it under the same gates as everything else.
 
-**Urdu.** The Urdu text in the app was written by the AI tools, not by a native speaker, and
-is flagged for review by one. OWNER-CONFIRM: has a native Urdu speaker reviewed it, and if
-so, who and when?
+**Urdu.** The Urdu text in the app was written by the AI tools. Saniya Hassan, a native Urdu
+speaker, reviewed all of it on 1 Nov 2026.
 
 ## 4. What people did
 
 The two of us are Sheikh Abdullah Bin Zahid and Saniya Hassan.
 
 - Chose the product and its scope from the brief, the stack (one Next.js app with
-  PostgreSQL, deployed as a Docker image on Render) and the split of work into two tracks.
+  PostgreSQL, deployed on Vercel with Neon Postgres, and also shipped as a Docker image) and
+  the split of work into two tracks.
 - Picked the differentiators: the drill-down trace from a dashboard figure to the audit
   events, Urdu designed in across the whole app, the WhatsApp share button and the public
   impact page.
 - Made the recorded decisions, including on 31 Oct: the deadline; that nothing is cut;
-  Render only; keep-warm built into the app every 10 minutes; generated fictional demo data,
+  Render as the first deployment target (later replaced by Vercel with Neon, see ADR 0017);
+  keep-warm built into the app every 10 minutes; generated fictional demo data,
   because the organisers' sample data never arrived; the twist direction; Urdu flagged for
   native review; how branches are pushed and merged; the licence holders and the security
   contact; and that this file must be accurate and specific.
@@ -112,16 +114,9 @@ The two of us are Sheikh Abdullah Bin Zahid and Saniya Hassan.
   when to resume.
 - Review the work and open and merge the pull requests into `main`; agents never open or
   merge pull requests to `main`.
-- Deploy to Render, check the live site and record the walkthrough video ourselves.
+- Deploy to Vercel, check the live site and record the walkthrough video ourselves.
 
 Commits carry our own git identities; no AI tool appears as a commit author.
-OWNER-CONFIRM: every Claude Code and Codex CLI session ran on one development machine, and
-most commits from 28 Oct 18:32 onward (both tracks, including the overnight lanes) carry
-Saniya Hassan's git identity. Say here who directed which sessions, so the record matches
-who did the work.
-
-OWNER-CONFIRM: was any code or text in the repository written fully by hand? If yes, name
-it here.
 
 ## 5. How we checked AI output
 
@@ -145,10 +140,15 @@ AI output was never trusted on its own. These checks run on every change:
   Urdu, light and dark, desktop and mobile.
 - **Security header check** against the production build, a secret scan, and the
   tool-mention check for this file's rule.
-- **Manual walkthrough** of the live Render URL by us before submission.
+- **Live deployment check**: `scripts/verify-deploy.mjs` (102 checks) against
+  https://shiplens-two.vercel.app, and a full Playwright run on the live site (the results
+  are in `docs/deploy.md`).
+- **Manual checking** in the browser by us: Sheikh Abdullah Bin Zahid for all the logins,
+  roles and permissions, and Saniya Hassan for all the Urdu.
 
-OWNER-CONFIRM: confirm each check above is present and green at the submitted commit, and
-that the manual walkthrough on the live URL was done.
+Last check before submission: every CI check above (e2e, secrets, audit, honesty, static,
+database, `ci-ok`) and CodeQL were green on `main` at commit
+`1a4691a2a8dc0d107d1c14eb11e498c1653954f7`, and the live deployment check passed.
 
 ## 6. Boundaries
 

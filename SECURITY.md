@@ -31,14 +31,14 @@ This is a small volunteer-built project, so these are goals rather than guarante
 
 In scope:
 
-- The live demo deployment on Render.
+- The live demo deployment on Vercel.
 - The code in this repository: application, database migrations, Docker image, CI
   workflows and scripts.
 
 Out of scope:
 
 - Denial of service and load testing against the live demo (it runs on a free instance).
-- Social engineering, physical attacks, and attacks on Render or GitHub themselves.
+- Social engineering, physical attacks, and attacks on Vercel, Neon or GitHub themselves.
 - Findings that need a compromised device or browser, or only affect outdated browsers.
 - Missing best-practice headers or settings with no demonstrated impact (we still welcome
   them as normal issues).

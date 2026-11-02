@@ -1,27 +1,23 @@
 # Handover guide
 
 This page is for whoever runs ShipLens next. It covers what you are taking over, the
-accounts you need, how to run it, how to deploy and check it on Vercel (production) or
-Render (the container alternative), how to keep the database and the service alive, how to rotate secrets, how to read the audit chain, and
-what to do when something breaks.
+accounts you need, how to run it, how to deploy and check it on Vercel (production), how to keep the database and the service
+alive, how to rotate secrets, how to read the audit chain, and what to do when something
+breaks.
 
 The step-by-step deploy, and the evidence recorded from the production deploy, live in
-[deploy.md](deploy.md): first [Vercel + Neon (production)](deploy.md#deploying-to-vercel--neon-production),
-then [Render (container)](deploy.md#alternative-render-container) as the alternative. This
-guide links to it rather than repeating it. Why production runs on Vercel:
+[deploy.md](deploy.md): [Vercel + Neon (production)](deploy.md#deploying-to-vercel--neon-production).
+This guide links to it rather than repeating it. Why production runs on Vercel:
 [ADR 0017](adr/0017-production-on-vercel-and-neon.md).
 
-Render facts on this page were checked against Render's documentation
-(<https://render.com/docs/free>) on 1 November 2026. Neon limits change; check them at
-<https://neon.com/pricing>.
+Neon limits change; check them at <https://neon.com/pricing>.
 
 ## 1. What you are taking over
 
 ShipLens is one Next.js application (public bilingual website, private platform and the
 `/api/v1` API) backed by one PostgreSQL database. Production is the Vercel project
 `shiplens` (Hobby plan) at <https://shiplens-two.vercel.app>, with a Neon Postgres database
-on the free plan. The same app also ships as one Docker image for Render, the documented
-container alternative. Every change to data goes through one command wrapper that
+on the free plan. The same app also ships as one Docker image (the `Dockerfile` in the repository). Every change to data goes through one command wrapper that
 checks the permission table and writes an audit event in the same transaction; audit
 events are linked in a tamper-evident hash chain, and approved weekly reports carry a
 public verification code.
@@ -43,8 +39,8 @@ Start with:
 | --- | --- | --- |
 | Source code | GitHub repository `Abdullah2240/ShipLens-1.0` | Repository owner and collaborators |
 | CI | GitHub Actions in the same repository (`.github/workflows/ci.yml`, required check `ci-ok`) | Same as the repository |
-| Hosting | Vercel project `shiplens` (Hobby plan, live at <https://shiplens-two.vercel.app>) with the Neon Postgres database `shiplens-db` (Free plan) added through the Vercel marketplace. Render (`render.yaml`) is the documented alternative and is not deployed | OWNER-CONFIRM: Vercel account owner (name and login email) |
-| Demo password | The value of `SEED_DEMO_PASSWORD` used when the seed runs (from a developer machine for Vercel; typed into the dashboard on Render) | Kept in the owner's password manager; shared with judges only through the submission form. Never in the repository, chat or a file |
+| Hosting | Vercel project `shiplens` (Hobby plan, live at <https://shiplens-two.vercel.app>) with the Neon Postgres database `shiplens-db` (Free plan) added through the Vercel marketplace. | Sheikh Abdullah Bin Zahid (the repository owner) |
+| Demo password | The value of `SEED_DEMO_PASSWORD` used when the seed runs (from a developer machine for Vercel) | Kept in the owner's password manager; shared with judges only through the submission form. Never in the repository, chat or a file |
 | Security reports | `szahid.bese24seecs@seecs.edu.pk` (see [SECURITY.md](../SECURITY.md)) | Sheikh Abdullah Bin Zahid |
 
 When you hand over, add the new maintainer as a collaborator on GitHub and give them access
@@ -58,17 +54,17 @@ committed; refer to them by name.
 
 | Name | Purpose | Who sets it | Secret |
 | --- | --- | --- | --- |
-| `DATABASE_URL` | Postgres connection string | You locally; on Vercel the Neon integration sets it (pooled); Render injects it from `shiplens-db` (`render.yaml`) | Yes in production |
+| `DATABASE_URL` | Postgres connection string | You locally; on Vercel the Neon integration sets it (pooled) | Yes in production |
 | `DATABASE_URL_UNPOOLED` | Direct (unpooled) Neon connection string. The app does not read it; pass it as `DATABASE_URL` when running migrations | The Neon integration on Vercel | Yes |
-| `APP_ORIGIN` | Public origin used for the Origin check and absolute links | You locally; on Vercel set by hand to `https://shiplens-two.vercel.app` for Production (required, because Vercel has no `RENDER_EXTERNAL_URL`); not set on Render (the app falls back to `RENDER_EXTERNAL_URL`) | No |
-| `RENDER_EXTERNAL_URL` | Public `https://` URL of the service; also the keep-warm target | Render, automatically. Leave empty locally | No |
-| `PORT` | Port the server listens on | Docker image (3000), `render.yaml` (10000) | No |
-| `NODE_ENV` | `development`, `test` or `production` | Next.js, Vercel, the image, `render.yaml` | No |
-| `LOG_LEVEL` | `debug`, `info`, `warn` or `error` | You or Render (`info`) | No |
-| `KEEP_WARM` | `0` turns the built-in self-ping off | You or Render (unset means on) | No |
-| `SEED_ON_BOOT` | `true` runs the idempotent seed after migrations | You locally; `render.yaml` sets `true` | No |
-| `SEED_DEMO_PASSWORD` | Password of the five demo logins, 12+ characters | You locally; typed into the Render dashboard (`sync: false`) | **Yes** |
-| `SEED_ROTATE_DEMO_PASSWORDS` | `true` for one boot re-hashes the demo passwords | You or Render, then remove it | No |
+| `APP_ORIGIN` | Public origin used for the Origin check and absolute links | You locally; on Vercel set by hand to `https://shiplens-two.vercel.app` for Production (required, because Vercel has no `RENDER_EXTERNAL_URL`); on a container host that sets `RENDER_EXTERNAL_URL` the app falls back to it | No |
+| `RENDER_EXTERNAL_URL` | Public `https://` URL of the service; also the keep-warm target | Set by a container host such as Render; not set on Vercel. Leave empty locally | No |
+| `PORT` | Port the server listens on | Docker image (3000) | No |
+| `NODE_ENV` | `development`, `test` or `production` | Next.js, Vercel, the image | No |
+| `LOG_LEVEL` | `debug`, `info`, `warn` or `error` | You (`info` by default) | No |
+| `KEEP_WARM` | `0` turns the built-in self-ping off | You (unset means on) | No |
+| `SEED_ON_BOOT` | `true` runs the idempotent seed after migrations | You locally; not used on Vercel | No |
+| `SEED_DEMO_PASSWORD` | Password of the five demo logins, 12+ characters | You locally; on Vercel, a variable you set | **Yes** |
+| `SEED_ROTATE_DEMO_PASSWORDS` | `true` for one boot re-hashes the demo passwords | You, then remove it | No |
 | `TEST_DATABASE_URL` | Integration test database (created and migrated by the test setup) | You, CI | No (throwaway local) |
 | `BASE_URL` | Base URL of a running app for the smoke script, page check and Playwright | You, CI | No |
 | `SMOKE_DEMO_PASSWORD` | Demo password the smoke and post-deploy scripts log in with | You, CI (generated per run) | Yes when it targets the live site |
@@ -133,66 +129,13 @@ The short form:
    2026-11-01T07:37:03Z: 102/102 PASS, cold start 821 ms
    ([deploy.md, Vercel: recorded facts](deploy.md#vercel-recorded-facts)).
 
-### Alternative: Render (container)
-
-The full click-by-click version is
-[deploy.md, Alternative: Render (container)](deploy.md#alternative-render-container), steps 1
-to 7. The short form:
-
-1. **Prerequisites.** The branch Render will watch (normally `main`) is pushed, contains
-   `render.yaml`, and its latest commit has a green `ci-ok` check. The demo password
-   (12+ characters) is in your password manager.
-2. **Create the Blueprint.** Render Dashboard, **New > Blueprint**, connect the
-   repository, Blueprint name `shiplens`, the branch from step 1, empty Blueprint path.
-   Render must list exactly two resources: `shiplens-db` (Postgres 16, Free, Singapore)
-   and `shiplens` (Docker web service, Free, Singapore). Both stay in one region; only
-   one free Postgres can be active per workspace.
-3. **Region.** Singapore, set in `render.yaml` for both resources. If it is not offered,
-   change `region:` for both, push, and start again.
-4. **Secret.** Paste `SEED_DEMO_PASSWORD` when Render asks (it is the only value you
-   type). Do not set `APP_ORIGIN`: the app derives its origin from
-   `RENDER_EXTERNAL_URL`. Set `APP_ORIGIN` (exact live URL, no trailing slash) only if
-   logins from the browser return 403 (see section 11).
-5. **Keep-warm.** Leave `KEEP_WARM` unset: it is on by default whenever
-   `RENDER_EXTERNAL_URL` is an `https:` URL (section 7).
-6. **Deploy Blueprint.** The first deploy does not wait for CI. The container start
-   command (`Dockerfile` `CMD`) runs `node scripts/migrate.mjs`, which applies pending
-   migrations and, because `SEED_ON_BOOT=true`, runs the idempotent seed, then starts the
-   server. Nothing has to be run by hand. Render marks the deploy **Live** once
-   `GET /api/health` answers 200.
-7. **Post-deploy check.** From the repository root on your machine, without echoing the
-   password:
-
-   ```sh
-   URL=https://shiplens-xxxx.onrender.com   # the live URL, no trailing slash
-   read -rs -p 'Demo password: ' DEMO_PW; echo
-   BASE_URL="$URL" SMOKE_DEMO_PASSWORD="$DEMO_PW" node scripts/verify-deploy.mjs
-   unset DEMO_PW
-   ```
-
-   `scripts/verify-deploy.mjs` is the post-deploy check: health with the cold-start time,
-   database health, the smoke checks (both locales, a login for every role, cookie flags),
-   the security headers and CSP nonce, the audit chain status, and the public verification
-   of an approved report through the API and both language pages. It exits 0 only when
-   every check passes; add `--markdown` to print a summary block for the deploy record.
-   The smoke script alone is step 6 of [deploy.md](deploy.md#step-6-verify-the-deployment-from-your-machine).
-   The check makes one deliberately wrong login, so do not run it many times in a row
-   (section 11, login lockout).
-8. **Record the result.** Copy the summary lines (never the password) into
-   [deploy.md, Recorded facts](deploy.md#recorded-facts), together with the live URL,
-   the deployed commit and the database dates from section 6.
-
-After the first deploy, Render deploys a new commit on the watched branch only after its
-CI checks pass (`autoDeployTrigger: checksPass`). Rollback, branch switching and moving to
-a paid plan: [deploy.md](deploy.md#rollback).
-
 ## 6. Database
 
 | Fact | Value |
 | --- | --- |
 | Name, plan, region | `shiplens-db`, Neon Postgres, Free plan, US East (near the `iad1` functions) |
 | Database created on | 2026-11-01 (Neon, added through the Vercel marketplace) |
-| Expiry | No fixed expiry on Neon's free plan, unlike Render's free Postgres (30 days). Usage limits apply: check Neon's current free-plan limits at <https://neon.com/pricing> and the usage shown for the database |
+| Expiry | No fixed expiry on Neon's free plan. Usage limits apply: check Neon's current free-plan limits at <https://neon.com/pricing> and the usage shown for the database |
 | Connection strings | `DATABASE_URL` (pooled, used by the app) and `DATABASE_URL_UNPOOLED` (direct, for migrations and `pg_dump`), both set on the Vercel project by the integration |
 | Backups | Take your own `pg_dump` before any risky change (below); for what Neon itself keeps, see its current free-plan limits |
 
@@ -209,44 +152,6 @@ unset UNPOOLED
 Store the dump outside the repository (it holds password hashes and session hashes);
 never commit it. Restoring is described below and is the same for any host.
 
-### If you run the Render alternative
-
-| Fact | Value |
-| --- | --- |
-| Name, plan, region | `shiplens-db`, Render Postgres 16, Free, Singapore |
-| Database created on | Record it from Render Dashboard -> shiplens-db -> Info if you deploy there |
-| Free tier expires on | Creation date + 30 days |
-| Deleted on (if not upgraded) | Expiry date + 14 days |
-| Storage | 1 GB, fixed |
-| Backups | None on the free plan |
-| Outside access | Refused: `ipAllowList: []` in `render.yaml`; the web service uses the private connection string |
-
-Put the expiry date in a calendar with a reminder a week before.
-
-**What happens at expiry.** Render's free Postgres expires 30 days after it is created.
-The database then stops accepting connections: `/api/health` still answers 200, but
-`/api/health/db` answers 503 and every page that reads data fails. You have a 14-day
-grace period to upgrade it to a paid plan; after that Render deletes the database and its
-data. One free database per workspace means you cannot simply create a second one
-alongside it.
-
-**Take a backup on Render** (do this before expiry, and before any risky change). Free
-Render databases have no backups, so export one yourself with the external connection string:
-
-1. **shiplens-db > Networking**: add your current IP address to the allow list.
-2. **shiplens-db > Info > Connections**: copy the **External Database URL** into your
-   shell without echoing it, then dump:
-
-   ```sh
-   read -rs -p 'External database URL: ' EXTERNAL_DATABASE_URL; echo
-   pg_dump --no-owner --format=custom "$EXTERNAL_DATABASE_URL" > shiplens-YYYYMMDD.dump
-   unset EXTERNAL_DATABASE_URL
-   ```
-
-   Use a `pg_dump` of major version 16 or newer.
-3. Remove your IP from the allow list again. Store the dump outside the repository (it
-   holds password hashes and session hashes); never commit it.
-
 **Restore.** The database has triggers that matter on restore: `audit_events_chain`
 recomputes the chain on every insert, `weekly_reports_issue_verification_*` issue new
 verification codes when approved reports are inserted, and the finance guards check
@@ -262,63 +167,27 @@ pg_restore --no-owner --disable-triggers -h localhost -p 5434 -U shiplens \
 ```
 
 Then point a local app at it and confirm the audit chain is intact (section 9) and a
-known verification code still verifies. `--disable-triggers` needs superuser rights;
-Render's database user is not a superuser, so a restore into a Render database has not
-been rehearsed, and neither has a restore into Neon. On Render, prefer the upgrade path
-below, which needs no restore.
-
-**Upgrade path (Render).** Before day 30: **shiplens-db > Upgrade** to a paid plan. Data is kept
-and the expiry no longer applies. Then set `plan:` of `shiplens-db` in `render.yaml` to the
-same paid plan so a Blueprint sync does not try to change it back. The alternative, a new
-free database, loses all data; the seed recreates the demo branch, users and demo data,
-but historical audit events and issued verification codes are gone, so printed QR codes
-stop working. Details: [deploy.md, Before the database expires](deploy.md#before-the-database-expires).
+known verification code still verifies. `--disable-triggers` needs superuser rights, and a restore into Neon has not been rehearsed.
 
 ## 7. Keeping the service warm
 
-**On Vercel (production) there is nothing to do.** The built-in self-ping starts only when
-`RENDER_EXTERNAL_URL` is set, which Vercel does not do, so it is inactive there; serverless
-functions do not need it (measured cold start: 821 ms). The rest of this section applies to
-the Render alternative.
-
-Render's free web service spins down after 15 minutes without inbound traffic, and the
-next request waits about a minute while it starts. ShipLens keeps itself awake from
-inside the app; no outside pinger or scheduled CI job is involved.
-
-- **How it works.** `src/instrumentation.ts` starts the pinger once per server process
-  (`src/platform/keepwarm/index.ts`). It runs only when `RENDER_EXTERNAL_URL` is a valid
-  `https:` URL and `KEEP_WARM` is not `0`, so it never runs locally or in CI. It requests
-  `<RENDER_EXTERNAL_URL origin>/api/health` about 60 to 90 seconds after start, then every
-  10 minutes plus or minus 90 seconds, always well inside the 15-minute idle window. Each
-  request times out after 10 seconds; failures are logged and never crash the server.
-- **Evidence.** In **shiplens > Logs**, search for `keepwarm.ping`. Each success is one
-  JSON line at info level with the HTTP status and the time taken. Failures log
-  `keepwarm.ping_failed` at warn level; a failure to start logs `keepwarm.start_failed`.
-- **Turn it off.** **shiplens > Environment**, add `KEEP_WARM` = `0`, save and deploy.
-- **Hour budget.** A workspace gets 750 free instance hours per calendar month; one
-  always-on service uses at most 744 (31 days x 24 hours). That leaves no hours for a
-  second free service in the same workspace that should also stay awake.
-- **Limits.** If the instance is ever stopped (a failed deploy, platform maintenance,
-  free hours or bandwidth exhausted), nothing inside it can wake it; the first visitor
-  does and waits for the cold start. Render may also restart free instances at any time.
-- **Optional extra.** An external uptime monitor that requests `/api/health` every few
-  minutes would also wake a stopped instance. It is not configured; add one only if the
-  built-in ping proves insufficient, and point it at `/api/health` (no database call).
-
-Why it is built this way: [ADR 0015](adr/0015-built-in-keep-warm.md).
+**On Vercel (production) there is nothing to do.** Serverless functions do not need a
+keep-warm ping (measured cold start: 821 ms). The app still contains a built-in self-ping
+that starts only when `RENDER_EXTERNAL_URL` is set, which Vercel does not do, so it is
+inactive; it exists for container hosts that sleep idle services. How it works and why it is
+built this way: [ADR 0015](adr/0015-built-in-keep-warm.md).
 
 ## 8. Secrets and access
 
 The only application secret is the demo password. Database credentials are managed by
-the Neon integration on Vercel (by Render on the alternative) and injected through
+the Neon integration on Vercel and injected through
 `DATABASE_URL`.
 
 **Rotate the demo password (preferred).** Use the audited seed rotation. On Vercel, rerun
 the migrate and seed command from your machine once with the new `SEED_DEMO_PASSWORD` and
 `SEED_ROTATE_DEMO_PASSWORDS=true`
 ([deploy.md, Vercel: re-seeding](deploy.md#vercel-re-seeding-redeploying-and-rolling-back)).
-On Render, follow [deploy.md, Rotating the demo password](deploy.md#rotating-the-demo-password):
-set both for one deploy, then remove the flag. Each change is recorded in the audit log.
+Set both for one deploy, then remove the flag. Each change is recorded in the audit log.
 
 **Rotate by hand (any account, or when a deploy is not possible).** This bypasses the
 command wrapper, so it writes no audit event; note the date and reason in your handover
@@ -350,7 +219,7 @@ log.
 3. Remove your IP from the database allow list, update the password manager, and never
    commit the password or the hash.
 
-**Access.** Remove departing people from the GitHub repository and the Render workspace.
+**Access.** Remove departing people from the GitHub repository, the Vercel project and the Neon database.
 To lock an application user out without deleting history, set `is_active = false`; a
 session of an inactive user is no longer accepted (`src/modules/auth/session.ts`).
 
@@ -393,8 +262,7 @@ its own SHA-256 hash, computed by the `audit_events_chain` database trigger
 
 ## 10. Health, logs and rate limits
 
-- `GET /api/health`: liveness, no database call. Render's health check and the keep-warm
-  ping use it.
+- `GET /api/health`: liveness, no database call. The keep-warm ping uses it.
 - `GET /api/health/db`: runs `SELECT 1` with a 2-second limit; 503 with no error detail
   when the database is down or expired.
 - **Logs.** One JSON line per event from `src/platform/log/logger.ts`; keys that look like
@@ -411,16 +279,13 @@ its own SHA-256 hash, computed by the `audit_events_chain` database trigger
   effective limit is higher when traffic is spread over several instances; this trade-off
   is accepted ([ADR 0017](adr/0017-production-on-vercel-and-neon.md)). Login throttling
   above is in the database and is not affected. The client IP is the first `X-Forwarded-For` entry; confirm once on the live
-  service that Render replaces, rather than appends to, a value the client sends
+  service that the platform replaces, rather than appends to, a value the client sends
   ([security.md, Residual risks](security.md#residual-risks)).
-- **Single instance (Render).** Free Render web services run one instance. Do not scale
-  out there without first moving the in-memory limits to a shared store.
 
 ## 11. Troubleshooting
 
 | Symptom | Cause and fix |
 | --- | --- |
-| First request takes about a minute (Render) | Cold start after the free instance spun down or was restarted. Check `keepwarm.ping` lines in the logs; if they stopped, see section 7. |
 | Deploy fails at start with a migration checksum error | A migration file that was already applied has changed (the checksum covers the text with line endings normalised, so only real edits count). Migrations are forward-only: restore the original file content from git and add a new migration for the change. Never edit an applied migration. |
 | Deploy fails at start; log mentions `SEED_DEMO_PASSWORD` | Missing or shorter than 12 characters. Set it under **Environment** and save. |
 | `POST` requests (login, any change) return 403 from the browser | The browser's `Origin` differs from the origin the app derived. Set `APP_ORIGIN` to the exact live URL (scheme and host, no trailing slash) and redeploy. |
@@ -428,9 +293,6 @@ its own SHA-256 hash, computed by the `audit_events_chain` database trigger
 | Browser console shows "Refused to execute inline script" or another Content Security Policy violation | A script without the per-request nonce, or from another origin. Do not add `'unsafe-inline'` to `script-src`; load the script through Next.js so it receives the nonce. The policy and its reasons: [ADR 0012](adr/0012-nonce-based-csp.md) and [security.md](security.md#security-headers). |
 | The public verification page says "This report could not be traced" (`unanchored`) | The report has no `report.approve` audit event, or no earlier submit event carrying its totals (for example it was approved by direct SQL). The figures cannot be proven; investigate how the report was approved. Do not insert audit rows by hand. |
 | The public verification page says "The audit record cannot be trusted right now" (`chain_broken`) | See section 9, incident steps. |
-| Pages fail with a database error after about a month (Render) | The free Render database expired. See section 6. On Neon, check the usage limits instead. |
-
-More deploy-specific cases: [deploy.md, Troubleshooting](deploy.md#troubleshooting).
 
 ## 12. Known limits and next steps
 
@@ -451,12 +313,9 @@ From the consequences recorded in the ADRs:
   developer machine; in-memory rate limits count per serverless instance. Next steps:
   connect the project to Git (`vercel git connect`) and move the in-memory limits to a
   shared store.
-- **Keep-warm** ([ADR 0015](adr/0015-built-in-keep-warm.md)): inactive on Vercel. On
-  Render it cannot wake a stopped instance and uses the whole monthly free hour budget.
-- **Database**: Neon's free plan has no fixed expiry but has usage limits (section 6).
-  On Render the free tier expires after 30 days and has no backups.
-- **Deploy on Render**: on the free plan migrations run at container start, not before
-  traffic. Next step on a paid plan: `preDeployCommand: node scripts/migrate.mjs`
-  ([deploy.md, Moving to a paid plan](deploy.md#moving-to-a-paid-plan)).
+- **Keep-warm** ([ADR 0015](adr/0015-built-in-keep-warm.md)): inactive on Vercel, where it
+  is not needed.
+- **Database**: Neon's free plan has no fixed expiry but has usage limits (section 6), and
+  you take your own backups.
 - **Tests** ([ADR 0016](adr/0016-testing-strategy.md)): coverage thresholds measure lines
   run, not correctness; the behavioural suites carry the weight.

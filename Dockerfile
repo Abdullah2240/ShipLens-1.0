@@ -5,7 +5,7 @@
 # not traced, so the runner starts from the full production node_modules and the
 # standalone output is copied on top of it.
 #
-# The last stage is the runner, so a plain `docker build` (and Render) always produces
+# The last stage is the runner, so a plain `docker build` always produces
 # the production image. Runtime configuration (database URL, app origin, seed settings)
 # is never set here; it comes from the environment at run time.
 FROM node:24-slim AS deps
@@ -51,6 +51,5 @@ USER app
 EXPOSE 3000
 HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=6 CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 # Migrate (and seed when SEED_ON_BOOT=true), then replace the shell with the server so it
-# receives signals directly. On a paid Render plan the migrate step moves to
-# preDeployCommand. No shell entrypoint file: a CRLF checkout on Windows would break it.
+# receives signals directly. No shell entrypoint file: a CRLF checkout on Windows would break it.
 CMD ["sh", "-c", "node scripts/migrate.mjs && exec node server.js"]

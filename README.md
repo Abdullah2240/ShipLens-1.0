@@ -52,8 +52,7 @@ whether the record still matches its seal. The limits are written down plainly i
 ## Architecture
 
 One Next.js app (pages and the `/api/v1` route handlers) with PostgreSQL. Production runs on
-Vercel with Neon Postgres; the same app also ships as one Docker image for the Render
-alternative.
+Vercel with Neon Postgres; the same app also ships as one Docker image (`Dockerfile`).
 
 ```mermaid
 flowchart LR
@@ -109,10 +108,7 @@ production dependency audit; the single required check is `ci-ok`.
 Production runs on Vercel (Hobby plan) with a free Neon Postgres database added through the
 Vercel marketplace. Migrations and the demo seed run once from a developer machine against
 the direct database URL, then `vercel deploy --prod` ships a clean checkout of `main`.
-Render stays documented as the container-based alternative: one free web service and one
-free Postgres database from the blueprint in `render.yaml`, with migrations on every start
-and a built-in keep-warm self-ping. Why production moved:
-[ADR 0017](docs/adr/0017-production-on-vercel-and-neon.md). Step by step:
+Why production runs there: [ADR 0017](docs/adr/0017-production-on-vercel-and-neon.md). Step by step:
 [docs/deploy.md](docs/deploy.md) and [docs/handover.md](docs/handover.md). After a deploy,
 one command checks health, logins, headers, the audit chain and a public verification end to
 end (102 of 102 checks passed on the live site on 1 November 2026):
@@ -131,7 +127,7 @@ BASE_URL="$URL" SMOKE_DEMO_PASSWORD="$DEMO_PW" node scripts/verify-deploy.mjs --
 | [docs/security.md](docs/security.md)         | OWASP Top 10 mapping with file references                 |
 | [docs/verification.md](docs/verification.md) | The audit chain and public report check, and their limits |
 | [docs/handover.md](docs/handover.md)         | Running and handing over the live service                 |
-| [docs/deploy.md](docs/deploy.md)             | Deploy runbook: Vercel + Neon, Render alternative         |
+| [docs/deploy.md](docs/deploy.md)             | Deploy runbook: Vercel + Neon                             |
 | [docs/test-logins.md](docs/test-logins.md)   | Demo users, one per role                                  |
 | [docs/e2e.md](docs/e2e.md)                   | End-to-end test stack                                     |
 | [AI-USAGE.md](AI-USAGE.md)                   | How we used AI tools                                      |
@@ -144,14 +140,16 @@ independently computed expected values live in `db/seed/data` and `db/seed/expec
 
 ## Commit history
 
-OWNER-CONFIRM: organisers' answer about the 25-commits-over-7-days rule (SUB-04), with the
-date it was asked.
+Planning started before the first commit. The first commit is dated 28 October 2026 and the
+latest at the time of writing is dated 1 November 2026, so the history spans fewer than
+7 days. The repository has more than 340 commits and 9 merged pull requests (#1 to #5 and #12 to #15);
+the owner opened and merged every one of them.
 
 ## Team
 
 | Person                    | Owned                                                                                                                                                                                         |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sheikh Abdullah Bin Zahid | Platform and security kernel, sign-in and permissions, audit trail, branches, collections, weekly reports, head office dashboard and drill-down, exports, Docker and Render deploy, the twist |
+| Sheikh Abdullah Bin Zahid | Platform and security kernel, sign-in and permissions, audit trail, branches, collections, weekly reports, head office dashboard and drill-down, exports, Docker and Vercel deploy, the twist |
 | Saniya Hassan             | Public website, volunteer applications, members and teams, content manager, English and Urdu (right to left) across the app, impact page, README and project docs                             |
 
 How the work was done, including the AI tools we used: [AI-USAGE.md](AI-USAGE.md).
