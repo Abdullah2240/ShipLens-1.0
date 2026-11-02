@@ -8,17 +8,17 @@
 # The last stage is the runner, so a plain `docker build` always produces
 # the production image. Runtime configuration (database URL, app origin, seed settings)
 # is never set here; it comes from the environment at run time.
-FROM node:24-slim AS deps
+FROM node:26-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:24-slim AS prod-deps
+FROM node:26-slim AS prod-deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
-FROM node:24-slim AS build
+FROM node:26-slim AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=deps /app/node_modules ./node_modules
@@ -31,7 +31,7 @@ COPY scripts ./scripts
 COPY db ./db
 RUN npm run build
 
-FROM node:24-slim AS runner
+FROM node:26-slim AS runner
 WORKDIR /app
 ENV NODE_ENV=production HOSTNAME=0.0.0.0 PORT=3000 NEXT_TELEMETRY_DISABLED=1
 RUN groupadd -g 10001 app && useradd -u 10001 -g app -m app
